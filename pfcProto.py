@@ -27,18 +27,61 @@ def main():
     ## and may be we can each chromosome run in 
     if args.tool == "MACS":
         import MACparamLearn
-	import bamtools
+        import MACS
+        import bamtools
         bamtools.run ( args.input )
-	
-	reference_char = ".REF_chr"
- 	each_inputs = 
-	MACparamLearn.run( args )
+
+        bam_name = args.input[:-4] ## delete '.bam'
+        reference_char = ".REF_chr"
+
+        run_in_parallel(MACS.run(bam_name + reference_char + "1.bam"),
+                        MACS.run(bam_name + reference_char + "2.bam"),
+                        MACS.run(bam_name + reference_char + "3.bam"),
+                        MACS.run(bam_name + reference_char + "4.bam"))
+
+        run_in_parallel(MACS.run(bam_name + reference_char + "5.bam"),
+                        MACS.run(bam_name + reference_char + "6.bam"),
+                        MACS.run(bam_name + reference_char + "7.bam"),
+                        MACS.run(bam_name + reference_char + "8.bam"))
+
+        run_in_parallel(MACS.run(bam_name + reference_char + "9.bam"),
+                        MACS.run(bam_name + reference_char + "10.bam"),
+                        MACS.run(bam_name + reference_char + "11.bam"),
+                        MACS.run(bam_name + reference_char + "12.bam"))
+
+        run_in_parallel(MACS.run(bam_name + reference_char + "13.bam"),
+                        MACS.run(bam_name + reference_char + "14.bam"),
+                        MACS.run(bam_name + reference_char + "15.bam"),
+                        MACS.run(bam_name + reference_char + "16.bam"))
+
+        run_in_parallel(MACS.run(bam_name + reference_char + "17.bam"),
+                        MACS.run(bam_name + reference_char + "18.bam"),
+                        MACS.run(bam_name + reference_char + "19.bam"))
+
+        run_in_parallel(MACS.run(bam_name + reference_char + "20.bam"),
+                        MACS.run(bam_name + reference_char + "21.bam"),
+                        MACS.run(bam_name + reference_char + "22.bam"))
+
+        run_in_parallel(MACS.run(bam_name + reference_char + "M.bam"),
+                        MACS.run(bam_name + reference_char + "X.bam"),
+                        MACS.run(bam_name + reference_char + "Y.bam"))
 
     elif args.tool == "Basset":
         pass
 
     else:
         print "the tool %s is not support.",args.tool
+
+
+def run_in_parallel(*functions):
+    """this is function for parallelize Some tools or functions may be by chromosome."""
+    proc = []
+    for fn in functions:
+        p = Process(target=fn)
+        p.start()
+        proc.append(p)
+    for p in proc:
+        p.join()
 
 if __name__ == '__main__':
     try:
