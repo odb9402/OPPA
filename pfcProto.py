@@ -5,6 +5,7 @@ import os
 import sys
 import argparse
 import tempfile
+from multiprocessing import Process
 
 def main():
     """The main function for pipeline"""
@@ -23,10 +24,15 @@ def main():
     args = arg_parser.parse_args()
 
     ## Run each other process by what tools they need.
+    ## and may be we can each chromosome run in 
     if args.tool == "MACS":
-        from MACparamLearn import run
-	print args
-        run( args )
+        import MACparamLearn
+	import bamtools
+        bamtools.run ( args.input )
+	
+	reference_char = ".REF_chr"
+ 	each_inputs = 
+	MACparamLearn.run( args )
 
     elif args.tool == "Basset":
         pass

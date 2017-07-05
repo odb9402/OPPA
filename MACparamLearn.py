@@ -42,19 +42,25 @@ def parse_peak_labels(peak_labels):
     print "what cell type you choose? :: e. g. {tcell, bcell, monocyte,... etc }"
     cell_type = raw_input()
 
-    result_labels = []
+    result_labels_list = []
 
     for label in labels:
 	if label[0] == chromosome_num:
 	    if (cell_type in label[1] or 'peaks' in label[1]):
-	        result_labels.append(label)
+	        result_labels_list.append(label[1])
 
-    print "%d`s label data is found.\n" % len(result_labels)
+    print "%d`s label data is found.\n" % len(result_labels_list)
     
-    if len(result_labels) == 0:
+    if len(result_labels_list) == 0:
 	print "there are matched label data."    
+
+    print result_labels_list
  
-    return result_labels
+
+
+def calculate_error():
+    pass
+
 
 
 def gradient_search(search_rate = 0.05):
