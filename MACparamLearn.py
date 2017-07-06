@@ -82,6 +82,6 @@ def run(args):
     p2.wait()
     p3.wait()
 
-    """The ErrorCalculation is also be parallel by choromosome.
+    """The ErrorCalculation can be also parallel by choromosome.
     """
     ##errorCalculation.run("default",args.validSet)
