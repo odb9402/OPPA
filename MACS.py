@@ -15,10 +15,10 @@ def callMAC(input_bam, input_q, validSet, control_bam=""):
 
     if control_bam is not "":
         commands = ["macs2", "callpeak", "-t", input_bam, "-c", control_bam, "-f", "BAM", "-g", "hs", "-n", input_bam
-            , "-B", "-q", input_q]
+            , "-B", "-q", input_q, "-n", input_bam]
     else:
         commands = ["macs2", "callpeak", "-t", input_bam, "-f", "BAM", "-g", "hs", "-n", input_bam
-            , "-B", "-q", input_q]
+            , "-B", "-q", input_q, "-n", input_bam]
 
 
-    # call(commands)
+    #call(commands)

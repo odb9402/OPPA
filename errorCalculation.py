@@ -4,6 +4,14 @@ return as bed file format."""
 
 import random
 
+
+validation_set = []
+test_set = []
+input_bed_name = ''
+input_label_name = ''
+
+
+
 def peak_label_load(validSet):
     """loading Validation Set Files and translate to Python Object."""
     valid_file = open(validSet, 'r')
@@ -37,7 +45,6 @@ def parse_peak_labels(peak_labels):
         containor = []
         containor.append(peak.split(':')[0])
         containor.append(peak.split(':')[1].split(' ',2))
-        print containor
         labels.append(containor)
 
     ### this part will be change to it decided by input name automatically
@@ -52,7 +59,6 @@ def parse_peak_labels(peak_labels):
     ### check the condition ( chromosome and cell type ) and change to python map
     for label in labels:
         if label[0] == chromosome_num:
-            print label[1]
             if ((len(label[1]) is 3 and
                          cell_type in label[1][2]) or
                         'peaks' in label[1]):
@@ -62,10 +68,13 @@ def parse_peak_labels(peak_labels):
     print "%d`s label data is found.\n" % len(result_labels_list)
 
     if len(result_labels_list) == 0:
-        print "there are matched label data."
+        print "there are matched label data. so cannot handle it"
+        return -1
 
     for label in result_labels_list:
         label['regions'] = label['regions'].split('-')
+        label['regions'][0] = int(label['regions'][0].replace(',',''))
+        label['regions'][1] = int(label['regions'][1].replace(',',''))
 
     print "Labeled Data List ::::::::::\n" + str(result_labels_list)
     return result_labels_list
@@ -106,7 +115,7 @@ def split_label_for_crossValidation(labels, k_fold = 4):
 def calculate_error(peak_data, labeled_data):
     """calculate actual error by numbering to wrong label"""
 
-    error_num = 0
+    error_num = 0.0
     error_rate = 0.0
 
     for label in labeled_data:
@@ -115,37 +124,19 @@ def calculate_error(peak_data, labeled_data):
             print "in peaks"
             if not is_correct_label(peak_data, label['regions'], mult_peak = True) : error_num += 1
 
-        elif label['peakStat'] == 'peakStart':
+        elif label['peakStat'] == 'peakStart' or 'peakEnd':
             print "in peakStart"
             if not is_correct_label(peak_data, label['regions']) : error_num += 1
 
     error_rate = error_num / len(labeled_data)
-
+    print "incorrect label // correct label ::" + str(error_num) +":"+ str(len(labeled_data))
     return error_rate
 
 
 
-def call_error_cal_script(input_bed, validSet, control_bam="", input_q="0.01"):
-    """keep call MACS until we find proper parameter"""
-
-    ### load and handle labeled Data
-    peak_labels = peak_label_load(validSet)
-    peak_labels = parse_peak_labels(peak_labels)
-    test_labels, valid_labels = split_label_for_crossValidation(peak_labels)
-
-    ### load and handle bed files
-    peak_data = bed_file_load("NA_summits.bed")
-
-    print calculate_error(peak_data, valid_labels)
-
-def run(input_bed, input_labels):
-    """it will be runned by protoPFC.py"""
-    call_error_cal_script(input_bed, input_labels)
-
-
-
-def is_correct_label(target, value, similarity = 0.0, mult_peak = False):
+def is_correct_label(target, value, similarity = 5000, mult_peak = False):
     """this function will find to regions in target bed set by using binary search"""
+    """the similarity allow the distance of bed file row between label area as long as own value"""
 
     correct_num = 0
     index = len(target)/2
@@ -155,6 +146,10 @@ def is_correct_label(target, value, similarity = 0.0, mult_peak = False):
     ## if find correct one, return True
     while True:
         correct_ness = is_same(target, value, index, similarity)
+
+        if max_index <= min_index + 1:
+            print "cannot find correct peak"
+            return False
 
         if correct_ness is 'less':
             max_index = index
@@ -167,19 +162,55 @@ def is_correct_label(target, value, similarity = 0.0, mult_peak = False):
         else:
             ### if label is "peaks", correct regions must bigger than 2.
             if (mult_peak is False) or correct_num > 1:
+                print "find correct peak"
                 return True
             else:
+                print "find one"
                 correct_num += 1
+                index = len(target) / 2
+                min_index = 0
+                max_index = len(target)
 
-        if max_index == min_index:
-            return False
+
+
 
 def is_same(target, value, index, similarity):
     """this function check label value whether bigger than index or lower than index"""
-
-    if value[1] * (1 - similarity) <= target[index]['regions_s']:
+    if value[1] + similarity <= float(target[index]['region_s']):
         return 'less'
-    elif value[0] * (1 + similarity ) >= target[index]['regions_e']:
+    elif value[0] - similarity  >= float(target[index]['region_e']):
         return 'upper'
     else:
         return 'in'
+
+
+
+def call_error_cal_script(input_bed, validSet, control_bam="", input_q="0.01"):
+    """keep call MACS until we find proper parameter"""
+
+    ### load and handle labeled Data
+    peak_labels = peak_label_load(validSet)
+    peak_labels = parse_peak_labels(peak_labels)
+
+    ## cannot found label about selected area.
+    if peak_labels is -1:
+        pass
+
+    global test_set
+    global validation_set
+    test_set, validation_set = split_label_for_crossValidation(peak_labels)
+
+    ### load and handle bed files
+    peak_data = bed_file_load("NA_summits.bed")
+
+    print "error is :" + str(calculate_error(peak_data, validation_set))
+
+
+
+def run(input_bed, input_labels):
+    """it will be runned by protoPFC.py"""
+    global input_bed_name
+    input_bed_name = input_bed
+    global input_label_name
+    input_label_name = input_labels
+    call_error_cal_script(input_bed, input_labels)
