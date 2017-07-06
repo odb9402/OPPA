@@ -53,6 +53,7 @@ def run_in_parallel(*functions):
     for p in proc:
         p.join()
 
+
 if __name__ == '__main__':
     try:
         main()

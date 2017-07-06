@@ -6,6 +6,7 @@ named 'practical bayesian optimization in machine learning algorithm'
 """
 
 from subprocess import call
+from subprocess import Popen
 import argparse
 import numpy as np
 from pfcProto import run_in_parallel
@@ -29,37 +30,41 @@ def run(args):
     bam_name = args.input[:-4]  ## delete '.bam'
     reference_char = ".REF_chr"
 
+    p1 = MACS.run(bam_name + reference_char + "1.bam", args)
+    p2 = MACS.run(bam_name + reference_char + "2.bam", args)
+    p3 = MACS.run(bam_name + reference_char + "3.bam", args)
+    p4 = MACS.run(bam_name + reference_char + "4.bam", args)
 
-    run_in_parallel(MACS.run(bam_name + reference_char + "1.bam", args),
-                    MACS.run(bam_name + reference_char + "2.bam", args),
-                    MACS.run(bam_name + reference_char + "3.bam", args),
-                    MACS.run(bam_name + reference_char + "4.bam", args))
+    p1.wait()
+    p2.wait()
+    p3.wait()
+    p4.wait()
 
-    run_in_parallel(MACS.run(bam_name + reference_char + "5.bam", args),
-                    MACS.run(bam_name + reference_char + "6.bam", args),
-                    MACS.run(bam_name + reference_char + "7.bam", args),
-                    MACS.run(bam_name + reference_char + "8.bam", args))
+    MACS.run(bam_name + reference_char + "5.bam", args)
+    MACS.run(bam_name + reference_char + "6.bam", args)
+    MACS.run(bam_name + reference_char + "7.bam", args)
+    MACS.run(bam_name + reference_char + "8.bam", args)
 
-    run_in_parallel(MACS.run(bam_name + reference_char + "9.bam", args),
-                    MACS.run(bam_name + reference_char + "10.bam", args),
-                    MACS.run(bam_name + reference_char + "11.bam", args),
-                    MACS.run(bam_name + reference_char + "12.bam", args))
+    MACS.run(bam_name + reference_char + "9.bam", args)
+    MACS.run(bam_name + reference_char + "10.bam", args)
+    MACS.run(bam_name + reference_char + "11.bam", args)
+    MACS.run(bam_name + reference_char + "12.bam", args)
 
-    run_in_parallel(MACS.run(bam_name + reference_char + "13.bam", args),
-                    MACS.run(bam_name + reference_char + "14.bam", args),
-                    MACS.run(bam_name + reference_char + "15.bam", args),
-                    MACS.run(bam_name + reference_char + "16.bam", args))
+    MACS.run(bam_name + reference_char + "13.bam", args)
+    MACS.run(bam_name + reference_char + "14.bam", args)
+    MACS.run(bam_name + reference_char + "15.bam", args)
+    MACS.run(bam_name + reference_char + "16.bam", args)
 
-    run_in_parallel(MACS.run(bam_name + reference_char + "17.bam", args),
-                    MACS.run(bam_name + reference_char + "18.bam", args),
-                    MACS.run(bam_name + reference_char + "19.bam", args))
+    MACS.run(bam_name + reference_char + "17.bam", args)
+    MACS.run(bam_name + reference_char + "18.bam", args)
+    MACS.run(bam_name + reference_char + "19.bam", args)
 
-    run_in_parallel(MACS.run(bam_name + reference_char + "20.bam", args),
-                    MACS.run(bam_name + reference_char + "21.bam", args),
-                    MACS.run(bam_name + reference_char + "22.bam", args))
+    MACS.run(bam_name + reference_char + "20.bam", args)
+    MACS.run(bam_name + reference_char + "21.bam", args)
+    MACS.run(bam_name + reference_char + "22.bam", args)
 
-    run_in_parallel(MACS.run(bam_name + reference_char + "M.bam", args),
-                    MACS.run(bam_name + reference_char + "X.bam", args),
-                    MACS.run(bam_name + reference_char + "Y.bam", args))
+    MACS.run(bam_name + reference_char + "M.bam", args)
+    MACS.run(bam_name + reference_char + "X.bam", args)
+    MACS.run(bam_name + reference_char + "Y.bam", args)
 
     errorCalculation.run("default",args.validSet)
