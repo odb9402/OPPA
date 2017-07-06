@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # Time-stamp: < >
-
+import time
+from datetime import timedelta
 import os
 import sys
 import argparse
@@ -28,9 +29,17 @@ def main():
     if args.tool == "MACS":
         import MACparamLearn
         import bamtools
-        #bamtools.run ( args.input )
+	start_time = time.time()
 
+	##running bamtools to split the bam file
+        bamtools.run ( args.input )
+	elapsed_time_secs = time.time() - start_time
+	print "Execution _ bamtools : %s" % timedelta(seconds=round(elapsed_time_secs))
+
+	start_time = time.time()
         MACparamLearn.run(args)
+	elapsed_time_secs = time.time() - start_time
+	print "Execution _ learning parameter : %s" % timedelta(seconds=round(elapsed_time_secs))
 
 
     elif args.tool == "PeakSeg":
@@ -41,18 +50,6 @@ def main():
 
     else:
         print "the tool %s is not support.",args.tool
-
-
-def run_in_parallel(*functions):
-    """this is function for parallelize Some tools or functions may be by chromosome."""
-    proc = []
-    for fn in functions:
-        p = Process(target=fn)
-        p.start()
-        proc.append(p)
-    for p in proc:
-        p.join()
-
 
 if __name__ == '__main__':
     try:

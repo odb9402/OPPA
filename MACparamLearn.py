@@ -9,9 +9,6 @@ from subprocess import call
 from subprocess import Popen
 import argparse
 import numpy as np
-from pfcProto import run_in_parallel
-
-
 
 
 def callLearningScript(input_bed, validSet, control_bam = "", input_q = "0.01"):
@@ -40,31 +37,58 @@ def run(args):
     p3.wait()
     p4.wait()
 
-    MACS.run(bam_name + reference_char + "5.bam", args)
-    MACS.run(bam_name + reference_char + "6.bam", args)
-    MACS.run(bam_name + reference_char + "7.bam", args)
-    MACS.run(bam_name + reference_char + "8.bam", args)
+    p1 = MACS.run(bam_name + reference_char + "5.bam", args)
+    p2 = MACS.run(bam_name + reference_char + "6.bam", args)
+    p3 = MACS.run(bam_name + reference_char + "7.bam", args)
+    p4 = MACS.run(bam_name + reference_char + "8.bam", args)
+ 
+    p1.wait()
+    p2.wait()
+    p3.wait()
+    p4.wait()
 
-    MACS.run(bam_name + reference_char + "9.bam", args)
-    MACS.run(bam_name + reference_char + "10.bam", args)
-    MACS.run(bam_name + reference_char + "11.bam", args)
-    MACS.run(bam_name + reference_char + "12.bam", args)
+    p1 = MACS.run(bam_name + reference_char + "9.bam", args)
+    p2 = MACS.run(bam_name + reference_char + "10.bam", args)
+    p3 = MACS.run(bam_name + reference_char + "11.bam", args)
+    p4 = MACS.run(bam_name + reference_char + "12.bam", args)
 
-    MACS.run(bam_name + reference_char + "13.bam", args)
-    MACS.run(bam_name + reference_char + "14.bam", args)
-    MACS.run(bam_name + reference_char + "15.bam", args)
-    MACS.run(bam_name + reference_char + "16.bam", args)
+    p1.wait()
+    p2.wait()
+    p3.wait()
+    p4.wait()
 
-    MACS.run(bam_name + reference_char + "17.bam", args)
-    MACS.run(bam_name + reference_char + "18.bam", args)
-    MACS.run(bam_name + reference_char + "19.bam", args)
+    p1 = MACS.run(bam_name + reference_char + "13.bam", args)
+    p2 = MACS.run(bam_name + reference_char + "14.bam", args)
+    p3 = MACS.run(bam_name + reference_char + "15.bam", args)
+    p4 = MACS.run(bam_name + reference_char + "16.bam", args)
+    
+    p1.wait()
+    p2.wait()
+    p3.wait()
+    p4.wait()
+    
+    p1 = MACS.run(bam_name + reference_char + "17.bam", args)
+    p2 = MACS.run(bam_name + reference_char + "18.bam", args)
+    p3 = MACS.run(bam_name + reference_char + "19.bam", args)
 
-    MACS.run(bam_name + reference_char + "20.bam", args)
-    MACS.run(bam_name + reference_char + "21.bam", args)
-    MACS.run(bam_name + reference_char + "22.bam", args)
+    p1.wait()
+    p2.wait()
+    p3.wait()
 
-    MACS.run(bam_name + reference_char + "M.bam", args)
-    MACS.run(bam_name + reference_char + "X.bam", args)
-    MACS.run(bam_name + reference_char + "Y.bam", args)
+    p1 = MACS.run(bam_name + reference_char + "20.bam", args)
+    p2 = MACS.run(bam_name + reference_char + "21.bam", args)
+    p3 = MACS.run(bam_name + reference_char + "22.bam", args)
+    
+    p1.wait()
+    p2.wait()
+    p3.wait()
+    
+    p1 = MACS.run(bam_name + reference_char + "M.bam", args)
+    p2 = MACS.run(bam_name + reference_char + "X.bam", args)
+    p3 = MACS.run(bam_name + reference_char + "Y.bam", args)
+
+    p1.wait()
+    p2.wait()
+    p3.wait()
 
     errorCalculation.run("default",args.validSet)
