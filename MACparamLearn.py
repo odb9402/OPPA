@@ -15,8 +15,6 @@ def callLearningScript(input_bed, validSet, control_bam = "", input_q = "0.01"):
     """until we find proper parameter"""
 
 
-
-
 def run(args):
     import MACS
     import errorCalculation
@@ -31,7 +29,6 @@ def run(args):
     p2 = MACS.run(bam_name + reference_char + "2.bam", args)
     p3 = MACS.run(bam_name + reference_char + "3.bam", args)
     p4 = MACS.run(bam_name + reference_char + "4.bam", args)
-
     p1.wait()
     p2.wait()
     p3.wait()
@@ -41,7 +38,6 @@ def run(args):
     p2 = MACS.run(bam_name + reference_char + "6.bam", args)
     p3 = MACS.run(bam_name + reference_char + "7.bam", args)
     p4 = MACS.run(bam_name + reference_char + "8.bam", args)
- 
     p1.wait()
     p2.wait()
     p3.wait()
@@ -51,7 +47,6 @@ def run(args):
     p2 = MACS.run(bam_name + reference_char + "10.bam", args)
     p3 = MACS.run(bam_name + reference_char + "11.bam", args)
     p4 = MACS.run(bam_name + reference_char + "12.bam", args)
-
     p1.wait()
     p2.wait()
     p3.wait()
@@ -61,7 +56,6 @@ def run(args):
     p2 = MACS.run(bam_name + reference_char + "14.bam", args)
     p3 = MACS.run(bam_name + reference_char + "15.bam", args)
     p4 = MACS.run(bam_name + reference_char + "16.bam", args)
-    
     p1.wait()
     p2.wait()
     p3.wait()
@@ -70,7 +64,6 @@ def run(args):
     p1 = MACS.run(bam_name + reference_char + "17.bam", args)
     p2 = MACS.run(bam_name + reference_char + "18.bam", args)
     p3 = MACS.run(bam_name + reference_char + "19.bam", args)
-
     p1.wait()
     p2.wait()
     p3.wait()
@@ -78,7 +71,6 @@ def run(args):
     p1 = MACS.run(bam_name + reference_char + "20.bam", args)
     p2 = MACS.run(bam_name + reference_char + "21.bam", args)
     p3 = MACS.run(bam_name + reference_char + "22.bam", args)
-    
     p1.wait()
     p2.wait()
     p3.wait()
@@ -86,9 +78,10 @@ def run(args):
     p1 = MACS.run(bam_name + reference_char + "M.bam", args)
     p2 = MACS.run(bam_name + reference_char + "X.bam", args)
     p3 = MACS.run(bam_name + reference_char + "Y.bam", args)
-
     p1.wait()
     p2.wait()
     p3.wait()
 
-    errorCalculation.run("default",args.validSet)
+    """The ErrorCalculation is also be parallel by choromosome.
+    """
+    ##errorCalculation.run("default",args.validSet)
