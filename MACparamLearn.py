@@ -29,7 +29,7 @@ def run(args):
     bam_name = args.input[:-4]  ## delete '.bam'
     reference_char = ".REF_chr"
 
-    """
+
     run_in_parallel(MACS.run(bam_name + reference_char + "1.bam", args),
                     MACS.run(bam_name + reference_char + "2.bam", args),
                     MACS.run(bam_name + reference_char + "3.bam", args),
@@ -61,5 +61,5 @@ def run(args):
     run_in_parallel(MACS.run(bam_name + reference_char + "M.bam", args),
                     MACS.run(bam_name + reference_char + "X.bam", args),
                     MACS.run(bam_name + reference_char + "Y.bam", args))
-    """
+
     errorCalculation.run("default",args.validSet)
