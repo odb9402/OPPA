@@ -27,13 +27,15 @@ def main():
     ## and may be we can each chromosome run in 
     if args.tool == "MACS":
         import MACparamLearn
+        import errorCalculation
         import MACS
         import bamtools
-        bamtools.run ( args.input )
+        #bamtools.run ( args.input )
 
         bam_name = args.input[:-4] ## delete '.bam'
         reference_char = ".REF_chr"
 
+        """
         run_in_parallel(MACS.run(bam_name + reference_char + "1.bam"),
                         MACS.run(bam_name + reference_char + "2.bam"),
                         MACS.run(bam_name + reference_char + "3.bam"),
@@ -65,6 +67,13 @@ def main():
         run_in_parallel(MACS.run(bam_name + reference_char + "M.bam"),
                         MACS.run(bam_name + reference_char + "X.bam"),
                         MACS.run(bam_name + reference_char + "Y.bam"))
+        """
+
+        errorCalculation.run("default", args.validSet)
+
+
+    elif args.tool == "PeakSeg":
+        pass
 
     elif args.tool == "Basset":
         pass
