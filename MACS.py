@@ -1,12 +1,12 @@
 import os
 import sys
 
-def run(args):
+def run(input_file, args):
     """it will be runned by protoPFC.py"""
     if args.control is None:
-        callMAC(args.input, args.validSet, input_q = args.Qval)
+        callMAC(input_file, args.validSet, input_q = args.Qval)
     else:
-        callMAC(args.input, args.validSet, input_q = args.Qval, control_bam=args.control)
+        callMAC(input_file, args.validSet, input_q = args.Qval, control_bam=args.control)
 
 
 def callMAC(input_bam, input_q, validSet, control_bam=""):
