@@ -9,6 +9,7 @@ from subprocess import call
 from subprocess import Popen
 import argparse
 import numpy as np
+import errorLoad
 
 
 def callLearningScript(input_bed, validSet, control_bam = "", input_q = "0.01"):
@@ -87,4 +88,5 @@ def run(args):
 
     """The ErrorCalculation can be also parallel by choromosome.
     """
-    errorCalculation.run("default",args.validSet)
+    test_set, validation_set =  errorLoad.run(args.validSet)
+    errorCalculation.run("TestBed_peaks.broadPeak",validation_set)

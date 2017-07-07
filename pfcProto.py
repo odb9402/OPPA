@@ -29,17 +29,17 @@ def main():
     if args.tool == "MACS":
         import MACparamLearn
         import bamtools
-	start_time = time.time()
+        start_time = time.time()
 
-	##running bamtools to split the bam file
-    #bamtools.run ( args.input )
-	elapsed_time_secs = time.time() - start_time
-	print "Execution _ bamtools : %s" % timedelta(seconds=round(elapsed_time_secs))
+        ##running bamtools to split the bam file
+        ##bamtools.run ( args.input )
+        elapsed_time_secs = time.time() - start_time
+        print "Execution _ bamtools : %s" % timedelta(seconds=round(elapsed_time_secs))
 
-	start_time = time.time()
+        start_time = time.time()
         MACparamLearn.run(args)
-	elapsed_time_secs = time.time() - start_time
-	print "Execution _ learning parameter : %s" % timedelta(seconds=round(elapsed_time_secs))
+        elapsed_time_secs = time.time() - start_time
+        print "Execution _ learning parameter : %s" % timedelta(seconds=round(elapsed_time_secs))
 
 
     elif args.tool == "PeakSeg":
