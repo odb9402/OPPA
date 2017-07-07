@@ -119,22 +119,21 @@ def calculate_error(peak_data, labeled_data):
     error_rate = 0.0
 
     for label in labeled_data:
-        print label['peakStat']
         if label['peakStat'] == 'peaks':
             print "in peaks"
-            if not is_correct_label(peak_data, label['regions'], mult_peak = True) : error_num += 1
+            if not is_correct_label(peak_data, label['regions'], weak_predict= True) : error_num += 1
 
         elif label['peakStat'] == 'peakStart' or 'peakEnd':
             print "in peakStart"
             if not is_correct_label(peak_data, label['regions']) : error_num += 1
 
     error_rate = error_num / len(labeled_data)
-    print "incorrect label // correct label ::" + str(error_num) +":"+ str(len(labeled_data))
+    print "incorrect label // correct label ::" + str(error_num) + ":" + str(len(labeled_data))
     return error_rate
 
 
 
-def is_correct_label(target, value, similarity = 5000, mult_peak = False):
+def is_correct_label(target, value, similarity = 500, weak_predict = False):
     """this function will find to regions in target bed set by using binary search"""
     """the similarity allow the distance of bed file row between label area as long as own value"""
 
@@ -147,30 +146,49 @@ def is_correct_label(target, value, similarity = 5000, mult_peak = False):
     while True:
         correct_ness = is_same(target, value, index, similarity)
 
+        print target[index], value
+
+        #Case 1 : label is "peaks" or "noPeak" and False Negative or False Positive
+        #       and "peakStart" or "peakEnd" also.
         if max_index <= min_index + 1:
             print "cannot find correct peak"
             return False
 
+        #Case 2 : label is "peakStart" or "peakEnd" and Correct.
+        elif max_index <= min_index + 1 and correct_num == 1:
+            return True
+
+        #Case 3 : label is "peakStart" or "peakEnd" and False Negative
+        elif max_index <= min_index + 1 and correct_num > 1:
+            return False
+
+
         if correct_ness is 'less':
             max_index = index
             index = (min_index + index) / 2
-
         elif correct_ness is 'upper':
             min_index = index
             index = (max_index + index) / 2
-
+        ##find correct regions
         else:
-            ### if label is "peaks", correct regions must bigger than 2.
-            if (mult_peak is False) or correct_num > 1:
+            ### if label is "peaks", correct regions can be bigger than 2.
+            ### but "peakStart" or "peakEnd" are not they must exist only 1 correct regions.
+
+            #Case 4 : label is "peaks" or "noPeak" and Correct.
+            if (weak_predict is True):
                 print "find correct peak"
                 return True
+
+            #Case 5 : label is "peakStart" or "peakEnd" and False Positive
+            elif (weak_predict is False) and correct_num > 1:
+                print "there are too many peak."
+                return False
             else:
                 print "find one"
                 correct_num += 1
                 index = len(target) / 2
                 min_index = 0
                 max_index = len(target)
-
 
 
 
@@ -185,7 +203,7 @@ def is_same(target, value, index, similarity):
 
 
 
-def call_error_cal_script(input_bed, validSet, control_bam="", input_q="0.01"):
+def call_error_cal_script(input_bed, validSet):
     """keep call MACS until we find proper parameter"""
 
     ### load and handle labeled Data
@@ -213,4 +231,7 @@ def run(input_bed, input_labels):
     input_bed_name = input_bed
     global input_label_name
     input_label_name = input_labels
+
+    input_bed = "NA_summits.bed"
+
     call_error_cal_script(input_bed, input_labels)

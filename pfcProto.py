@@ -32,7 +32,7 @@ def main():
 	start_time = time.time()
 
 	##running bamtools to split the bam file
-        bamtools.run ( args.input )
+    #bamtools.run ( args.input )
 	elapsed_time_secs = time.time() - start_time
 	print "Execution _ bamtools : %s" % timedelta(seconds=round(elapsed_time_secs))
 

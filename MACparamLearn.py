@@ -25,6 +25,7 @@ def run(args):
     bam_name = args.input[:-4]  ## delete '.bam'
     reference_char = ".REF_chr"
 
+    """
     p1 = MACS.run(bam_name + reference_char + "1.bam", args)
     p2 = MACS.run(bam_name + reference_char + "2.bam", args)
     p3 = MACS.run(bam_name + reference_char + "3.bam", args)
@@ -82,6 +83,8 @@ def run(args):
     p2.wait()
     p3.wait()
 
+    """
+
     """The ErrorCalculation can be also parallel by choromosome.
     """
-    ##errorCalculation.run("default",args.validSet)
+    errorCalculation.run("default",args.validSet)
