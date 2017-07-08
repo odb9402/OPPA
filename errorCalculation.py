@@ -6,6 +6,7 @@ import random
 from peakLoad import run as peakLoad
 
 
+
 def calculate_error(peak_data, labeled_data):
     """calculate actual error by numbering to wrong label"""
 
@@ -116,16 +117,18 @@ def is_noPeak(target, value, tolerance = 0):
         else:
             break
 
-        if abs(float(target[index]['region_e']) - region_min) < 5 * steps:
+        if abs(float(target[index]['region_e']) - region_min) < 5 * steps or steps > 1000:
             break
         steps += 1
 
-    if float(target[index + 1]['region_s']) + tolerance > region_max:
+    if index + 1 == len(target) or\
+            float(target[index + 1]['region_s']) + tolerance > region_max:
         print "correct noPeak"
         return True
     else:
         print "false Negative noPeak"
         return False
+
 
 
 def is_same(target, value, index, tolerance):
