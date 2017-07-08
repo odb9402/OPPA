@@ -1,6 +1,6 @@
 """this is the module for calculation Error. it will run parallel also.
 and this module can be used to regular, for MACS and peakSeq which any algorithms
-return as bed file format."""
+return as bed, narrowPeak, broadPeak file format."""
 
 import random
 from peakLoad import run as peakLoad
@@ -91,7 +91,9 @@ def is_peak(target, value, tolerance = 0, weak_predict = False):
 
 
 def is_noPeak(target, value, tolerance = 0):
-
+    """this function will find to regions in target bed using binary search
+    and after check that regions either there is peak or not."""
+    
     region_min = value[0]
     region_max = value[1]
 
@@ -116,7 +118,9 @@ def is_noPeak(target, value, tolerance = 0):
         ##find correct regions
         else:
             break
-
+        
+        ### we keep increase tolerance for finding nearest target bed regions with label regions.
+        ### if cannot find in 1000 steps, stop the searching.
         if abs(float(target[index]['region_e']) - region_min) < 5 * steps or steps > 1000:
             break
         steps += 1
