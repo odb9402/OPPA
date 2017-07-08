@@ -1,3 +1,6 @@
+"""this module will return peak information as python object (map)
+and support regular bedformat, narrowPeak, broadPeak"""
+
 #regular bed
 def bed_file_load(input_bed, chrom = None):
     """loading bed files and translate to Python Object"""
