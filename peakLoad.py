@@ -1,5 +1,5 @@
-"""this module will return peak information as python object (map)
-and support regular bedformat, narrowPeak, broadPeak"""
+"""this module will return peak information as python object (map).
+you can be supported regular bedformat, narrowPeak, broadPeak"""
 
 #regular bed
 def bed_file_load(input_bed, chrom = None):
@@ -66,3 +66,5 @@ def run(input_file_name):
         return broad_peak_file_load(input_file_name)
     elif format == "gappedPeak":
         return gapped_peak_file_load(input_file_name)
+    else:
+        print "we do not support [" + format[1] + "] formats."
