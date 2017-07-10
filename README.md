@@ -1,12 +1,6 @@
 # PFC
 developing python pipeline for optimizing some peak detect tools. ( keep )
 
-INSTALL::
-
-
-
-COMMAND::
-    
 
 
 DEPENDENCY ::
@@ -18,6 +12,9 @@ DEPENDENCY ::
 
 
     bamtools - using bamtools
+
+
+    MOE - using MOE for hyperparameter learning
 
 
     MACS - using MACS version 2.1.0
