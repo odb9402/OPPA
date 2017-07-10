@@ -1,6 +1,6 @@
 import os
-import sys
 import subprocess
+
 
 def run(input_file, args):
     """it will be runned by protoPFC.py"""
@@ -8,6 +8,7 @@ def run(input_file, args):
         return callMAC(input_file, args.validSet, input_q = args.Qval)
     else:
         return callMAC(input_file, args.validSet, input_q = args.Qval, control_bam=args.control)
+
 
 
 def callMAC(input_bam, validSet, control_bam="", input_q = 0.05):

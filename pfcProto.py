@@ -13,7 +13,7 @@ def main():
 
     ## Setting Script Option.
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("-t","--tool",  help="what tool you use. : { MACS , Basset }")
+    arg_parser.add_argument("-t","--tool",  help="what tool you use. : { MACS , Basset , peakSeg }")
     arg_parser.add_argument("-i","--input", help="what file you input.")
     arg_parser.add_argument("-cr","--control", help="it is control-Bam file for MACS")
     arg_parser.add_argument("-f","--format", help="input file format for : { MACS , ")
@@ -27,7 +27,7 @@ def main():
     ## Run each other process by what tools they need.
     ## and may be we can each chromosome run in 
     if args.tool == "MACS":
-        import MACparamLearn
+        import learnMACSparam
         import bamtools
         start_time = time.time()
 
@@ -37,7 +37,7 @@ def main():
         print "Execution _ bamtools : %s" % timedelta(seconds=round(elapsed_time_secs))
 
         start_time = time.time()
-        MACparamLearn.run(args)
+        learnMACSparam.run(args)
         elapsed_time_secs = time.time() - start_time
         print "Execution _ learning parameter : %s" % timedelta(seconds=round(elapsed_time_secs))
 
