@@ -9,10 +9,10 @@ from subprocess import call
 from subprocess import Popen
 import argparse
 import numpy as np
-from loadLabel import run as loadLabel
-from parseLabel import run as parseLabel
-from calculateError import run as calculateError
 
+from ..calculateError import run as calculateError
+from ..loadPaser.loadLabel import run as loadLabel
+from ..loadPaser.parseLabel import run as parseLabel
 
 def get_error(input_file, valid_set):
     """return calculated error that compare label with output of MACS"""
