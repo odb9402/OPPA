@@ -1,6 +1,5 @@
-# PFC
-developing python pipeline for optimizing some peak detect tools. ( keep )
-
+# OPPA
+Optimize Parameter in Peak detection Algorithm by bayesian optimization.
 
 
 DEPENDENCY ::
