@@ -29,7 +29,7 @@ def calculate_error(peak_data, labeled_data):
 
     error_rate = error_num / len(labeled_data)
     print "incorrect label // correct label ::" + str(error_num) + ":" + str(len(labeled_data))
-    return error_num, error_rate
+    return error_num, len(labeled_data)
 
 
 
@@ -180,9 +180,13 @@ def run(input_file_name, input_labels):
     :return: number of incorrect label, rate of incorrect label
         (incorrect label / correct label)
     """
+    
+    #case of input label size is 0, error num error rate is zero.
+    if input_labels is -1:
+	return 0, 0
 
     #load and handle peak files
     input_file = loadPeak(input_file_name)
-    error_num, error_rate = calculate_error(input_file, input_labels)
-    print "error is {NUM/RATE}:" + str(error_num) + "/" + str(error_rate)
-    return error_num, error_rate
+    error_num, total_label = calculate_error(input_file, input_labels)
+    print "error is {error label/ total label}:" + str(error_num) + "/" + str(total_label) + '\n'
+    return error_num, total_label

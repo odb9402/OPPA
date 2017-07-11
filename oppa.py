@@ -24,6 +24,9 @@ def main():
 
     args = arg_parser.parse_args()
 
+    if args.Qval == None:
+	args.Qval = '0.05'
+
     # Run each other process by what tools they need.
     # and may be we can each chromosome run in
     if args.tool == "MACS":
@@ -32,10 +35,12 @@ def main():
         start_time = time.time()
 
         #running bamtools to split the bam file
-        #bamtools.( args.input )
+        print "Execute bamtools . . . : split bam file by chromosome "
+	bamtools( args.input )
         elapsed_time_secs = time.time() - start_time
         print "Execution _ bamtools : %s" % timedelta(seconds=round(elapsed_time_secs))
 
+	print "Execute MACS . . . : each chromosome "
         start_time = time.time()
         learnMACSparam(args)
         elapsed_time_secs = time.time() - start_time

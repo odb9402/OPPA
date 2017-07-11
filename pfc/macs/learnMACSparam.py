@@ -27,7 +27,6 @@ def run(args):
     bam_name = args.input[:-4]  ## delete '.bam'
     reference_char = ".REF_chr"
 
-    """
     p1 = MACS.run(bam_name + reference_char + "1.bam", args)
     p2 = MACS.run(bam_name + reference_char + "2.bam", args)
     p3 = MACS.run(bam_name + reference_char + "3.bam", args)
@@ -85,25 +84,23 @@ def run(args):
     p2.wait()
     p3.wait()
 
-    """
-
     """The ErrorCalculation can be also parallel by choromosome.
     """
 
-    ## load labeled file.
+    #load labeled file.
     exist_test_set = True
     test_set, validation_set = loadLabel(args.validSet)
     print "# of test set is      :: " + str(len(test_set))
     print "# of validation set is :: " + str(len(validation_set))
 
-    ## there must be valid validation set and test set.
+    #there must be valid validation set and test set.
     if not test_set or not validation_set:
         print "there are no matched validation set :p\n"
         exit()
 
-    ## actual learning part
+    #actual learning part
     else:
-        summerize_error(bam_name, validation_set)
+        print summerize_error(bam_name, validation_set)
 
 
 def summerize_error(bam_name, validation_set):
@@ -118,17 +115,18 @@ def summerize_error(bam_name, validation_set):
     reference_char = ".REF_chr"
 
     for chr_no in range(22):
-        input_name = bam_name + reference_char + str(chr_no+1) +".broadPeak"
+        input_name = bam_name + reference_char + str(chr_no+1) + ".bam_peaks" + ".broadPeak"
         label_num, error_num = calculateError(input_name, parseLabel(validation_set, input_name))
         sum_error_num += error_num
         sum_label_num += label_num
 
     # add about sexual chromosome
-    input_name = bam_name + reference_char + str('X') + ".broadPeak"
+    input_name = bam_name + reference_char + str('X') + ".bam_peaks" + ".broadPeak"
     label_num, error_num = calculateError(input_name, parseLabel(validation_set, input_name))
     sum_error_num += error_num
     sum_label_num += label_num
-    input_name = bam_name + reference_char + str('Y') + ".broadPeak"
+    
+    input_name = bam_name + reference_char + str('Y') + ".bam_peaks" + ".broadPeak"
     label_num, error_num = calculateError(input_name, parseLabel(validation_set, input_name))
     sum_error_num += error_num
     sum_label_num += label_num
