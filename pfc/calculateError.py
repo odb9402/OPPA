@@ -3,11 +3,17 @@ and this module can be used to regular, for MACS and peakSeq which any algorithm
 return as bed file format."""
 
 import random
-from loadPaser.loadPeak import run as peakLoad
-
+from loadParser.loadPeak import run as loadPeak
 
 def calculate_error(peak_data, labeled_data):
-    """calculate actual error by numbering to wrong label"""
+    """
+    calculate actual error by numbering to wrong label
+
+    :param peak_data:
+    :param labeled_data:
+    :return:
+    """
+
 
     error_num = 0.0
     error_rate = 0.0
@@ -23,11 +29,19 @@ def calculate_error(peak_data, labeled_data):
 
     error_rate = error_num / len(labeled_data)
     print "incorrect label // correct label ::" + str(error_num) + ":" + str(len(labeled_data))
-    return error_rate
+    return error_num, error_rate
 
 
 
 def is_peak(target, value, tolerance = 0, weak_predict = False):
+    """
+
+    :param target:
+    :param value:
+    :param tolerance:
+    :param weak_predict:
+    :return:
+    """
     """this function will find to regions in target bed set by using binary search"""
     """the similarity allow the distance of bed file row between label area as long as own value"""
 
@@ -36,7 +50,7 @@ def is_peak(target, value, tolerance = 0, weak_predict = False):
     min_index = 0
     max_index = len(target)
 
-    ## if find correct one, return True
+    # if find correct one, return True
     while True:
         correct_ness = is_same(target, value, index, tolerance)
 
@@ -62,10 +76,10 @@ def is_peak(target, value, tolerance = 0, weak_predict = False):
         elif correct_ness is 'upper':
             min_index = index
             index = (max_index + index) / 2
-        ##find correct regions
+        #find correct regions
         else:
-            ### if label is "peaks", correct regions can be bigger than 2.
-            ### but "peakStart" or "peakEnd" are not they must exist only 1 correct regions.
+            # if label is "peaks", correct regions can be bigger than 2.
+            # but "peakStart" or "peakEnd" are not they must exist only 1 correct regions.
 
             #Case 4 : label is "peaks" or "noPeak" and Correct.
             if (weak_predict is True):
@@ -84,8 +98,14 @@ def is_peak(target, value, tolerance = 0, weak_predict = False):
 
 
 
-def is_noPeak(target, value, tolerance = 5000):
+def is_noPeak(target, value, tolerance = 0):
+    """
 
+    :param target:
+    :param value:
+    :param tolerance:
+    :return:
+    """
     region_min = value[0]
     region_max = value[1]
 
@@ -107,7 +127,7 @@ def is_noPeak(target, value, tolerance = 5000):
         elif find_matched is 'upper':
             min_index = index
             index = (max_index + index) / 2
-        ##find correct regions
+        #find correct regions
         else:
             break
 
@@ -115,19 +135,26 @@ def is_noPeak(target, value, tolerance = 5000):
             break
         steps += 1
 
-    ## correct label ( no peak )
+    #correct label ( no peak )
     if index + 1 == len(target) or\
             float(target[index + 1]['region_s']) + tolerance > region_max:
         return True
 
-    ## false negative no peak ( there is peak )
+    #false negative no peak ( there is peak )
     else:
         return False
 
 
-
 def is_same(target, value, index, tolerance):
-    """this function check label value whether bigger than index or lower than index"""
+    """
+    this function check label value whether bigger than index or lower than index
+
+    :param target:
+    :param value:
+    :param index:
+    :param tolerance:
+    :return:
+    """
     if value[1] + tolerance <= float(target[index]['region_s']):
         return 'less'
     elif value[0] - tolerance  >= float(target[index]['region_e']):
@@ -136,17 +163,26 @@ def is_same(target, value, index, tolerance):
         return 'in'
 
 
-
-def call_error_cal_script(input_file_name, input_valid):
-    """keep call MACS until we find proper parameter"""
-
-    ### load and handle peak files
-    input_file = peakLoad(input_file_name)
-
-    print "error is :" + str(calculate_error(input_file, input_valid))
-
-
-
 def run(input_file_name, input_labels):
-    """it will be runned by protoPFC.py"""
-    call_error_cal_script(input_file_name, input_labels)
+    """
+    this is the module for calculation Error. it will run parallel also.
+    and this module can be used to regular, for MACS and peakSeq which
+    any algorithms return as bed file format.
+
+    :param input_file_name:
+        this parameter is file name that result of running MACS
+         by chromosome.
+
+    :param input_labels:
+        this paramerter is python map about labeled data
+         that it is loaded by loadParser.loadLabel.py
+
+    :return: number of incorrect label, rate of incorrect label
+        (incorrect label / correct label)
+    """
+
+    #load and handle peak files
+    input_file = loadPeak(input_file_name)
+    error_num, error_rate = calculate_error(input_file, input_labels)
+    print "error is {NUM/RATE}:" + str(error_num) + "/" + str(error_rate)
+    return error_num, error_rate
