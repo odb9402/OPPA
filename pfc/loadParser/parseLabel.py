@@ -2,36 +2,46 @@
 import random
 
 
-def parse_chr_celltype():
-    pass
+def parse_chr_celltype(file_name):
+    """Parsing file_name and extracting cell-type , chromosome
+    input file must be EXPERIMENT_AREA_CELL-TYPE.bam so bamtools create
+    EXPERIMENT_AREA_CELL-TYPE._chrN.PEAK"""
+
+    file_name = file_name.rsplit('.',1)[0]
+    file_name = file_name.rsplit('_',1)
+    chromosome = file_name[1]
+
+    file_name = file_name[0].rsplit('.',1)[0]
+    file_name = file_name.rsplit('_',1)
+    cell_type = file_name[1]
+
+    return chromosome, cell_type
 
 
-def parse_peak_labels(peak_labels):
+def parse_peak_labels(peak_labels, chromosome_num, cell_type):
     """Parsing Peak_labels by each chromosome and cell_types
 	if there are correct , append to result and return."""
 
     labels = []
     label_table = ['regions', 'peakStat', 'cellType']
-    chromosome_num = 0
-    cell_type = ""
 
-    ### parse the text file to python list
+    #parse the text file to python list
     for peak in peak_labels:
         containor = []
         containor.append(peak.split(':')[0])
         containor.append(peak.split(':')[1].split(' ',2))
         labels.append(containor)
 
-    ### this part will be change to it decided by input name automatically
-    print "what chromosome you choose? :: e. g. chrN "
+    #this part will be change to it decided by input name automatically
+    """print "what chromosome you choose? :: e. g. chrN "
     chromosome_num = raw_input()
     print "what cell type you choose? :: e. g. {tcell, bcell, monocyte,... etc }"
-    cell_type = raw_input()
+    cell_type = raw_input()"""
 
-    ### this list will be return value.
+    #this list will be return value.
     result_labels_list = []
 
-    ### check the condition ( chromosome ) and change to python map
+    #check the condition ( chromosome ) and change to python map
     for label in labels:
         if label[0] == chromosome_num:
             label_map = dict(zip(label_table, label[1]))
@@ -45,7 +55,7 @@ def parse_peak_labels(peak_labels):
         return -1
 
     for label in result_labels_list:
-        if len(label) == 2 or not cell_type in label['cellType']:
+        if len(label) == 2 or not cell_type.lower() in label['cellType'].lower():
             label['peakStat'] = 'noPeak'
 
     for label in result_labels_list:
@@ -56,12 +66,12 @@ def parse_peak_labels(peak_labels):
     return result_labels_list
 
 
-
 def run(validSet, file_name):
-    ### load and handle labeled Data
-    peak_labels = parse_peak_labels(validSet)
+    # load and handle labeled Data
+    chromosome, cell_type = parse_chr_celltype(file_name)
+    peak_labels = parse_peak_labels(validSet, chromosome, cell_type)
 
-    ## cannot found label about selected area.
+    # cannot found label about selected area.
     if peak_labels is -1:
         return -1
 

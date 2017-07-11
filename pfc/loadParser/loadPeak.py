@@ -13,7 +13,6 @@ def bed_file_load(input_bed, chrom = None):
     return peak_labels
 
 
-
 #ENCODE narrowPeak
 def narrow_peak_file_load(input_Npeak, chrom = None):
     """"""
@@ -27,7 +26,6 @@ def narrow_peak_file_load(input_Npeak, chrom = None):
         peak_labels.append(dict(zip(peak_table,peak.split())))
 
     return peak_labels
-
 
 
 #ENCODE broadPeak
@@ -45,11 +43,9 @@ def broad_peak_file_load(input_Bpeak, chrom = None):
     return peak_labels
 
 
-
 #ENCODE gappedPeak
 def gapped_peak_file_load(input_Gpeak, chrom = None):
     pass
-
 
 
 def run(input_file_name):
