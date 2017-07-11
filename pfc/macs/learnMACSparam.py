@@ -5,20 +5,17 @@ we need to satisfied many condition which mentioned in the paper
 named 'practical bayesian optimization in machine learning algorithm'
 """
 
+
 from subprocess import call
 from subprocess import Popen
 import argparse
 import numpy as np
 
+
 from ..calculateError import run as calculateError
 from ..loadParser.loadLabel import run as loadLabel
 from ..loadParser.parseLabel import run as parseLabel
 
-def get_error(input_file, valid_set):
-    """return calculated error that compare label with output of MACS"""
-
-    error = calculateError(input_file, parseLabel(valid_set, input_file))
-    return error
 
 
 def run(args):
@@ -106,4 +103,34 @@ def run(args):
 
     ## actual learning part
     else:
-        print calculateError("H3K4me3_CD4_Tcell.REF_chr11.broadPeak", parseLabel(validation_set, "H3K4me3_CD4_Tcell.REF_chr11.broadPeak"))
+        summerize_error(bam_name, validation_set)
+
+
+def summerize_error(bam_name, validation_set):
+    """
+
+    :param bam_name:
+    :param validation_set:
+    :return:
+    """
+    sum_error_num = 0
+    sum_label_num = 0
+    reference_char = ".REF_chr"
+
+    for chr_no in range(22):
+        input_name = bam_name + reference_char + str(chr_no+1) +".broadPeak"
+        label_num, error_num = calculateError(input_name, parseLabel(validation_set, input_name))
+        sum_error_num += error_num
+        sum_label_num += label_num
+
+    # add about sexual chromosome
+    input_name = bam_name + reference_char + str('X') + ".broadPeak"
+    label_num, error_num = calculateError(input_name, parseLabel(validation_set, input_name))
+    sum_error_num += error_num
+    sum_label_num += label_num
+    input_name = bam_name + reference_char + str('Y') + ".broadPeak"
+    label_num, error_num = calculateError(input_name, parseLabel(validation_set, input_name))
+    sum_error_num += error_num
+    sum_label_num += label_num
+
+    return sum_error_num , sum_label_num
