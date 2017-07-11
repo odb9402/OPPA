@@ -11,7 +11,7 @@ from multiprocessing import Process
 def main():
     """The main function for pipeline"""
 
-    ## Setting Script Option.
+    # setting Script Option.
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("-t","--tool",  help="what tool you use. : { MACS , Basset , peakSeg }")
     arg_parser.add_argument("-i","--input", help="what file you input.")
@@ -24,20 +24,20 @@ def main():
 
     args = arg_parser.parse_args()
 
-    ## Run each other process by what tools they need.
-    ## and may be we can each chromosome run in 
+    # Run each other process by what tools they need.
+    # and may be we can each chromosome run in
     if args.tool == "MACS":
-        import learnMACSparam
-        import bamtools
+        from pfc.macs.learnMACSparam import run as learnMACSparam
+        from pfc.bamtools import run as bamtools
         start_time = time.time()
 
-        ##running bamtools to split the bam file
-        ##bamtools.run ( args.input )
+        #running bamtools to split the bam file
+        #bamtools.( args.input )
         elapsed_time_secs = time.time() - start_time
         print "Execution _ bamtools : %s" % timedelta(seconds=round(elapsed_time_secs))
 
         start_time = time.time()
-        learnMACSparam.run(args)
+        learnMACSparam(args)
         elapsed_time_secs = time.time() - start_time
         print "Execution _ learning parameter : %s" % timedelta(seconds=round(elapsed_time_secs))
 
