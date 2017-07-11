@@ -8,6 +8,7 @@ Optimize Parameter in Peak detection Algorithm by bayesian optimization.
 
 
 >**DEPENDENCY:**
+
 >-python2.7 -using python 2.7
 >-BayesianOptimization
 >-samtools - 
