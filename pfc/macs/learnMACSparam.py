@@ -11,19 +11,14 @@ import argparse
 import numpy as np
 
 from ..calculateError import run as calculateError
-from ..loadPaser.loadLabel import run as loadLabel
-from ..loadPaser.parseLabel import run as parseLabel
+from ..loadParser.loadLabel import run as loadLabel
+from ..loadParser.parseLabel import run as parseLabel
 
 def get_error(input_file, valid_set):
     """return calculated error that compare label with output of MACS"""
 
     error = calculateError(input_file, parseLabel(valid_set, input_file))
     return error
-
-
-
-def call_learning_script(input_bed, validSet, control_bam = "", input_q = "0.01"):
-    """until we find proper parameter, keep to learn"""
 
 
 def run(args):
@@ -111,4 +106,4 @@ def run(args):
 
     ## actual learning part
     else:
-        print calculateError("TestBed_peaks.broadPeak", parseLabel(validation_set, "filename"))
+        print calculateError("H3K4me3_CD4_Tcell.REF_chr11.broadPeak", parseLabel(validation_set, "H3K4me3_CD4_Tcell.REF_chr11.broadPeak"))
