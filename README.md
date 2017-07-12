@@ -1,4 +1,5 @@
-# OPPA
+OPPA
+======
 Optimize Parameter in Peak detection Algorithm by bayesian optimization.
 
 <p align="center">
