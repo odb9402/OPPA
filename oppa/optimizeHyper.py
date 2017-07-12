@@ -57,7 +57,11 @@ def run(function, Param_bound, init_point):
         this Parameter would be boundary of parameter will be learned. and it must be
         python tuple : (min,max)
 
+    :param init_point:
+        this parameter decide number of sample which randomly generated for first state.
+        
     :return:
+    
     """
 
     optimizer = BayesianOptimization(function, Param_bound, init_point)
