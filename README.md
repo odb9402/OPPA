@@ -2,8 +2,9 @@
 Optimize Parameter in Peak detection Algorithm by bayesian optimization.
 
 <p align="center">
-    <img src="https://github.com/odb9402/OPPA/blob/master/oppa/oppa.jpg" alt="OPPA logo">
+    <img src="https://github.com/odb9402/OPPA/blob/master/oppa/oppa.jpg" alt="OPPA logo" size=50  width="210" height="200">
 </p>
+
 > **OPPA :** A respectful Korean term used by females to call older males such as older male friends or older brothers, but now with the Hallyu kickin' in, people are using it being as annoying as the Japanese, "Kawaii" wave.
 
 
