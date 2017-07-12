@@ -2,16 +2,16 @@ import os
 import subprocess
 
 
-def run(input_file, args):
+def run(input_file,  Qval, control = None):
     """it will be runned by protoPFC.py"""
-    if args.control is None:
-        return callMAC(input_file, args.validSet, input_q = args.Qval)
+    if control is None:
+        return callMAC(input_file, input_q = Qval)
     else:
-        return callMAC(input_file, args.validSet, input_q = args.Qval, control_bam=args.control)
+        return callMAC(input_file, input_q = Qval, control_bam=control)
 
 
 
-def callMAC(input_bam, validSet, control_bam= "", input_q = '0.05'):
+def callMAC(input_bam, control_bam= "", input_q = '0.05'):
     """call MACS by LINUX shell with input parameter"""
     """in MACS, can input control bam file for getting more accurate result, so check it"""
 

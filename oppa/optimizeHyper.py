@@ -6,7 +6,7 @@ from BayesianOptimization.bayes_opt.bayesian_optimization import BayesianOptimiz
 
 #function for testing Bayesian optimization.
 def test_function(y):
-    return (y-50)**2
+    return -(y-50)**2
 
 
 def optimized_function(function, error, *param):
@@ -61,6 +61,9 @@ def run(function, Param_bound, init_point):
         this parameter decide number of sample which randomly generated for first state.
         
     :return:
+        return the python dictionary that is
+        {'max_val' : maximum observation value. ,
+        'max_param' : the parameter can be observe maximum value }
     
     """
 
@@ -92,13 +95,16 @@ def run(function, Param_bound, init_point):
     and you can do optimization by maximize() Method,
     you can initialize data frame ( table of data structure ) by initialize_df method.
     """
-    optimizer.init(init_point)
-    optimizer.maximize(Param_bound, acq = 'ei')
-    optimizer.points_to_csv("result")
+
+    optimizer.explore(Param_bound)
+    optimizer.maximize(acq = 'ei', init_points=init_point, n_iter=15)
+    print optimizer.res['max']
+
 
 #code for test you just run this script
 
 # number of random generate sample.
-init_point = 3
-Param_bound = {'y' : (0, 100.0)}
+"""init_point = 3
+Param_bound = {'y' : (15, 75.0)}
 run(test_function, Param_bound, init_point)
+"""

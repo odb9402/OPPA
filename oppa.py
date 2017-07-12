@@ -2,11 +2,9 @@
 # Time-stamp: < >
 import time
 from datetime import timedelta
-import os
 import sys
 import argparse
-import tempfile
-from multiprocessing import Process
+
 
 def main():
     """The main function for pipeline"""
@@ -24,23 +22,26 @@ def main():
 
     args = arg_parser.parse_args()
 
+    def get_args():
+        return args
+
     if args.Qval == None:
-	args.Qval = '0.05'
+        args.Qval = '0.05'
 
     # Run each other process by what tools they need.
     # and may be we can each chromosome run in
     if args.tool == "MACS":
-        from pfc.macs.learnMACSparam import run as learnMACSparam
-        from pfc.bamtools import run as bamtools
+        from oppa.macs.learnMACSparam import learnMACSparam
+        from oppa.bamtools import run as bamtools
         start_time = time.time()
 
         #running bamtools to split the bam file
         print "Execute bamtools . . . : split bam file by chromosome "
-	bamtools( args.input )
+        bamtools( args.input )
         elapsed_time_secs = time.time() - start_time
         print "Execution _ bamtools : %s" % timedelta(seconds=round(elapsed_time_secs))
 
-	print "Execute MACS . . . : each chromosome "
+        print "Execute MACS . . . : each chromosome "
         start_time = time.time()
         learnMACSparam(args)
         elapsed_time_secs = time.time() - start_time
@@ -55,6 +56,7 @@ def main():
 
     else:
         print "the tool %s is not support.",args.tool
+
 
 if __name__ == '__main__':
     try:
