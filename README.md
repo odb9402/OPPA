@@ -9,15 +9,20 @@ Optimize Parameter in Peak detection Algorithm by bayesian optimization.
 
 
 --------
+>**QUICK START**
 
 
->**DEPENDENCY:**
+--------
+>**DEPENDENCY**
 
-> - python2.7 -using python 2.7
-> - BayesianOptimization - by https://github.com/fmfn/BayesianOptimization
-> - samtools - 
-> - bamtools - using bamtools
-> - MACS - using MACS version 2.1.0
+- python2.7 -using python 2.7
+ >>- [BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
+ >>- scipy
+ >>- numpy
+ >>- skleran
+- samtools - 
+- bamtools - using bamtools
+- [MACS](https://github.com/taoliu/MACS) - using MACS version 2.1.0
 
 ---------
 >**CITATION**
