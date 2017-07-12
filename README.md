@@ -14,3 +14,9 @@ Optimize Parameter in Peak detection Algorithm by bayesian optimization.
 > - samtools - 
 > - bamtools - using bamtools
 > - MACS - using MACS version 2.1.0
+
+---------
+>**CITATION**
+
+> - HOCKING, Toby Dylan, et al. Optimizing ChIP-seq peak detectors using visual labels and supervised machine learning. Bioinformatics, 2016, 33.4: 491-499.
+> - SNOEK, Jasper; LAROCHELLE, Hugo; ADAMS, Ryan P. Practical bayesian optimization of machine learning algorithms. In: Advances in neural information processing systems. 2012. p. 2951-2959.
