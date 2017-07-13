@@ -4,7 +4,7 @@ import time
 from datetime import timedelta
 import sys
 import argparse
-from oppa.loadParser import loadLabel
+from oppa.loadParser.loadLabel import run as loadLabel
 
 def main():
     """The main function for pipeline"""
