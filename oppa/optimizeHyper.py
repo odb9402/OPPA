@@ -97,9 +97,9 @@ def run(function, Param_bound, init_point):
     """
 
     optimizer.explore(Param_bound)
-    optimizer.maximize(acq = 'ei', init_points=init_point, n_iter=15)
+    optimizer.maximize(acq = 'ei', init_points=init_point, n_iter=10)
     print optimizer.res['max']
-
+    optimizer.points_to_csv("result")
 
 #code for test you just run this script
 

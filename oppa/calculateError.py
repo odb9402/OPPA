@@ -28,7 +28,6 @@ def calculate_error(peak_data, labeled_data):
             if not is_noPeak(peak_data, label['regions']) : error_num += 1
 
     error_rate = error_num / len(labeled_data)
-    print "incorrect label // correct label ::" + str(error_num) + ":" + str(len(labeled_data))
     return error_num, len(labeled_data)
 
 
@@ -188,5 +187,5 @@ def run(input_file_name, input_labels):
     #load and handle peak files
     input_file = loadPeak(input_file_name)
     error_num, total_label = calculate_error(input_file, input_labels)
-    print "error is {error label/ total label}:" + str(error_num) + "/" + str(total_label) + '\n'
+    #print "error is {error label/ total label}:" + str(error_num) + "/" + str(total_label) + '\n'
     return error_num, total_label

@@ -50,10 +50,10 @@ def parse_peak_labels(peak_labels, chromosome_num, cell_type):
             result_labels_list.append(label_map)
 
 
-    print "%d`s label data is found.i" % len(result_labels_list)
+    #print "%d`s label data is found.i" % len(result_labels_list)
 
     if len(result_labels_list) == 0:
-        print "there are matched label data. so cannot handle it"
+        #print "there are matched label data. so cannot handle it"
         return -1
 
     for label in result_labels_list:

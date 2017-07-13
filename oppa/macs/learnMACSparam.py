@@ -9,6 +9,7 @@ from subprocess import call
 from subprocess import Popen
 import argparse
 import numpy as np
+import logging
 
 from ..optimizeHyper import run as optimizeHyper
 from ..calculateError import run as calculateError
@@ -32,17 +33,18 @@ def learnMACSparam(args):
     valid_set = args.validSet
     Qval = args.Qval
     control = args.control
+    call_type = args.callType
 
     def wrapper_function(opt_Qval):
-        run(input_file,valid_set,opt_Qval,control)
-
-    parameter_bound = {'opt_Qval' : (0,0.8)}
+        error = run(input_file,valid_set,str(opt_Qval),call_type,control)
+	return -error
+    parameter_bound = {'opt_Qval' : (10**-16,0.8)}
     number_of_init_sample = 2
 
     optimizeHyper(wrapper_function, parameter_bound, number_of_init_sample)
 
 
-def run(input_file, valid_set, Qval, control = None):
+def run(input_file, valid_set, Qval, call_type, control = None):
     """
     this function run MACS and calculate error at once.
     each arguments will be given by learnMACSparam that from command line.
@@ -66,59 +68,59 @@ def run(input_file, valid_set, Qval, control = None):
     bam_name = input_file[:-4]  ## delete '.bam'
     reference_char = ".REF_chr"
 
-    p1 = MACS.run(bam_name + reference_char + "1.bam", Qval ,control)
-    p2 = MACS.run(bam_name + reference_char + "2.bam", Qval ,control)
-    p3 = MACS.run(bam_name + reference_char + "3.bam", Qval ,control)
-    p4 = MACS.run(bam_name + reference_char + "4.bam",  Qval ,control)
+    p1 = MACS.run(bam_name + reference_char + "1.bam", Qval ,call_type,control)
+    p2 = MACS.run(bam_name + reference_char + "2.bam", Qval ,call_type,control)
+    p3 = MACS.run(bam_name + reference_char + "3.bam", Qval ,call_type,control)
+    p4 = MACS.run(bam_name + reference_char + "4.bam",  Qval ,call_type,control)
     p1.wait()
     p2.wait()
     p3.wait()
     p4.wait()
 
-    p1 = MACS.run(bam_name + reference_char + "5.bam",  Qval ,control)
-    p2 = MACS.run(bam_name + reference_char + "6.bam",  Qval ,control)
-    p3 = MACS.run(bam_name + reference_char + "7.bam",  Qval ,control)
-    p4 = MACS.run(bam_name + reference_char + "8.bam",  Qval ,control)
+    p1 = MACS.run(bam_name + reference_char + "5.bam",  Qval ,call_type,control)
+    p2 = MACS.run(bam_name + reference_char + "6.bam",  Qval ,call_type,control)
+    p3 = MACS.run(bam_name + reference_char + "7.bam",  Qval ,call_type,control)
+    p4 = MACS.run(bam_name + reference_char + "8.bam",  Qval ,call_type,control)
     p1.wait()
     p2.wait()
     p3.wait()
     p4.wait()
 
-    p1 = MACS.run(bam_name + reference_char + "9.bam",  Qval ,control)
-    p2 = MACS.run(bam_name + reference_char + "10.bam",  Qval ,control)
-    p3 = MACS.run(bam_name + reference_char + "11.bam",  Qval ,control)
-    p4 = MACS.run(bam_name + reference_char + "12.bam",  Qval ,control)
+    p1 = MACS.run(bam_name + reference_char + "9.bam",  Qval ,call_type,control)
+    p2 = MACS.run(bam_name + reference_char + "10.bam",  Qval ,call_type,control)
+    p3 = MACS.run(bam_name + reference_char + "11.bam",  Qval ,call_type,control)
+    p4 = MACS.run(bam_name + reference_char + "12.bam",  Qval ,call_type,control)
     p1.wait()
     p2.wait()
     p3.wait()
     p4.wait()
 
-    p1 = MACS.run(bam_name + reference_char + "13.bam",  Qval ,control)
-    p2 = MACS.run(bam_name + reference_char + "14.bam",  Qval ,control)
-    p3 = MACS.run(bam_name + reference_char + "15.bam",  Qval ,control)
-    p4 = MACS.run(bam_name + reference_char + "16.bam",  Qval ,control)
+    p1 = MACS.run(bam_name + reference_char + "13.bam",  Qval ,call_type,control)
+    p2 = MACS.run(bam_name + reference_char + "14.bam",  Qval ,call_type,control)
+    p3 = MACS.run(bam_name + reference_char + "15.bam",  Qval ,call_type,control)
+    p4 = MACS.run(bam_name + reference_char + "16.bam",  Qval ,call_type,control)
     p1.wait()
     p2.wait()
     p3.wait()
     p4.wait()
     
-    p1 = MACS.run(bam_name + reference_char + "17.bam",  Qval ,control)
-    p2 = MACS.run(bam_name + reference_char + "18.bam",  Qval ,control)
-    p3 = MACS.run(bam_name + reference_char + "19.bam",  Qval ,control)
+    p1 = MACS.run(bam_name + reference_char + "17.bam",  Qval ,call_type,control)
+    p2 = MACS.run(bam_name + reference_char + "18.bam",  Qval ,call_type,control)
+    p3 = MACS.run(bam_name + reference_char + "19.bam",  Qval ,call_type,control)
     p1.wait()
     p2.wait()
     p3.wait()
 
-    p1 = MACS.run(bam_name + reference_char + "20.bam",  Qval ,control)
-    p2 = MACS.run(bam_name + reference_char + "21.bam",  Qval ,control)
-    p3 = MACS.run(bam_name + reference_char + "22.bam",  Qval ,control)
+    p1 = MACS.run(bam_name + reference_char + "20.bam",  Qval ,call_type,control)
+    p2 = MACS.run(bam_name + reference_char + "21.bam",  Qval ,call_type,control)
+    p3 = MACS.run(bam_name + reference_char + "22.bam",  Qval ,call_type,control)
     p1.wait()
     p2.wait()
     p3.wait()
     
-    p1 = MACS.run(bam_name + reference_char + "M.bam",  Qval ,control)
-    p2 = MACS.run(bam_name + reference_char + "X.bam",  Qval ,control)
-    p3 = MACS.run(bam_name + reference_char + "Y.bam",  Qval ,control)
+    p1 = MACS.run(bam_name + reference_char + "M.bam",  Qval ,call_type,control)
+    p2 = MACS.run(bam_name + reference_char + "X.bam",  Qval ,call_type,control)
+    p3 = MACS.run(bam_name + reference_char + "Y.bam",  Qval ,call_type,control)
     p1.wait()
     p2.wait()
     p3.wait()
@@ -128,8 +130,8 @@ def run(input_file, valid_set, Qval, control = None):
     #load labeled file.
     exist_test_set = True
     test_set, validation_set = loadLabel(valid_set)
-    print "# of test set is      :: " + str(len(test_set))
-    print "# of validation set is :: " + str(len(validation_set))
+    #print "# of test set is      :: " + str(len(test_set))
+    #print "# of validation set is :: " + str(len(validation_set))
 
     #there must be valid validation set and test set.
     if not test_set or not validation_set:
@@ -139,7 +141,7 @@ def run(input_file, valid_set, Qval, control = None):
     #actual learning part
     else:
         error_num, label_num = summerize_error(bam_name, validation_set)
-        return error_num/label_num
+       	return error_num/label_num
 
 def summerize_error(bam_name, validation_set):
     """
@@ -154,18 +156,18 @@ def summerize_error(bam_name, validation_set):
 
     for chr_no in range(22):
         input_name = bam_name + reference_char + str(chr_no+1) + ".bam_peaks" + ".broadPeak"
-        label_num, error_num = calculateError(input_name, parseLabel(validation_set, input_name))
+        error_num, label_num = calculateError(input_name, parseLabel(validation_set, input_name))
         sum_error_num += error_num
         sum_label_num += label_num
 
     # add about sexual chromosome
     input_name = bam_name + reference_char + str('X') + ".bam_peaks" + ".broadPeak"
-    label_num, error_num = calculateError(input_name, parseLabel(validation_set, input_name))
+    error_num, label_num = calculateError(input_name, parseLabel(validation_set, input_name))
     sum_error_num += error_num
     sum_label_num += label_num
     
     input_name = bam_name + reference_char + str('Y') + ".bam_peaks" + ".broadPeak"
-    label_num, error_num = calculateError(input_name, parseLabel(validation_set, input_name))
+    error_num, label_num = calculateError(input_name, parseLabel(validation_set, input_name))
     sum_error_num += error_num
     sum_label_num += label_num
 

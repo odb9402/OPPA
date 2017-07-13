@@ -19,6 +19,7 @@ def main():
                                                 "significance value in Statical solutions it is only for"
                                                 ": {MACS ")
     arg_parser.add_argument("-vs","--validSet", help="validation set it is labeled. used for : { MACS , ")
+    arg_parser.add_argument("-ct","--callType", help="decide peak call type either broad or narrow. used for : {MACS ")
 
     args = arg_parser.parse_args()
 
@@ -37,7 +38,7 @@ def main():
 
         #running bamtools to split the bam file
         print "Execute bamtools . . . : split bam file by chromosome "
-        bamtools( args.input )
+        #bamtools( args.input )
         elapsed_time_secs = time.time() - start_time
         print "Execution _ bamtools : %s" % timedelta(seconds=round(elapsed_time_secs))
 
