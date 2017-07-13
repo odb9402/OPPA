@@ -1,6 +1,6 @@
 OPPA
 ======
-Optimize Parameter in Peak detection Algorithm by bayesian optimization.
+Optimize Parameter in Peak detection Algorithm by bayesian optimization. ( it is being developed . . . )
 
 <p align="center">
     <img src="https://github.com/odb9402/OPPA/blob/master/oppa/oppa.jpg" alt="OPPA logo" size=50  width="210" height="200">
@@ -13,16 +13,36 @@ Optimize Parameter in Peak detection Algorithm by bayesian optimization.
 QUICK START
 -------
 
+>INSTALL:
+>0   
+
+---
+
+>RUNNING:
+>
+	example :	
+    `python oppa.py -t MACS -I input_name -c control_file_name -vs label_name`
+    see more :
+    `python oppa.py -h`
+
+
+
+--------
+LABELED DATA
+-------
+0
+
 
 --------
 DEPENDENCY
 -------
 
 - python2.7 -using python 2.7
- >>- [BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
- >>- scipy
- >>- numpy
- >>- skleran
+ >- [BayesianOptimization](https://github.com/fmfn/BayesianOptimization)
+ >- scipy
+ >- numpy
+ >- skleran
+
 - samtools - 
 - bamtools - using bamtools
 - [MACS](https://github.com/taoliu/MACS) - using MACS version 2.1.0
