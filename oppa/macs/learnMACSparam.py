@@ -5,19 +5,13 @@ we need to satisfied many condition which mentioned in the paper
 named 'practical bayesian optimization in machine learning algorithm'
 """
 
-from subprocess import call
-from subprocess import Popen
-import argparse
-import numpy as np
-import logging
-
 from ..optimizeHyper import run as optimizeHyper
 from ..calculateError import run as calculateError
 from ..loadParser.loadLabel import run as loadLabel
 from ..loadParser.parseLabel import run as parseLabel
 
 
-def learnMACSparam(args):
+def learnMACSparam(args, test_set, validation_set):
     """
     this function actually control learning steps. args is given by
     oppa.py ( main function of this program ) from command line.
@@ -29,13 +23,8 @@ def learnMACSparam(args):
     :return: learned parameter.
     """
 
-    #load labeled file.
-    test_set, validation_set = loadLabel(args.validSet)
-    print test_set, validation_set
 
     input_file = args.input
-    valid_set = args.validSet
-    Qval = args.Qval
     control = args.control
     call_type = args.callType
 
@@ -46,7 +35,10 @@ def learnMACSparam(args):
     parameter_bound = {'opt_Qval' : (10**-16,0.8)}
     number_of_init_sample = 2
 
-    optimizeHyper(wrapper_function, parameter_bound, number_of_init_sample)
+    result = optimizeHyper(wrapper_function, parameter_bound, number_of_init_sample)
+    final_error = run(input_file, test_set, str(result['max_params']), call_type, control)
+
+    print " final error about test set is :::" + str(final_error)
 
 
 def run(input_file, valid_set, Qval, call_type, control = None):
@@ -57,7 +49,7 @@ def run(input_file, valid_set, Qval, call_type, control = None):
     :param input_file:
         input file name.
     :param valid_set:
-        name of labeled data.
+        python list of labeled data
     :param Qval:
         Q-value of MACS. it will be learned.
     :param control:
@@ -140,6 +132,7 @@ def run(input_file, valid_set, Qval, call_type, control = None):
     else:
         error_num, label_num = summerize_error(bam_name, valid_set)
        	return error_num/label_num
+
 
 def summerize_error(bam_name, validation_set):
     """

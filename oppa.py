@@ -4,7 +4,7 @@ import time
 from datetime import timedelta
 import sys
 import argparse
-
+from oppa.loadParser import loadLabel
 
 def main():
     """The main function for pipeline"""
@@ -23,11 +23,10 @@ def main():
 
     args = arg_parser.parse_args()
 
-    def get_args():
-        return args
-
     if args.Qval == None:
         args.Qval = '0.05'
+
+    validation_set, test_set = loadLabel(args.valid)
 
     # Run each other process by what tools they need.
     # and may be we can each chromosome run in
@@ -44,7 +43,7 @@ def main():
 
         print "Execute MACS . . . : each chromosome "
         start_time = time.time()
-        learnMACSparam(args)
+        learnMACSparam(args, validation_set, test_set)
         elapsed_time_secs = time.time() - start_time
         print "Execution _ learning parameter : %s" % timedelta(seconds=round(elapsed_time_secs))
 
