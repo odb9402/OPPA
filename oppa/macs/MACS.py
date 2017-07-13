@@ -17,15 +17,15 @@ def callMAC(input_bam, call_type, control_bam= "", input_q = '0.05'):
 
 
     if control_bam is not "":
-	if call_type == "broad":
-	    commands = ["macs2", "callpeak", "-t", input_bam, "-c", control_bam, '--broad', "-g", "hs", "-n", input_bam, "-B", "-q", input_q]
-	else:
-	    commands = ["macs2", "callpeak", "-t", input_bam, "-c", control_bam, "-g", "hs", "-n", input_bam, "-B", "-q",input_q]
+        if call_type == "broad":
+            commands = ["macs2", "callpeak", "-t", input_bam, "-c", control_bam, '--broad', "-g", "hs", "-n", input_bam, "-B", "-q", input_q]
+        else:
+            commands = ["macs2", "callpeak", "-t", input_bam, "-c", control_bam, "-g", "hs", "-n", input_bam, "-B", "-q",input_q]
     else:
-	if call_type == "broad":
+        if call_type == "broad":
             commands = ["macs2", "callpeak", "-t", input_bam, '--broad',  "-g", "hs", "-n", input_bam, "-B", "-q", input_q]
-	else:
-	    commands = ["macs", "callpeak", "-t", input_bam, "-g", "hs", "-n", input_bam, "-B", "-q", input_q]
+        else:
+            commands = ["macs", "callpeak", "-t", input_bam, "-g", "hs", "-n", input_bam, "-B", "-q", input_q]
     # make subprocess has no output to shell
     # and throw that output into dev/null
     FNULL = open(os.devnull, 'w')
