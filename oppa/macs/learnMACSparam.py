@@ -5,19 +5,13 @@ we need to satisfied many condition which mentioned in the paper
 named 'practical bayesian optimization in machine learning algorithm'
 """
 
-from subprocess import call
-from subprocess import Popen
-import argparse
-import numpy as np
-import logging
-
 from ..optimizeHyper import run as optimizeHyper
 from ..calculateError import run as calculateError
 from ..loadParser.loadLabel import run as loadLabel
 from ..loadParser.parseLabel import run as parseLabel
 
 
-def learnMACSparam(args):
+def learnMACSparam(args, test_set, validation_set):
     """
     this function actually control learning steps. args is given by
     oppa.py ( main function of this program ) from command line.
@@ -29,19 +23,22 @@ def learnMACSparam(args):
     :return: learned parameter.
     """
 
+
     input_file = args.input
-    valid_set = args.validSet
-    Qval = args.Qval
     control = args.control
     call_type = args.callType
 
     def wrapper_function(opt_Qval):
-        error = run(input_file,valid_set,str(opt_Qval),call_type,control)
-	return -error
+        error = run(input_file, validation_set, str(opt_Qval), call_type,control)
+        return -error
+
     parameter_bound = {'opt_Qval' : (10**-16,0.8)}
     number_of_init_sample = 2
 
-    optimizeHyper(wrapper_function, parameter_bound, number_of_init_sample)
+    result = optimizeHyper(wrapper_function, parameter_bound, number_of_init_sample)
+    final_error = run(input_file, test_set, str(result['max_params']), call_type, control)
+
+    print " final error about test set is :::" + str(final_error)
 
 
 def run(input_file, valid_set, Qval, call_type, control = None):
@@ -52,7 +49,7 @@ def run(input_file, valid_set, Qval, call_type, control = None):
     :param input_file:
         input file name.
     :param valid_set:
-        name of labeled data.
+        python list of labeled data
     :param Qval:
         Q-value of MACS. it will be learned.
     :param control:
@@ -107,41 +104,34 @@ def run(input_file, valid_set, Qval, call_type, control = None):
     p1 = MACS.run(bam_name + reference_char + "17.bam",  Qval ,call_type,control)
     p2 = MACS.run(bam_name + reference_char + "18.bam",  Qval ,call_type,control)
     p3 = MACS.run(bam_name + reference_char + "19.bam",  Qval ,call_type,control)
+    p4 = MACS.run(bam_name + reference_char + "X.bam",  Qval ,call_type,control)
     p1.wait()
     p2.wait()
     p3.wait()
-
+    p4.wait()
+    
     p1 = MACS.run(bam_name + reference_char + "20.bam",  Qval ,call_type,control)
     p2 = MACS.run(bam_name + reference_char + "21.bam",  Qval ,call_type,control)
     p3 = MACS.run(bam_name + reference_char + "22.bam",  Qval ,call_type,control)
+    p4 = MACS.run(bam_name + reference_char + "Y.bam",  Qval ,call_type,control)
     p1.wait()
     p2.wait()
     p3.wait()
-    
-    p1 = MACS.run(bam_name + reference_char + "M.bam",  Qval ,call_type,control)
-    p2 = MACS.run(bam_name + reference_char + "X.bam",  Qval ,call_type,control)
-    p3 = MACS.run(bam_name + reference_char + "Y.bam",  Qval ,call_type,control)
-    p1.wait()
-    p2.wait()
-    p3.wait()
+    p4.wait()
 
-    #The ErrorCalculation can be also parallel by choromosome.
 
-    #load labeled file.
-    exist_test_set = True
-    test_set, validation_set = loadLabel(valid_set)
-    #print "# of test set is      :: " + str(len(test_set))
-    #print "# of validation set is :: " + str(len(validation_set))
+
 
     #there must be valid validation set and test set.
-    if not test_set or not validation_set:
+    if not valid_set:
         print "there are no matched validation set :p\n"
         exit()
 
     #actual learning part
     else:
-        error_num, label_num = summerize_error(bam_name, validation_set)
+        error_num, label_num = summerize_error(bam_name, valid_set)
        	return error_num/label_num
+
 
 def summerize_error(bam_name, validation_set):
     """
@@ -172,3 +162,28 @@ def summerize_error(bam_name, validation_set):
     sum_label_num += label_num
 
     return sum_error_num , sum_label_num
+
+
+def is_exist_chr(valid_set, chr):
+    """
+    this method to decide either run MACS or not about
+    each chromosome in label data. if some chromosome did not
+    included by label data, there is no need to run MACS that
+    chromosome.
+
+    :param valid_set:
+        validation set before parse to python maps. it just list
+        of each line in file like a
+        ['chrN:0000-1132 peakStart bcell monocyte' , ... ]
+
+    :param chr:
+        input chromosome.
+
+    :return:
+        T/F about some chromosome exist in label.
+    """
+    
+    for label in valid_set:
+        if chr in label:
+            return True
+    return False

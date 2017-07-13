@@ -100,6 +100,7 @@ def run(function, Param_bound, init_point):
     optimizer.maximize(acq = 'ei', init_points=init_point, n_iter=10)
     print optimizer.res['max']
     optimizer.points_to_csv("result")
+    return optimizer.res['max']
 
 #code for test you just run this script
 
