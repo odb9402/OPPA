@@ -104,23 +104,22 @@ def run(input_file, valid_set, Qval, call_type, control = None):
     p1 = MACS.run(bam_name + reference_char + "17.bam",  Qval ,call_type,control)
     p2 = MACS.run(bam_name + reference_char + "18.bam",  Qval ,call_type,control)
     p3 = MACS.run(bam_name + reference_char + "19.bam",  Qval ,call_type,control)
+    p4 = MACS.run(bam_name + reference_char + "X.bam",  Qval ,call_type,control)
     p1.wait()
     p2.wait()
     p3.wait()
-
+    p4.wait()
+    
     p1 = MACS.run(bam_name + reference_char + "20.bam",  Qval ,call_type,control)
     p2 = MACS.run(bam_name + reference_char + "21.bam",  Qval ,call_type,control)
     p3 = MACS.run(bam_name + reference_char + "22.bam",  Qval ,call_type,control)
+    p4 = MACS.run(bam_name + reference_char + "Y.bam",  Qval ,call_type,control)
     p1.wait()
     p2.wait()
     p3.wait()
-    
-    p1 = MACS.run(bam_name + reference_char + "M.bam",  Qval ,call_type,control)
-    p2 = MACS.run(bam_name + reference_char + "X.bam",  Qval ,call_type,control)
-    p3 = MACS.run(bam_name + reference_char + "Y.bam",  Qval ,call_type,control)
-    p1.wait()
-    p2.wait()
-    p3.wait()
+    p4.wait()
+
+
 
 
     #there must be valid validation set and test set.
