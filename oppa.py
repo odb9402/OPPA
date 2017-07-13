@@ -26,7 +26,7 @@ def main():
     if args.Qval == None:
         args.Qval = '0.05'
 
-    validation_set, test_set = loadLabel(args.valid)
+    validation_set, test_set = loadLabel(args.validSet)
 
     # Run each other process by what tools they need.
     # and may be we can each chromosome run in
