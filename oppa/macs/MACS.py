@@ -16,7 +16,7 @@ def callMAC(input_bam, call_type, control_bam= "", input_q = '0.05'):
     """in MACS, can input control bam file for getting more accurate result, so check it"""
 
     if call_type == "broad":
-	broad_cutoff = input_q * 1.122
+	broad_cutoff = str(float(input_q) * 1.122)
 
     if control_bam is not "":
         if call_type == "broad":
