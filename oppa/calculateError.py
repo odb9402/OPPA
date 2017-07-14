@@ -10,8 +10,12 @@ def calculate_error(peak_data, labeled_data):
     calculate actual error by numbering to wrong label
 
     :param peak_data:
+    	python map is parsed and it is from result of peak calling algorithm
+	like a MACS.
     :param labeled_data:
+    	python map is parsed and it is from labeled data file.
     :return:
+    	return python tuple ( number of incorrect label , number of whole label )
     """
 
 
