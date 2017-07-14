@@ -1,6 +1,6 @@
-"""this is the module for calculation Error. it will run parallel also.
+"""this is the module for error calculation. it will run parallel also.
 and this module can be used to regular, for MACS and peakSeq which any algorithms
-return as bed file format."""
+return as bed, narrowpeak, broadpeak file format."""
 
 import random
 from loadParser.loadPeak import run as loadPeak
