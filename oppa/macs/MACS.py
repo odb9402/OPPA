@@ -15,17 +15,19 @@ def callMAC(input_bam, call_type, control_bam= "", input_q = '0.05'):
     """call MACS by LINUX shell with input parameter"""
     """in MACS, can input control bam file for getting more accurate result, so check it"""
 
+    if call_type == "broad":
+	broad_cutoff = input_q * 1.122
 
     if control_bam is not "":
         if call_type == "broad":
-            commands = ["macs2", "callpeak", "-t", input_bam, "-c", control_bam, '--broad', "-g", "hs", "-n", input_bam, "-B", "-q", input_q]
+            commands = ["macs2", "callpeak", "-t", input_bam, "-c", control_bam, '--broad', "-g", "hs", "-n", input_bam , "--broad-cutoff" , broad_cutoff]
         else:
-            commands = ["macs2", "callpeak", "-t", input_bam, "-c", control_bam, "-g", "hs", "-n", input_bam, "-B", "-q",input_q]
+            commands = ["macs2", "callpeak", "-t", input_bam, "-c", control_bam, "-g", "hs", "-n", input_bam, "-q", input_q]
     else:
         if call_type == "broad":
-            commands = ["macs2", "callpeak", "-t", input_bam, '--broad',  "-g", "hs", "-n", input_bam, "-B", "-q", input_q]
+            commands = ["macs2", "callpeak", "-t", input_bam, '--broad',  "-g", "hs", "-n", input_bam, "--broad-cutoff" , broad_cutoff]
         else:
-            commands = ["macs", "callpeak", "-t", input_bam, "-g", "hs", "-n", input_bam, "-B", "-q", input_q]
+            commands = ["macs2", "callpeak", "-t", input_bam, "-g", "hs", "-n", input_bam,  "-q", input_q , "--broad-cutoff", bruoad_cutoff]
     # make subprocess has no output to shell
     # and throw that output into dev/null
     FNULL = open(os.devnull, 'w')

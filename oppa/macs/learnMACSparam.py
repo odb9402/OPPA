@@ -32,7 +32,7 @@ def learnMACSparam(args, test_set, validation_set):
         error = run(input_file, validation_set, str(opt_Qval), call_type,control)
         return -error
 
-    parameter_bound = {'opt_Qval' : (10**-16,0.8)}
+    parameter_bound = {'opt_Qval' : (10**-15,0.8)}
     number_of_init_sample = 2
 
     result = optimizeHyper(wrapper_function, parameter_bound, number_of_init_sample)
@@ -59,7 +59,6 @@ def run(input_file, valid_set, Qval, call_type, control = None):
         error rate of between MACS_output and labeled Data.
     """
     import MACS
-
 
     """it will be runned by protoPFC.py"""
     bam_name = input_file[:-4]  ## delete '.bam'
@@ -129,11 +128,12 @@ def run(input_file, valid_set, Qval, call_type, control = None):
 
     #actual learning part
     else:
-        error_num, label_num = summerize_error(bam_name, valid_set)
-       	return error_num/label_num
+        error_num, label_num = summerize_error(bam_name, valid_set, call_type)
+       	print "error :" + str(error_num/label_num)
+	return error_num/label_num
 
 
-def summerize_error(bam_name, validation_set):
+def summerize_error(bam_name, validation_set, call_type):
     """
 
     :param bam_name:
@@ -143,20 +143,24 @@ def summerize_error(bam_name, validation_set):
     sum_error_num = 0
     sum_label_num = 0
     reference_char = ".REF_chr"
+    if call_type == "broad":
+		output_format_name = '.broadPeak'
+    else:
+		output_format_name = '.narrowPeak'
 
     for chr_no in range(22):
-        input_name = bam_name + reference_char + str(chr_no+1) + ".bam_peaks" + ".broadPeak"
+        input_name = bam_name + reference_char + str(chr_no+1) + ".bam_peaks" + output_format_name
         error_num, label_num = calculateError(input_name, parseLabel(validation_set, input_name))
         sum_error_num += error_num
         sum_label_num += label_num
 
     # add about sexual chromosome
-    input_name = bam_name + reference_char + str('X') + ".bam_peaks" + ".broadPeak"
+    input_name = bam_name + reference_char + str('X') + ".bam_peaks" + output_format_name
     error_num, label_num = calculateError(input_name, parseLabel(validation_set, input_name))
     sum_error_num += error_num
     sum_label_num += label_num
     
-    input_name = bam_name + reference_char + str('Y') + ".bam_peaks" + ".broadPeak"
+    input_name = bam_name + reference_char + str('Y') + ".bam_peaks" + output_format_name
     error_num, label_num = calculateError(input_name, parseLabel(validation_set, input_name))
     sum_error_num += error_num
     sum_label_num += label_num
