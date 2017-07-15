@@ -36,7 +36,7 @@ def learnMACSparam(args, test_set, validation_set):
     number_of_init_sample = 2
 
     result = optimizeHyper(wrapper_function, parameter_bound, number_of_init_sample)
-    final_error = run(input_file, test_set, str(result['max_params']), call_type, control)
+    final_error = run(input_file, test_set, str(result['max_params']['opt_Qval']), call_type, control)
 
     print " final error about test set is :::" + str(final_error)
 
