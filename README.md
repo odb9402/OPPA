@@ -14,7 +14,9 @@ QUICK START
 -------
 
 >INSTALL:
->0   
+>	    
+	setup :
+	'python setup.py install'
 
 ---
 
