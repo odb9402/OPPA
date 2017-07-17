@@ -4,6 +4,9 @@ bayesian optimization. if we run this function in parallel,
 we need to satisfied many condition which mentioned in the paper
 named 'practical bayesian optimization in machine learning algorithm'
 """
+import time
+from multiprocessing import cpu_count
+from multiprocessing import Process
 
 from ..optimizeHyper import run as optimizeHyper
 from ..calculateError import run as calculateError
@@ -60,65 +63,49 @@ def run(input_file, valid_set, Qval, call_type, control = None):
     """
     import MACS
 
+    chromosome_list = []
+    for label in valid_set:
+        chromosome_list.append(label.split(':')[0])
+    chromosome_list = list(set(chromosome_list))
+
+    print chromosome_list
+
     """it will be runned by protoPFC.py"""
     bam_name = input_file[:-4]  ## delete '.bam'
-    reference_char = ".REF_chr"
+    reference_char = ".REF_"
 
-    p1 = MACS.run(bam_name + reference_char + "1.bam", Qval ,call_type,control)
-    p2 = MACS.run(bam_name + reference_char + "2.bam", Qval ,call_type,control)
-    p3 = MACS.run(bam_name + reference_char + "3.bam", Qval ,call_type,control)
-    p4 = MACS.run(bam_name + reference_char + "4.bam",  Qval ,call_type,control)
+    MAX_CORE = cpu_count()
+    TASKS = len(chromosome_list)
+    TASK_NO = 0
+    macs_processes = []
+
+    while (len(macs_processes) < MAX_CORE-1) and (TASK_NO < TASKS):
+	macs_processes.append(MACS.run(bam_name + reference_char + chromosome_list[TASK_NO] + ".bam", Qval, call_type, control))
+	TASK_NO += 1
+
+    while len(macs_processes) > 0:
+	time.sleep(0.1)
+	
+	for proc in reversed(range(len(macs_processes))):
+	    if macs_processes[proc].poll() is not None:
+		del macs_processes[proc]
+
+	while (len(macs_processes) < MAX_CORE - 1) and (TASK_NO < TASKS):
+	    macs_processes.append(MACS.run(bam_name + reference_char + chromosome_list[TASK_NO] + ".bam", Qval, call_type, control))
+	    TASK_NO += 1
+
+		
+
+    """
+    p1 = MACS.run(bam_name + reference_char + chromosome_list[0] + ".bam", Qval ,call_type,control)
+    p2 = MACS.run(bam_name + reference_char + chromosome_list[1] + ".bam", Qval ,call_type,control)
+    p3 = MACS.run(bam_name + reference_char + chromosome_list[2] + ".bam", Qval ,call_type,control)
+    p4 = MACS.run(bam_name + reference_char + chromosome_list[3] + ".bam", Qval ,call_type,control)
     p1.wait()
     p2.wait()
     p3.wait()
     p4.wait()
-
-    p1 = MACS.run(bam_name + reference_char + "5.bam",  Qval ,call_type,control)
-    p2 = MACS.run(bam_name + reference_char + "6.bam",  Qval ,call_type,control)
-    p3 = MACS.run(bam_name + reference_char + "7.bam",  Qval ,call_type,control)
-    p4 = MACS.run(bam_name + reference_char + "8.bam",  Qval ,call_type,control)
-    p1.wait()
-    p2.wait()
-    p3.wait()
-    p4.wait()
-
-    p1 = MACS.run(bam_name + reference_char + "9.bam",  Qval ,call_type,control)
-    p2 = MACS.run(bam_name + reference_char + "10.bam",  Qval ,call_type,control)
-    p3 = MACS.run(bam_name + reference_char + "11.bam",  Qval ,call_type,control)
-    p4 = MACS.run(bam_name + reference_char + "12.bam",  Qval ,call_type,control)
-    p1.wait()
-    p2.wait()
-    p3.wait()
-    p4.wait()
-
-    p1 = MACS.run(bam_name + reference_char + "13.bam",  Qval ,call_type,control)
-    p2 = MACS.run(bam_name + reference_char + "14.bam",  Qval ,call_type,control)
-    p3 = MACS.run(bam_name + reference_char + "15.bam",  Qval ,call_type,control)
-    p4 = MACS.run(bam_name + reference_char + "16.bam",  Qval ,call_type,control)
-    p1.wait()
-    p2.wait()
-    p3.wait()
-    p4.wait()
-    
-    p1 = MACS.run(bam_name + reference_char + "17.bam",  Qval ,call_type,control)
-    p2 = MACS.run(bam_name + reference_char + "18.bam",  Qval ,call_type,control)
-    p3 = MACS.run(bam_name + reference_char + "19.bam",  Qval ,call_type,control)
-    p4 = MACS.run(bam_name + reference_char + "X.bam",  Qval ,call_type,control)
-    p1.wait()
-    p2.wait()
-    p3.wait()
-    p4.wait()
-    
-    p1 = MACS.run(bam_name + reference_char + "20.bam",  Qval ,call_type,control)
-    p2 = MACS.run(bam_name + reference_char + "21.bam",  Qval ,call_type,control)
-    p3 = MACS.run(bam_name + reference_char + "22.bam",  Qval ,call_type,control)
-    p4 = MACS.run(bam_name + reference_char + "Y.bam",  Qval ,call_type,control)
-    p1.wait()
-    p2.wait()
-    p3.wait()
-    p4.wait()
-
-
+    """
 
 
     #there must be valid validation set and test set.
@@ -129,8 +116,7 @@ def run(input_file, valid_set, Qval, call_type, control = None):
     #actual learning part
     else:
         error_num, label_num = summerize_error(bam_name, valid_set, call_type)
-       	print "error :" + str(error_num/label_num)
-	return error_num/label_num
+    return error_num/label_num
 
 
 def summerize_error(bam_name, validation_set, call_type):
