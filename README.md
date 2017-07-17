@@ -41,11 +41,12 @@ LABELED DATA
 
 for running oppa, you need labeled data file for defining error.  all these approach is from [1] ( 2016 HOCKING , Toby Dylan  ,et al ). example of labeled data is like this. (ASCII)
 
-> chr1:1,000,000-1,100,000 peaks K562
-> chr1:1,100,000-1,200,000 peakStart K562
-> chr1:1,250,000-1,300,000 peakEnd K562
-> chr2:10,000,000-10,002,000 peaks
 > 
+	chr1:1,000,000-1,100,000 peaks K562
+	chr1:1,100,000-1,200,000 peakStart K562
+	chr1:1,250,000-1,300,000 peakEnd K562
+	chr2:10,000,000-10,002,000 peaks
+
 
 in line 1, mean cell K562 at least has one peak in that regions. in line 2, 3, mean cell K562 just only one peak in that regions. in line 4,  there is no peak in that regions about K562 or other cell. if you using this label data on other cell,  all the line 1-4 mean 'noPeak' because there is no cell name in line. as the paper [1], you can label your own data in 10 minute at UCSC genome browser. if you want to know specific rules of this labeling work, please look [here.](https://academic.oup.com/bioinformatics/article/33/4/491/2608653/Optimizing-ChIP-seq-peak-detectors-using-visual)
 
