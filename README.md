@@ -9,6 +9,7 @@ Optimize Parameter in Peak detection Algorithm by bayesian optimization. ( it is
 
 > **OPPA :** A respectful Korean term used by females to call older males such as older male friends or older brothers, but now with the Hallyu kickin' in, people are using it being as annoying as the Japanese, "Kawaii" wave.
 
+oppa try to automatically bayesian optimize hyperparameter of peak detection algirithm , like a macs , by using labeled data.
 
 --------
 QUICK START
