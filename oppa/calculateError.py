@@ -1,7 +1,7 @@
 """this is the module for error calculation. it will run parallel also.
 and this module can be used to regular, for MACS and peakSeq which any algorithms
 return as bed, narrowpeak, broadpeak file format."""
-
+import os
 import random
 from loadParser.loadPeak import run as loadPeak
 
@@ -186,6 +186,8 @@ def run(input_file_name, input_labels):
     
     #case of input label size is 0, error num error rate is zero.
     if input_labels is -1:
+	return 0, 0
+    if not os.path.exists(input_file_name):
 	return 0, 0
 
     #load and handle peak files
