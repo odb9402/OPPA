@@ -18,8 +18,9 @@ QUICK START
 >INSTALL:
 >
 > 
-	python setup.py install
-you can install macs2, scikit-learn, numpy, scipy from this setup python script.
+	cd dependencies
+	python dependencies.py
+you can install dependencies from this python script
 >		
 	sudo apt-get install bamtools
 	sudo apt-get install samtools
