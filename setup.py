@@ -8,5 +8,5 @@ setup(name='OPPA',
       author='dong pin oh',
       license='MIT',
       packages=['OPPA'],
-      install_requires=['scikit-learn','scipy','numpy','Cython','MACS2'],
+      install_requires=['scikit-learn','scipy','numpy','Cython','MACS2','rpy2'],
       zip_safe=False)
