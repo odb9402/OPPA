@@ -1,7 +1,7 @@
-"""this is the module for calculation Error. it will run parallel also.
+"""this is the module for error calculation. it will run parallel also.
 and this module can be used to regular, for MACS and peakSeq which any algorithms
-return as bed file format."""
-
+return as bed, narrowpeak, broadpeak file format."""
+import os
 import random
 from loadParser.loadPeak import run as loadPeak
 
@@ -10,8 +10,12 @@ def calculate_error(peak_data, labeled_data):
     calculate actual error by numbering to wrong label
 
     :param peak_data:
+    	python map is parsed and it is from result of peak calling algorithm
+	like a MACS.
     :param labeled_data:
+    	python map is parsed and it is from labeled data file.
     :return:
+    	return python tuple ( number of incorrect label , number of whole label )
     """
 
 
@@ -182,6 +186,8 @@ def run(input_file_name, input_labels):
     
     #case of input label size is 0, error num error rate is zero.
     if input_labels is -1:
+	return 0, 0
+    if not os.path.exists(input_file_name):
 	return 0, 0
 
     #load and handle peak files
