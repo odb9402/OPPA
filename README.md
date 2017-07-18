@@ -61,10 +61,13 @@ DEPENDENCY
  >- numpy
  >- skleran
 
+- R 
+ >- multicore
+ 
 - samtools - 
 - bamtools - using bamtools
 - [MACS](https://github.com/taoliu/MACS) - using MACS version 2.1.0
-
+- [SPP](https://github.com/xinwang2hms/SPP) - using SPP version 2.0.1
 ---------
 >**CITATION**
 1. HOCKING, Toby Dylan, et al. Optimizing ChIP-seq peak detectors using visual labels and supervised machine learning. Bioinformatics, 2016, 33.4: 491-499.
