@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(name='OPPA',
       version='0.1',
-      description='Oppa _ 오빠 :: Optimize Parameter in Peak'
+      description='Oppa _ :: Optimize Parameter in Peak'
                   ' detection Algorithm by bayesian optimization.',
       url='http://github.com/odb9402/OPPA',
       author='dong pin oh',
