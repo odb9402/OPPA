@@ -1,10 +1,9 @@
-
-
 #main function called by python.
 py_spp <- function(file_name, control_name, fdr=0.01) {
-library(spp)
+
 library(parallel)
 library(multicore)
+library(spp)
 
 options(spp.core = detectCores())
 
@@ -20,7 +19,9 @@ conf<- IPconf(ChIP=chip_data, Input=control_data)
 conf$binding_position$set.param(fdr, method="tag.wtd", add_broad_peak_reg=TRUE)
 conf$binding_position$identify()
 
+#make output file name
+output_name = substr(file_name, 0, nchar(file_name) - 4)
+output_name = paste(output_name, ".narrowpeak", sep="")
 
+conf$binding_position$write.narrowpeak(file=output_name)
 }
-
-py_spp("MYC_K562.bam")

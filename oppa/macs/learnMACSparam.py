@@ -42,7 +42,8 @@ def learnMACSparam(args, test_set, validation_set):
     final_error = run(input_file, test_set, str(result['max_params']['opt_Qval']), call_type, control)
 
     print " final error about test set is :::" + str(final_error)
-
+    default_error = run(input_file, test_set, '0.05', call_type, control)
+    print " default error about test set is :::" + str(default_error)
 
 def run(input_file, valid_set, Qval, call_type, control = None):
     """
@@ -67,8 +68,6 @@ def run(input_file, valid_set, Qval, call_type, control = None):
     for label in valid_set:
         chromosome_list.append(label.split(':')[0])
     chromosome_list = list(set(chromosome_list))
-
-    print chromosome_list
 
     """it will be runned by protoPFC.py"""
     bam_name = input_file[:-4]  ## delete '.bam'

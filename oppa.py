@@ -5,13 +5,14 @@ from datetime import timedelta
 import sys
 import argparse
 from oppa.loadParser.loadLabel import run as loadLabel
+from oppa.samtools import run as samtools
 
 def main():
     """The main function for pipeline"""
 
     # setting Script Option.
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("-t","--tool",  help="what tool you use. : { MACS , Basset , peakSeg }")
+    arg_parser.add_argument("-t","--tool",  help="what tool you use. : { MACS , SPP , peakSeg }")
     arg_parser.add_argument("-i","--input", help="what file you input.")
     arg_parser.add_argument("-cr","--control", help="it is control-Bam file for MACS")
     arg_parser.add_argument("-f","--format", help="input file format for : { MACS , ")
@@ -27,7 +28,6 @@ def main():
         args.Qval = '0.05'
 
     validation_set, test_set = loadLabel(args.validSet)
-
     # Run each other process by what tools they need.
     # and may be we can each chromosome run in
     if args.tool == "MACS":
@@ -37,7 +37,7 @@ def main():
 
         #running bamtools to split the bam file
         print "Execute bamtools . . . : split bam file by chromosome "
-        #bamtools( args.input )
+        bamtools( args.input )
         elapsed_time_secs = time.time() - start_time
         print "Execution _ bamtools : %s" % timedelta(seconds=round(elapsed_time_secs))
 
@@ -47,6 +47,12 @@ def main():
         elapsed_time_secs = time.time() - start_time
         print "Execution _ learning parameter : %s" % timedelta(seconds=round(elapsed_time_secs))
 
+
+    elif args.tool == "spp":
+		from oppa.spp.learnSPPparam import learnSPPparam
+		start_time = time.time()
+		learnSPPparam(args, validation_set, test_set)
+	
 
     elif args.tool == "PeakSeg":
         pass
