@@ -18,7 +18,8 @@ def main():
             scripts=['oppa.py']
             author='dong pin oh',
             license='MIT',
-            packages=[],
+            packages=['oppa','oppa.macs','oppa.loadParser','oppa.spp',
+                     'oppa.BayesianOptimization','dependencies'],
             install_requires=['scikit-learn','scipy','numpy','Cython','MACS2'],
             zip_safe=False)
 
