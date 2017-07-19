@@ -31,9 +31,9 @@ and you need bamtools and samtools  for execute oppa
 >RUNNING:
 >
 	example :	
-    `python oppa.py -t MACS -I input_name -c control_file_name -vs label_name`
+    `OPPA -t MACS -I input_name -c control_file_name -vs label_name`
     see more :
-    `python oppa.py -h`
+    `OPPA -h`
 
 
 
