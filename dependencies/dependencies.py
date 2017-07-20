@@ -38,7 +38,12 @@ def main():
     robjects.r('''install.packages( 'oppa/spp/spp_1.14.tar.gz' )''')
 #    robjects.r('''install.packages( 'spp.tar.gz' )''')
 
-
+#    cmd = 'sudo apt-get install bamtools'
+#    subprocess.call(cmd, shell=True)
+    
+#    cmd = 'sudo apt-get install samtools'
+#    subprocess.call(cmd, shell=True)
+    
 
 if __name__ == '__main__':
     main()
