@@ -21,17 +21,26 @@ def main():
                                                 ": {MACS ")
     arg_parser.add_argument("-vs","--validSet", help="validation set it is labeled. used for : { MACS , ")
     arg_parser.add_argument("-ct","--callType", help="decide peak call type either broad or narrow. used for : {MACS ")
+    arg_parser.add_argument("-ens","--ensemble", help="you using at least two tools and combine them."
 
     args = arg_parser.parse_args()
+
 
     if args.Qval == None:
         args.Qval = '0.05'
 
+    if args.validSet == None:
+	print "you need '-vs label_data_file_name'. . ."
+	exit()
     validation_set, test_set = loadLabel(args.validSet)
     # Run each other process by what tools they need.
     # and may be we can each chromosome run in
+
+    if args.ens == True:
+	print "///// ENSEMBLE METHOD ON /////"
+
     if args.tool == "MACS":
-        from oppa.macs.learnMACSparam import learnMACSparam
+	from oppa.macs.learnMACSparam import learnMACSparam
         from oppa.bamtools import run as bamtools
         start_time = time.time()
 
@@ -49,9 +58,9 @@ def main():
 
 
     elif args.tool == "spp":
-		from oppa.spp.learnSPPparam import learnSPPparam
-		start_time = time.time()
-		learnSPPparam(args, validation_set, test_set)
+	from oppa.spp.learnSPPparam import learnSPPparam
+	start_time = time.time()
+	learnSPPparam(args, validation_set, test_set)
 	
 
     elif args.tool == "PeakSeg":
@@ -60,8 +69,15 @@ def main():
     elif args.tool == "Basset":
         pass
 
+    elif args.tool == "gridMACS":
+        from oppa.macs.learnMACSparam import run as runMACS
+        from oppa.bamtools import run as bamtools
+	bamtools(args.input)
+	for i in range(30):
+	    print runMACS(args.input, validation_set, str(float(i+1)/40) , args.callType ,args.control)
+
     else:
-        print "the tool %s is not support.",args.tool
+        print "the tool %s is not support." % args.tool
 
 
 if __name__ == '__main__':
