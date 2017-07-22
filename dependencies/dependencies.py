@@ -43,7 +43,10 @@ def main():
     
 #    cmd = 'sudo apt-get install samtools'
 #    subprocess.call(cmd, shell=True)
-    
+   
+#    cmd = 'sudo apt-get install python-dev'
+#    subprocess.call(cmd, shell=True)
+
 
 if __name__ == '__main__':
     main()
