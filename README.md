@@ -62,7 +62,7 @@ DEPENDENCY
  >- numpy
  >- skleran
 
--python-dev
+- dev-python
 
 - R 
  >- multicore
