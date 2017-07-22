@@ -67,6 +67,10 @@ DEPENDENCY
 - R 
  >- multicore
  
+- C++
+ >- boost
+ >- python.h ( in dev-python )
+ 
 - samtools - 
 - bamtools - using bamtools
 - [MACS](https://github.com/taoliu/MACS) - using MACS version 2.1.0
