@@ -15,8 +15,7 @@ def main():
             author='dong pin oh',
             author_email='dhehdqls@gmail.com',
             url='http://github.com/odb9402/OPPA',
-            scripts=['OPPA']
-            author='dong pin oh',
+            scripts=['OPPA'],
             license='MIT',
             packages=['oppa','oppa.macs','oppa.loadParser','oppa.spp',
                      'oppa.BayesianOptimization','dependencies'],

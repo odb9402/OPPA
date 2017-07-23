@@ -22,6 +22,13 @@ def learnMACSparam(args, test_set, validation_set):
     only wrapper_function`s arguments will be learned by library.
 
     :param args:
+        argument from command lines
+
+    :param test_set:
+        python list of test set
+
+    :param validation_set:
+        python list of validation set
 
     :return: learned parameter.
     """
