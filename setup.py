@@ -19,7 +19,7 @@ def main():
             license='MIT',
             packages=['oppa','oppa.macs','oppa.loadParser','oppa.spp',
                      'oppa.BayesianOptimization','dependencies'],
-            install_requires=['scikit-learn','scipy','numpy','Cython','MACS2'],
+            install_requires=['scikit-learn','scipy','numpy','Cython','MACS2','rpy2'],
             zip_safe=False)
 
 if __name__ == '__main__':
