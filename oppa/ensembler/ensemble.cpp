@@ -31,7 +31,7 @@ ens_main(PyObject *self, PyObject *args){
 	char* score;
 
 	//////// Python Object to C++ Local variable /////////
-	if(!PyArg_ParseTuple(args, "O!O", &PyList_Type, &peaks_data, &PyList_Type, &error_data))
+	if(!PyArg_ParseTuple(args, "O!O!",&PyList_Type,&peaks_data, &PyList_Type, &error_data))
 		return NULL;
 
 	for ( int i = 0; i < PyList_Size(peaks_data); i++){

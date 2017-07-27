@@ -2,7 +2,7 @@ from distutils.core import setup, Extension
 
 
 def main():
-	ensemble_mod = Extension('ensemble',['ensemble.cpp'],None)
+	ensemble_mod = Extension('ensemble',['oppa/ensembler/ensemble.cpp'],None)
 
 	setup( name = "ensemble_mod",
 		version ="1.0",
