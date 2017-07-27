@@ -6,19 +6,11 @@ import subprocess
 ### python test.py [inputfile1] [inputfile2]
 ### and it generate random error rate.
 
-#cmd = ['cd oppa/ensembler']
-#subprocess.call(cmd, shell=True)
-
 cmd = ['sudo rm -r oppa/ensembler/build']
 subprocess.call(cmd, shell=True)
 
 cmd = ['python oppa/ensembler/setup.py install']
 subprocess.call(cmd, shell=True)
-
-#cmd = ['cd ..']
-#subprocess.call(cmd, shell=True)
-#cmd = ['cd ..']
-#subprocess.call(cmd, shell=True)
 
 foo = []
 foo.append(sys.argv[1])
