@@ -6,7 +6,7 @@ import os
 import random
 from loadParser.loadPeak import run as loadPeak
 
-def calculate_error(peak_data, labeled_data):
+def calculate_error(peak_data, labeled_data, cell_type):
     """
     calculate actual error by numbering to wrong label
 
@@ -22,16 +22,22 @@ def calculate_error(peak_data, labeled_data):
 
     error_num = 0.0
     error_rate = 0.0
+    label_num = 0
     for label in labeled_data:
+	print label , cell_type
         if label['peakStat'] == 'peaks':
-            if not is_peak(peak_data, label['regions'], weak_predict= True) : error_num += 1
-
-        elif label['peakStat'] == ('peakStart' or 'peakEnd'):
-            if not is_peak(peak_data, label['regions']) : error_num += 1
-
-        else:
-            if not is_noPeak(peak_data, label['regions']) : error_num += 1
-
+            if not is_peak(peak_data, label['regions'], weak_predict= True):
+		error_num += 1
+        	print "error"
+	elif label['peakStat'] == 'peakStart' or label['peakStat'] == 'peakEnd':
+            if not is_peak(peak_data, label['regions']):
+		error_num += 1
+		print "error"
+	else:
+            if not is_noPeak(peak_data, label['regions']):
+		error_num += 1
+		print "error"
+	label_num += 1
     error_rate = error_num / len(labeled_data)
     return error_num, len(labeled_data)
 
@@ -58,7 +64,7 @@ def is_peak(target, value, tolerance = 0, weak_predict = False):
     while True:
         correct_ness = is_same(target, value, index, tolerance)
 
-        #print target[index], value
+        print target[index]['region_s'],target[index]['region_e'], value
 
         #Case 1 : label is "peaks" or "noPeak" and False Negative or False Positive
         #       and "peakStart" or "peakEnd" also. ( cannot find )
@@ -73,7 +79,6 @@ def is_peak(target, value, tolerance = 0, weak_predict = False):
         elif max_index <= min_index + 1 and correct_num > 1:
             return False
 
-
         if correct_ness is 'less':
             max_index = index
             index = (min_index + index) / 2
@@ -86,11 +91,11 @@ def is_peak(target, value, tolerance = 0, weak_predict = False):
             # but "peakStart" or "peakEnd" are not they must exist only 1 correct regions.
 
             #Case 4 : label is "peaks" or "noPeak" and Correct.
-            if (weak_predict is True):
+            if (weak_predict == True):
                 return True
 
             #Case 5 : label is "peakStart" or "peakEnd" and False Positive ( too many peak )
-            elif (weak_predict is False) and correct_num > 1:
+            elif (weak_predict == False) and correct_num > 1:
                 return False
 
             #find one peak
@@ -193,6 +198,9 @@ def run(input_file_name, input_labels):
     if not os.path.exists(input_file_name):
 	return 0, 0
     input_file = loadPeak(input_file_name)
-    error_num, total_label = calculate_error(input_file, input_labels)
+    cell_type = input_file_name.split('.')[0]
+    cell_type = cell_type.rsplit('_',1)[1]
+
+    error_num, total_label = calculate_error(input_file, input_labels, cell_type)
     #print "error is {error label/ total label}:" + str(error_num) + "/" + str(total_label) + '\n'
     return error_num, total_label
