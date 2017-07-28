@@ -18,10 +18,11 @@ ens_main(PyObject *self, PyObject *args){
    PyObject *peaks_data = (PyObject*)PyList_New(0);   
    PyObject *error_data = (PyObject*)PyList_New(0);
 
-   PyObject *peak_containor = (PyObject*)PyList_New(0);
+   PyObject **peak_containor = (PyObject**)PyList_New(2);
    PyObject *dict_containor = (PyObject*)PyDict_New();
 
-   double error_containor;
+
+   double error_containor[2];
    std::vector<peak> peak_vec;
    peak* peak_element;
 
@@ -37,13 +38,17 @@ ens_main(PyObject *self, PyObject *args){
    if(!PyArg_ParseTuple(args, "O!O!",&PyList_Type,&peaks_data, &PyList_Type, &error_data))
       return NULL;
 
+   //for ( int i = 0; i < PyList_Size(peaks_data); i++){
+     // printf("%d th output file process::::::\n" , i);
+     // peak_containor[i] = PyList_GetItem(peaks_data,i);
+      //error_containor = PyFloat_AsDouble(PyList_GetItem(error_data,i));
    for ( int i = 0; i < PyList_Size(peaks_data); i++){
-      printf("%d th output file process::::::\n" , i);
-      peak_containor = PyList_GetItem(peaks_data,i);
-      error_containor = PyFloat_AsDouble(PyList_GetItem(error_data,i));
-      
-      for ( int j = 0 ; j < PyList_Size(peak_containor) ; j++){
-         dict_containor = PyList_GetItem(peak_containor, j);
+      peak_containor[i] = PyList_GetItem(peaks_data,i);
+      error_containor[i] = PyFloat_AsDouble(PyList_GetItem(error_data,i));
+   }
+   for ( int i = 0; i < PyList_Size(peaks_data); i++){
+      for ( int j = 0 ; j < PyList_Size(peak_containor[i]) ; j++){
+         dict_containor = PyList_GetItem(peak_containor[i], j);
          PyArg_Parse(PyDict_GetItemString(dict_containor,"region_s"), "s", &chr_start);
          PyArg_Parse(PyDict_GetItemString(dict_containor,"region_e"), "s", &chr_end);
          PyArg_Parse(PyDict_GetItemString(dict_containor,"chr"), "s", &chr);
@@ -58,10 +63,10 @@ ens_main(PyObject *self, PyObject *args){
          peak_element->score = atof(score);
          peak_element->signal = atof(signal);
          peak_element->q_value = atof(q_value);
-         peak_element->error_rate = error_containor;
+         peak_element->error_rate = error_containor[i];
          
          peak_vec.push_back(*peak_element);
-         printf("now parse %d`s of peak , signal = %f\n", peak_vec.size(), peak_element->error_rate);
+         printf("now parse %d`s of peak , signal = %f\n", peak_vec.size(), peak_element->signal);
       }
    }
    //////// C++ value to Python Object /////////////////
