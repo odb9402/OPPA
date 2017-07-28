@@ -4,9 +4,11 @@ bayesian optimization. if we run this function in parallel,
 we need to satisfied many condition which mentioned in the paper
 named 'practical bayesian optimization in machine learning algorithm'
 """
+import subprocess
 import time
 from multiprocessing import cpu_count
 from multiprocessing import Process
+
 
 from ..optimizeHyper import run as optimizeHyper
 from ..calculateError import run as calculateError
@@ -48,9 +50,8 @@ def learnMACSparam(args, test_set, validation_set):
     result = optimizeHyper(wrapper_function, parameter_bound, number_of_init_sample)
     final_error = run(input_file, test_set, str(result['max_params']['opt_Qval']), call_type, control)
 
+    subprocess.call(['macs2','callpeak','-t',input_file,'-c',control,'-g','hs','-q',str(result['max_params']['opt_Qval'])])
     print " final error about test set is :::" + str(final_error)
-    default_error = run(input_file, test_set, '0.05', call_type, control)
-    print " default error about test set is :::" + str(default_error)
 
 def run(input_file, valid_set, Qval, call_type, control = None):
     """
@@ -78,6 +79,7 @@ def run(input_file, valid_set, Qval, call_type, control = None):
 
     """it will be runned by protoPFC.py"""
     bam_name = input_file[:-4]  ## delete '.bam'
+    cr_bam_name = control[:-4]
     reference_char = ".REF_"
 
     MAX_CORE = cpu_count()
@@ -86,7 +88,7 @@ def run(input_file, valid_set, Qval, call_type, control = None):
     macs_processes = []
 
     while (len(macs_processes) < MAX_CORE-1) and (TASK_NO < TASKS):
-	macs_processes.append(MACS.run(bam_name + reference_char + chromosome_list[TASK_NO] + ".bam", Qval, call_type, control))
+	macs_processes.append(MACS.run(bam_name + reference_char + chromosome_list[TASK_NO] + ".bam", Qval, call_type, cr_bam_name + reference_char + chromosome_list[TASK_NO] + ".bam"))
 	TASK_NO += 1
 
     while len(macs_processes) > 0:
@@ -97,21 +99,10 @@ def run(input_file, valid_set, Qval, call_type, control = None):
 		del macs_processes[proc]
 
 	while (len(macs_processes) < MAX_CORE - 1) and (TASK_NO < TASKS):
-	    macs_processes.append(MACS.run(bam_name + reference_char + chromosome_list[TASK_NO] + ".bam", Qval, call_type, control))
+	    macs_processes.append(MACS.run(bam_name + reference_char + chromosome_list[TASK_NO] + ".bam", Qval, call_type, cr_bam_name + reference_char + chromosome_list[TASK_NO] + ".bam"))
 	    TASK_NO += 1
 
 		
-
-    """
-    p1 = MACS.run(bam_name + reference_char + chromosome_list[0] + ".bam", Qval ,call_type,control)
-    p2 = MACS.run(bam_name + reference_char + chromosome_list[1] + ".bam", Qval ,call_type,control)
-    p3 = MACS.run(bam_name + reference_char + chromosome_list[2] + ".bam", Qval ,call_type,control)
-    p4 = MACS.run(bam_name + reference_char + chromosome_list[3] + ".bam", Qval ,call_type,control)
-    p1.wait()
-    p2.wait()
-    p3.wait()
-    p4.wait()
-    """
 
 
     #there must be valid validation set and test set.
@@ -147,12 +138,12 @@ def summerize_error(bam_name, validation_set, call_type):
         sum_label_num += label_num
 
     # add about sexual chromosome
-    input_name = bam_name + reference_char + str('X') + ".bam_peaks" + output_format_name
+    input_name = bam_name + reference_char + 'X' + ".bam_peaks" + output_format_name
     error_num, label_num = calculateError(input_name, parseLabel(validation_set, input_name))
     sum_error_num += error_num
     sum_label_num += label_num
     
-    input_name = bam_name + reference_char + str('Y') + ".bam_peaks" + output_format_name
+    input_name = bam_name + reference_char + 'Y' + ".bam_peaks" + output_format_name
     error_num, label_num = calculateError(input_name, parseLabel(validation_set, input_name))
     sum_error_num += error_num
     sum_label_num += label_num
