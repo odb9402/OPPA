@@ -21,7 +21,7 @@ def main():
                                                 ": {MACS ")
     arg_parser.add_argument("-vs","--validSet", help="validation set it is labeled. used for : { MACS , ")
     arg_parser.add_argument("-ct","--callType", help="decide peak call type either broad or narrow. used for : {MACS ")
-    arg_parser.add_argument("-ens","--ensemble", action='store_true', help="you using at least two tools and combine them."
+    arg_parser.add_argument("-ens","--ensemble", action='store_true', help="you using at least two tools and combine them.")
 
     args = arg_parser.parse_args()
 
@@ -36,10 +36,10 @@ def main():
     # Run each other process by what tools they need.
     # and may be we can each chromosome run in
 
-    if args.ens == True:
+    if args.ensemble == True:
 	print "///// ENSEMBLE METHOD ON /////"
 
-    if args.tool == "MACS":
+    if args.tool == "macs":
 	from oppa.macs.learnMACSparam import learnMACSparam
         from oppa.bamtools import run as bamtools
         start_time = time.time()
@@ -47,6 +47,8 @@ def main():
         #running bamtools to split the bam file
         print "Execute bamtools . . . : split bam file by chromosome "
         bamtools( args.input )
+	if args.control is not None:
+	   bamtools( args.control)
         elapsed_time_secs = time.time() - start_time
         print "Execution _ bamtools : %s" % timedelta(seconds=round(elapsed_time_secs))
 
