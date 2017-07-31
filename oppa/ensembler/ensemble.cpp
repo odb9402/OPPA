@@ -1,6 +1,12 @@
 #include <Python.h>
 #include <vector>
+#include <iostream>
+#include <cmath>
 
+#define file_num 2
+#define threshhold 0.6
+#define allowable_difference 100
+using namespace std;
 struct peak{
    char* chr;
    int chr_start;
@@ -18,13 +24,11 @@ ens_main(PyObject *self, PyObject *args){
    PyObject *peaks_data = (PyObject*)PyList_New(0);   
    PyObject *error_data = (PyObject*)PyList_New(0);
 
-   PyObject *mac_containor = (PyObject*)PyList_New(0);
-   PyObject *spp_containor = (PyObject*)PyList_New(0);
+   PyObject *peak_containor[2];
    PyObject *dict_containor = (PyObject*)PyDict_New();
 
-   double mac_error_containor,spp_error_containor;
-   std::vector<peak> mac_vec;
-std::vector<peak> spp_vec;
+   double error_containor[file_num];
+   std::vector<peak> peak_vec[file_num];
    peak* peak_element;
 
    char* chr;
@@ -38,59 +42,70 @@ std::vector<peak> spp_vec;
    //////// Python Object to C++ Local variable /////////
    if(!PyArg_ParseTuple(args, "O!O!",&PyList_Type,&peaks_data, &PyList_Type, &error_data))
       return NULL;
-
-  
-   mac_containor = PyList_GetItem(peaks_data,0);
-   mac_error_containor = PyFloat_AsDouble(PyList_GetItem(error_data,0));
-
-   spp_containor = PyList_GetItem(peaks_data,1);
-   spp_error_containor = PyFloat_AsDouble(PyList_GetItem(error_data,1));
-      
-//-----------------------MAC--------------------------
-   for ( int j = 0 ; j < PyList_Size(mac_containor) ; j++){
-      dict_containor = PyList_GetItem(mac_containor, j);
-      PyArg_Parse(PyDict_GetItemString(dict_containor,"region_s"), "s", &chr_start);
-      PyArg_Parse(PyDict_GetItemString(dict_containor,"region_e"), "s", &chr_end);
-      PyArg_Parse(PyDict_GetItemString(dict_containor,"chr"), "s", &chr);
-      PyArg_Parse(PyDict_GetItemString(dict_containor,"score"), "s", &score);
-      PyArg_Parse(PyDict_GetItemString(dict_containor,"signalValue"), "s", &signal);
-      PyArg_Parse(PyDict_GetItemString(dict_containor,"qValue"),"s",&q_value);
-         
-      peak_element = new peak;
-      peak_element->chr = chr;
-      peak_element->chr_start = atoi(chr_start);
-      peak_element->chr_end = atoi(chr_end);
-      peak_element->score = atof(score);
-      peak_element->signal = atof(signal);
-      peak_element->q_value = atof(q_value);
-      peak_element->error_rate = mac_error_containor;
-         
-      mac_vec.push_back(*peak_element);
-      printf("now parse %d`s of peak , signal = %f\n", mac_vec.size(), peak_element->signal);
+   for ( int i = 0; i < file_num; i++){
+      peak_containor[i] = (PyObject*)PyList_New(0);
+      peak_containor[i] = PyList_GetItem(peaks_data,i);
+      error_containor[i] = PyFloat_AsDouble(PyList_GetItem(error_data,i));
    }
-//----------------------------mac-end spp start-----------------------------
-   for ( int j = 0 ; j < PyList_Size(spp_containor) ; j++){
-      dict_containor = PyList_GetItem(spp_containor, j);
-      PyArg_Parse(PyDict_GetItemString(dict_containor,"region_s"), "s", &chr_start);
-      PyArg_Parse(PyDict_GetItemString(dict_containor,"region_e"), "s", &chr_end);
-      PyArg_Parse(PyDict_GetItemString(dict_containor,"chr"), "s", &chr);
-      PyArg_Parse(PyDict_GetItemString(dict_containor,"score"), "s", &score);
-      PyArg_Parse(PyDict_GetItemString(dict_containor,"signalValue"), "s", &signal);
-      PyArg_Parse(PyDict_GetItemString(dict_containor,"qValue"),"s",&q_value);
+   for ( int i = 0; i < file_num; i++){
+           
+      for ( int j = 0 ; j < PyList_Size(peak_containor[i]) ; j++){
+         dict_containor = PyList_GetItem(peak_containor[i], j);
+         PyArg_Parse(PyDict_GetItemString(dict_containor,"region_s"), "s", &chr_start);
+         PyArg_Parse(PyDict_GetItemString(dict_containor,"region_e"), "s", &chr_end);
+         PyArg_Parse(PyDict_GetItemString(dict_containor,"chr"), "s", &chr);
+         PyArg_Parse(PyDict_GetItemString(dict_containor,"score"), "s", &score);
+         PyArg_Parse(PyDict_GetItemString(dict_containor,"signalValue"), "s", &signal);
+         PyArg_Parse(PyDict_GetItemString(dict_containor,"qValue"),"s",&q_value);
          
-      peak_element = new peak;
-      peak_element->chr = chr;
-      peak_element->chr_start = atoi(chr_start);
-      peak_element->chr_end = atoi(chr_end);
-      peak_element->score = atof(score);
-      peak_element->signal = atof(signal);
-      peak_element->q_value = atof(q_value);
-      peak_element->error_rate =spp_error_containor;
+         peak_element = new peak;
+         peak_element->chr = chr;
+         peak_element->chr_start = atoi(chr_start);
+         peak_element->chr_end = atoi(chr_end);
+         peak_element->score = atof(score);
+         peak_element->signal = atof(signal);
+         peak_element->q_value = atof(q_value);
+         peak_element->error_rate = error_containor[i];
          
-      spp_vec.push_back(*peak_element);
-      printf("now parse %d`s of peak , signal = %f\n", spp_vec.size(), peak_element->signal);
+         peak_vec[i].push_back(*peak_element);
+        // printf("now parse %d`s of peak , signal = %f\n", peak_vec[i].size(), peak_element->signal);
+      }
    }
-// -------------------------------spp-end=-----------------------
+
+   cout <<"==============================================="<<endl;
+   vector<peak>::iterator it[file_num];
+
+   for(int i=0; i <file_num; i++)
+      it[i] = peak_vec[i].begin();
+
+   double smallest_value, pct;
+   int cnt=0;
+
+   cout <<it[0]->chr<< " " <<it[1]->chr<<endl;
+   smallest_value = it[0]->chr_start;
+   while(it[0]->chr[3] == it[1]->chr[3]){
+      for(int i=0; i <file_num; i++){
+         if(abs(smallest_value - it[i]->chr_start) <allowable_difference){
+            cnt++;
+         }
+      }
+
+      pct = cnt / file_num;
+
+      if(pct > threshhold){
+         cout <<"=========="<<file_num << " of " <<cnt<<" files are match"<<"=========="<<endl;
+         cout << it[0]->chr_start<<endl;
+         cout << it[1]->chr_start<<endl;
+         cout <<"===================="<<endl;
+      }
+      cnt = 0;
+      for(int i=0; i <file_num; i++){
+         if(abs(smallest_value - it[i]->chr_start) <allowable_difference){
+            it[i]++;
+         }
+      }
+      smallest_value = it[0]->chr_start < it[1]->chr_start? it[0]->chr_start : it[1]->chr_start;
+   }
    //////// C++ value to Python Object /////////////////
    return Py_BuildValue("i",1);
 }
