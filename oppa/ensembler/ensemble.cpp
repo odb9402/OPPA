@@ -3,9 +3,9 @@
 #include <iostream>
 #include <cmath>
 
-#define file_num 2
+#define file_num 3
 #define threshhold 0.6
-#define allowable_difference 100
+#define allowable_difference 20
 using namespace std;
 struct peak{
    char* chr;
@@ -24,7 +24,7 @@ ens_main(PyObject *self, PyObject *args){
    PyObject *peaks_data = (PyObject*)PyList_New(0);   
    PyObject *error_data = (PyObject*)PyList_New(0);
 
-   PyObject *peak_containor[2];
+   PyObject *peak_containor[file_num];
    PyObject *dict_containor = (PyObject*)PyDict_New();
 
    double error_containor[file_num];
@@ -101,8 +101,9 @@ ens_main(PyObject *self, PyObject *args){
       if(pct > threshhold){
          cout <<"=========="<<file_num << " of " <<cnt<<" files are match"<<"=========="<<endl;
 cout<< it[0]->chr <<endl; 
-         cout << it[0]->chr_start<<endl;
-         cout << it[1]->chr_start<<endl;
+for(int i=0;i<file_num; i++){
+         cout << it[i]->chr_start<<endl;
+         }
          cout <<"===================="<<endl;
 
       }
@@ -132,10 +133,10 @@ cout <<" -----------------=======================================";
          }
          current_chr = it[0]->chr[3];
       }
-      smallest_value = it[0]->chr_start < it[1]->chr_start? it[0]->chr_start : it[1]->chr_start;
-      for(int i=2; i < file_num;i++){
-      if(smallest_value > it[i]->chr_start)
-         smallest_value = it[i]->chr_start;
+      smallest_value = 2100000000;
+      for(int i=0; i <file_num; i++){
+         if(it[i]->chr[3] == current_chr && it[i]->chr_start < smallest_value)
+            smallest_value = it[i]->chr_start;
       }
 
    }
