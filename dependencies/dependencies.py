@@ -4,6 +4,8 @@ import sys
 
 def main():
 
+    curr_dir = os.getcwd()
+
 ####################### setup R language #####################################
     cmd = 'sudo apt-key --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD56CBB651716619EO84DAB9'
     subprocess.call(cmd, shell=True)
@@ -19,10 +21,10 @@ def main():
     
 ####################### setup.py install #####################################
     cmd = 'sudo apt-get install python-pip'
+    subprocess.call(cmd, shell=True)        
+    cmd = 'sudo apt-get install python-dev'
     subprocess.call(cmd, shell=True)
     cmd = 'sudo pip install --upgrade pip'
-    subprocess.call(cmd, shell=True)
-    cmd = 'sudo apt-get install python-dev'
     subprocess.call(cmd, shell=True)
     cmd = 'python ../setup.py install'
     subprocess.call(cmd, shell=True)
@@ -37,13 +39,9 @@ def main():
 #    subprocess.call(cmd, shell=True)
 #    cmd = 'tar --bzip2 -xf boost_1_64_0.tar.bz2'
 #    subprocess.call(cmd, shell=True)
-#    cmd = 'cd boost_1_64_0'
+#    cmd = '.' + curr_dir + '/boost_1_64_0/bootstrap.sh'
 #    subprocess.call(cmd, shell=True)
-#    cmd = './bootstrap.sh'
-#    subprocess.call(cmd, shell=True)
-#    cmd = './b2 install'
-#    subprocess.call(cmd, shell=True)
-#    cmd = 'cd ..'
+#    cmd = '.' + curr_dir '/boost_1_64_0/b2'
 #    subprocess.call(cmd, shell=True)
 #    cmd = 'sudo mv boost_1_64_0 /usr/local/'
 #    subprocess.call(cmd, shell=True)
@@ -59,19 +57,19 @@ def main():
     robjects.r('''install.packages( 'snow')''')
     robjects.r('''install.packages( 'snowfall')''')
     robjects.r('''source("https://bioconductor.org/biocLite.R")''')
-    robjects.r('''biocLite("Rsamtools",suppressUpdata=TRUE)''')
-    robjects.r('''install.packages( 'oppa/spp/spp_1.14.tar.gz' )''')
+    robjects.r('''biocLite("Rsamtools")''')
+    robjects.r('''install.packages( 'spp_1.14.tar.gz' )''')
 ##############################################################################
 
 
 
 ######################### bamtools and samtools install ######################
-    cmd = 'sudo apt-get install bamtools'
-    subprocess.call(cmd, shell=True)
-    cmd = 'sudo apt-get install samtools'
-    subprocess.call(cmd, shell=True)
-    cmd = 'sudo apt-get install macs'
-    subprocess.call(cmd, shell=True)
+#    cmd = 'sudo apt-get install bamtools'
+#    subprocess.call(cmd, shell=True)
+#    cmd = 'sudo apt-get install samtools'
+#    subprocess.call(cmd, shell=True)
+#    cmd = 'sudo apt-get install macs'
+#    subprocess.call(cmd, shell=True)
 ##############################################################################
 
 
