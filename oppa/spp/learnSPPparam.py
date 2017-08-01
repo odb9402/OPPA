@@ -2,6 +2,7 @@ import time
 from multiprocessing import cpu_count
 from multiprocessing import Process
 import subprocess
+import os
 
 from ..optimizeHyper import run as optimizeHyper
 from ..calculateError import run as calculateError
@@ -34,7 +35,7 @@ def learnSPPparam(args, test_set, validation_set):
         error = run(input_file, validation_set, str(opt_fdr), call_type, control)
         return -error
 
-    parameter_bound = {'opt_fdr' : (0,1)}
+    parameter_bound = {'opt_fdr' : (10**-8,0.9)}
     number_of_init_sample = 2
 
     fdr = 0.01
@@ -59,25 +60,36 @@ def run(input_file, valid_set, opt_fdr, call_type, control=None):
         error rate of between SPP_output and labeled Data.
     """
     
-#    CORE_NUM = cpu_count()
-#    if call_type is None:
-#        output_name = input_file.rsplit('.',1)[0] + ".narrowPeak"
-#    else:
-#        output_name = input_file.rsplit('.',1)[0] + ".broadPeak"
-#
-#    command = ['Rscript','oppa/spp/run_spp.R','-c='+'input_file','-i='+control,'-fdr='+str(opt_fdr),
-#               '-savn='+ output_name, '-rf', '-p='+str(CORE_NUM)]
-#
-#    subprocess.call(command, shell=True)
-#
-    command = ['./oppa/loadParser/spliter.sh ' + input_file]
+    curr_dir = os.getcwd()
+    input_file = curr_dir + "/" + input_file
+    control = curr_dir + "/" + control
+
+    print control
+
+    CORE_NUM = cpu_count()
+
+    if call_type is None:
+        output_name = input_file.rsplit('.',1)[0] + ".narrowPeak"
+    else:
+        output_name = input_file.rsplit('.',1)[0] + ".broadPeak"
+
+    command = ['Rscript','oppa/spp/run_spp.R','-c=',input_file,'-i=',control,'-fdr=',str(opt_fdr),\
+               '-savn='+ output_name,'-p='+str(CORE_NUM),'-rf']
+
+    subprocess.call(command, shell=True)
+    print "end" 
+    # to Split result file of SPP by chromosome then calculate error
+    command = ['./oppa/loadParser/spliter.sh ' + output_name]
     subprocess.call(command, shell=True)
 
     if not valid_set:
 	print "there are no matched validation set :p\n"
     else:
 	error_num, label_num = summerize_error(input_file.rsplit('.',1)[0], valid_set, call_type)
-    return error_num/label_num
+
+    if label_num is 0:
+	return 0
+    return (1 - error_num/label_num ) * 100
 
 
 def summerize_error(bam_name, validation_set, call_type):
