@@ -1,0 +1,101 @@
+#!/usr/bin/env python
+# Time-stamp: < >
+import time
+from datetime import timedelta
+import os
+import sys
+import argparse
+import subprocess
+
+from oppa.loadParser.loadLabel import run as loadLabel
+from oppa.samtools import run as samtools
+
+def main():
+    """The main function for pipeline"""
+
+    # setting Script Option.
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("-t","--tool",nargs='+', help="what tool you use. : { MACS , SPP , peakSeg }")
+    arg_parser.add_argument("-i","--input", help="what file you input.")
+    arg_parser.add_argument("-cr","--control", help="it is control-Bam file for MACS")
+    arg_parser.add_argument("-f","--format", help="input file format for : { MACS , ")
+    arg_parser.add_argument("-q","--Qval", default='0.05' ,help="it is parameter that will be learned and it mean\n"
+                                                "significance value in Statical solutions it is only for"
+                                                ": {MACS ")
+    arg_parser.add_argument("-vs","--validSet", help="validation set it is labeled. used for : { MACS , ")
+    arg_parser.add_argument("-ct","--callType", help="decide peak call type either broad or narrow. used for : {MACS ")
+
+    args = arg_parser.parse_args()
+
+    if args.input == None:
+	print "you need '-i input_data_file'"
+	exit()
+    if args.validSet == None:
+	print "you need '-vs label_data_file_name'. . ."
+	exit()
+
+    if not os.path.exists(args.input):
+	print args.input + " not exist"
+	exit()
+    if args.control is not None and not os.path.exists(args.control):
+	print args.control + " not exist"
+	exit()
+    if not os.path.exists(args.validSet):
+	print args.validSet + " not exist"
+	exit()
+
+    validation_set, test_set = loadLabel(args.validSet)
+    # Run each other process by what tools they need.
+    # and may be we can each chromosome run in
+
+    if len(args.tool) > 2:
+	print "///// ENSEMBLE METHOD ON /////"
+
+    if "macs" in args.tool:
+	from oppa.macs.learnMACSparam import learnMACSparam
+        from oppa.bamtools import run as bamtools
+        start_time = time.time()
+
+        #running bamtools to split the bam file
+        print "Execute bamtools . . . : split bam file by chromosome "
+        #bam_run1 = bamtools( args.input )
+	#if args.control is not None:
+	#    bam_run2 = bamtools(args.control)
+	#bam_run1.wait()
+	#bam_run2.wait()
+        elapsed_time_secs = time.time() - start_time
+        print "Execution _ bamtools : %s" % timedelta(seconds=round(elapsed_time_secs))
+
+        print "Execute MACS . . . : each chromosome "
+        start_time = time.time()
+        learnMACSparam(args, validation_set, test_set)
+        elapsed_time_secs = time.time() - start_time
+        print "Execution _ learning parameter : %s" % timedelta(seconds=round(elapsed_time_secs))
+
+
+    elif "spp" in args.tool:
+	from oppa.spp.learnSPPparam import learnSPPparam
+	start_time = time.time()
+	learnSPPparam(args, validation_set, test_set)
+	
+
+    elif args.tool == "PeakSeg":
+        pass
+
+    elif "gridMACS" in args.tool:
+        from oppa.macs.learnMACSparam import run as runMACS
+#       from oppa.bamtools import run as bamtools
+#	bamtools(args.input)
+	for i in range(30):
+	    print runMACS(args.input, validation_set, str(float(i+1)/40) , args.callType ,args.control)
+
+    else:
+        print "the tool %s is not support." % args.tool
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.stderr.write("i hope you complete. \n")
+        sys.exit()
