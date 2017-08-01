@@ -84,7 +84,11 @@ ens_main(PyObject *self, PyObject *args){
    char current_chr = it[0]->chr[3];
 
    cout <<it[0]->chr<< " " <<it[1]->chr<<endl;
-   smallest_value = it[0]->chr_start < it[1]->chr_start? it[0]->chr_start : it[1]->chr_start;
+   smallest_value = it[0]->chr_start < it[1]->chr_start? it[0]->chr_start : it[1]->chr_start; //*********************************************
+   for(int i=2; i < file_num;i++){
+      if(smallest_value > it[i]->chr_start)
+         smallest_value = it[i]->chr_start;
+   }
    while(1){
       for(int i=0; i <file_num; i++){
          if(abs(smallest_value - it[i]->chr_start) <allowable_difference){
@@ -129,7 +133,10 @@ cout <<" -----------------=======================================";
          current_chr = it[0]->chr[3];
       }
       smallest_value = it[0]->chr_start < it[1]->chr_start? it[0]->chr_start : it[1]->chr_start;
-
+      for(int i=2; i < file_num;i++){
+      if(smallest_value > it[i]->chr_start)
+         smallest_value = it[i]->chr_start;
+      }
 
    }
    //////// C++ value to Python Object /////////////////
