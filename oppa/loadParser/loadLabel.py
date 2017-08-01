@@ -7,7 +7,9 @@ def peak_label_load(validSet):
     peak_labels = []
 
     for peak in peak_data:
-        if peak == "\r\n":
+        if "#" in peak:
+	    peak_data.remove(peak)
+	if peak == "\r\n":
             peak_data.remove(peak)
     for peak in peak_data:
         peak = peak.rstrip('\r\n')
