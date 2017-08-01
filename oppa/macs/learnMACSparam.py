@@ -40,20 +40,29 @@ def learnMACSparam(args, test_set, validation_set):
     control = args.control
     call_type = args.callType
 
-    def wrapper_function(opt_Qval):
-        error = run(input_file, validation_set, str(opt_Qval), call_type,control)
-        return -error
+    def wrapper_narrow_cut(opt_Qval):
+	correct = run(input_file, validation_set, str(opt_Qval), call_type, control)
+        return correct 
 
-    parameter_bound = {'opt_Qval' : (10**-15,0.8)}
+    def wrapper_broad_cut(opt_Qval, opt_cutoff):
+	correct = run(input_file, validation_set, str(opt_Qval), call_type, control, broad=str(opt_cutoff))
+	return correct
+
+    parameters_bounds_narrow = {'opt_Qval':(10**-15,0.8)}
+
+    parameters_bounds_broad = {'opt_Qval':(10**-15,0.8),\
+				'opt_cutoff':(10**-14,0.9)}
     number_of_init_sample = 2
 
-    result = optimizeHyper(wrapper_function, parameter_bound, number_of_init_sample)
-    final_error = run(input_file, test_set, str(result['max_params']['opt_Qval']), call_type, control)
 
-    subprocess.call(['macs2','callpeak','-t',input_file,'-c',control,'-g','hs','-q',str(result['max_params']['opt_Qval'])])
-    print " final error about test set is :::" + str(final_error)
+    if call_type is None:
+        result = optimizeHyper(wrapper_narrow_cut, parameters_bounds_narrow, number_of_init_sample)
+    	subprocess.call(['macs2','callpeak','-t',input_file,'-c',control,'-g','hs','-q',str(result['max_params']['opt_Qval'])])
+    	print " final error about test set is :::" + str(final_error)
+    else:
+	result = optimizeHyper(wrapper_broad_cut, parameters_bounds_broad, number_of_init_sample)
 
-def run(input_file, valid_set, Qval, call_type, control = None):
+def run(input_file, valid_set, Qval, call_type, control = None, broad=None):
     """
     this function run MACS and calculate error at once.
     each arguments will be given by learnMACSparam that from command line.
@@ -78,17 +87,22 @@ def run(input_file, valid_set, Qval, call_type, control = None):
     chromosome_list = list(set(chromosome_list))
 
     """it will be runned by protoPFC.py"""
-    bam_name = input_file[:-4]  ## delete '.bam'
-    cr_bam_name = control[:-4]
     reference_char = ".REF_"
-
+    bam_name = input_file[:-4]  ## delete '.bam'
+    if control is not None:
+        cr_bam_name = control[:-4]
+    
     MAX_CORE = cpu_count()
     TASKS = len(chromosome_list)
     TASK_NO = 0
     macs_processes = []
 
     while (len(macs_processes) < MAX_CORE-1) and (TASK_NO < TASKS):
-	macs_processes.append(MACS.run(bam_name + reference_char + chromosome_list[TASK_NO] + ".bam", Qval, call_type, cr_bam_name + reference_char + chromosome_list[TASK_NO] + ".bam"))
+	if control is not None:
+	    macs_processes.append(MACS.run(bam_name + reference_char + chromosome_list[TASK_NO] + ".bam", Qval, call_type, cr_bam_name + reference_char + chromosome_list[TASK_NO] + ".bam", broad))
+	else:
+	    macs_processes.append(MACS.run(bam_name + reference_char + chromosome_list[TASK_NO] + ".bam", Qval, call_type, broad=broad))
+	    
 	TASK_NO += 1
 
     while len(macs_processes) > 0:
@@ -99,11 +113,11 @@ def run(input_file, valid_set, Qval, call_type, control = None):
 		del macs_processes[proc]
 
 	while (len(macs_processes) < MAX_CORE - 1) and (TASK_NO < TASKS):
-	    macs_processes.append(MACS.run(bam_name + reference_char + chromosome_list[TASK_NO] + ".bam", Qval, call_type, cr_bam_name + reference_char + chromosome_list[TASK_NO] + ".bam"))
+	    if control is not None:
+	        macs_processes.append(MACS.run(bam_name + reference_char + chromosome_list[TASK_NO] + ".bam", Qval, call_type, cr_bam_name + reference_char + chromosome_list[TASK_NO] + ".bam", broad))
+	    else:
+		macs_processes.append(MACS.run(bam_name + reference_char + chromosome_list[TASK_NO] + ".bam", Qval, call_type, broad=broad))
 	    TASK_NO += 1
-
-		
-
 
     #there must be valid validation set and test set.
     if not valid_set:
@@ -113,7 +127,10 @@ def run(input_file, valid_set, Qval, call_type, control = None):
     #actual learning part
     else:
         error_num, label_num = summerize_error(bam_name, valid_set, call_type)
-    return error_num/label_num
+
+    if label_num is 0:
+	return 1.0
+    return (1 - error_num/label_num) * 100
 
 
 def summerize_error(bam_name, validation_set, call_type):
