@@ -84,7 +84,7 @@ ens_main(PyObject *self, PyObject *args){
    char current_chr = it[0]->chr[3];
 
    cout <<it[0]->chr<< " " <<it[1]->chr<<endl;
-   smallest_value = it[0]->chr_start;
+   smallest_value = it[0]->chr_start < it[1]->chr_start? it[0]->chr_start : it[1]->chr_start;
    while(1){
       for(int i=0; i <file_num; i++){
          if(abs(smallest_value - it[i]->chr_start) <allowable_difference){
@@ -92,7 +92,7 @@ ens_main(PyObject *self, PyObject *args){
          }
       }
 
-      pct = cnt / file_num;
+      pct = cnt / file_num; // how many files are matched
 
       if(pct > threshhold){
          cout <<"=========="<<file_num << " of " <<cnt<<" files are match"<<"=========="<<endl;
@@ -104,18 +104,18 @@ cout<< it[0]->chr <<endl;
       }
       cnt = 0;
       for(int i=0; i <file_num; i++){
-         if(abs(smallest_value - it[i]->chr_start) <allowable_difference && current_chr == it[i]->chr[3] ){
+         if(abs(smallest_value - it[i]->chr_start) <allowable_difference && current_chr == it[i]->chr[3] ){// move to next peak element
             it[i]++;
             if(it[i]==peak_vec[i].end()){
                it[i]--;
-               it[i]->chr[3] = 'D';
+               it[i]->chr[3] = 'D';// prevent vector out of idx 
             }
          }
       }
       chr_check=0;
       for(int i=0; i <file_num; i++){
          if(it[i]!= peak_vec[i].end() && current_chr == it[i]->chr[3])
-            chr_check++;
+            chr_check++; //should i move to next chromosome?
       }
       if(double(chr_check) / double(file_num) < threshhold){
 cout <<" -----------------=======================================";
