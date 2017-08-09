@@ -5,12 +5,10 @@ import math
 from BayesianOptimization.bayes_opt.bayesian_optimization import BayesianOptimization
 
 #function for testing Bayesian optimization.
-def test_function(y):
-    return -(y-50)**2
 
 
 def optimized_function(function, error, *param):
-    """
+	"""
     this function will wrap black box function for bayesian optimization.
     now, we denote vector like X = { x1, x2, ... , xn } to capitalize
     like this A = { a1, a2, ... , an }. so in our concept, X is a
@@ -31,12 +29,12 @@ def optimized_function(function, error, *param):
 
     :return:
 
-    """
-    return None
+	"""
+	return None
 
 
-def run(function, Param_bound, init_point):
-    """
+def run(function, Param_bound, init_point, return_dict, num_itr = 10, acq_func = 'ei', chrNo= None):
+	"""
     Doing Bayesian optimization with some function. the function is just process that
     input the file and parameter to Peak Detection algorithm and get some error.
 
@@ -65,10 +63,9 @@ def run(function, Param_bound, init_point):
         {'max_val' : maximum observation value. ,
         'max_param' : the parameter can be observe maximum value }
     
-    """
+	"""
 
-    optimizer = BayesianOptimization(function, Param_bound, init_point)
-    """
+	"""
     In the Bayesian Optimization Class`s field :
         
         keys : Error Value of each parameters ( List : [] )
@@ -94,18 +91,16 @@ def run(function, Param_bound, init_point):
 
     and you can do optimization by maximize() Method,
     you can initialize data frame ( table of data structure ) by initialize_df method.
-    """
+	"""
+	optimizer = BayesianOptimization(function, Param_bound, verbose=False)
+    
+	
+	optimizer.explore(Param_bound)
+	optimizer.maximize(acq = acq_func, init_points=init_point, n_iter=num_itr)
 
-    optimizer.explore(Param_bound)
-    optimizer.maximize(acq = 'ei', init_points=init_point, n_iter=10)
-    print optimizer.res['max']
-    optimizer.points_to_csv("result")
-    return optimizer.res['max']
+	optimizer.points_to_csv("result")
 
-#code for test you just run this script
+	result = chrNo, optimizer.res['max']
 
-# number of random generate sample.
-"""init_point = 3
-Param_bound = {'y' : (15, 75.0)}
-run(test_function, Param_bound, init_point)
-"""
+	return_dict[chrNo] = optimizer.res['max']
+	print chrNo + " is done insert into result containor."

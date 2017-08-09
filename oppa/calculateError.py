@@ -19,30 +19,53 @@ def calculate_error(peak_data, labeled_data, cell_type):
     """
 
 
+    # sum of error label
     error_num = 0.0
+
+    # number of Error label about each error type.
+    FP_error = 0.0
+    FN_error = 0.0
+
+    # number of label which can occur error about each error type.
+    possible_FP = 0
+    possible_FN = 0
 
     for label in labeled_data:
         if label['peakStat'] == 'peaks':
-#	    print "peaks"
-            if not is_peak(peak_data, label['regions'], weak_predict= True):
+	    possible_FN += 1
+	    state = is_peak(peak_data, label['regions'], weak_predict = True)
+            if state is not True:
 		error_num += 1
+		FN_error += 1
 #		print "error : peaks"
 	elif label['peakStat'] == 'peakStart' or label['peakStat'] == 'peakEnd':
-#           print "peakStart PeakEnd"
-	    if not is_peak(peak_data, label['regions']):
+	    possible_FP += 1
+	    possible_FN += 1
+	    state = is_peak(peak_data, label['regions'])
+	    if state is not True:
 		error_num += 1
+		if state == "False Positive":
+		    FP_error += 1
+		else:
+		    FN_error += 1
 #		print "error : peakStart peakEnd"
 	else:
-#	    print " no peak"
-            if not is_noPeak(peak_data, label['regions']):
+	    possible_FP += 1
+	    state = is_noPeak(peak_data, label['regions'])
+            if state is not True:
 		error_num += 1
+		FP_error += 1
 #		print "error : nopeaks"
+
+
+    print "possible FN " + str(possible_FN) , "possible FP " + str(possible_FP)
+    print "FN_Error: " + str(FN_error) , "FP_Error: " + str(FP_error)
 
     return error_num, len(labeled_data)
 
 
 
-def is_peak(target, value, tolerance = 0, weak_predict = False):
+def is_peak(target, value, tolerance = 500, weak_predict = False):
     """
 
     :param target:
@@ -73,9 +96,6 @@ def is_peak(target, value, tolerance = 0, weak_predict = False):
             index = (max_index + index) / 2
         #find correct regions
         else:
-            # if label is "peaks", correct regions can be bigger than 2.
-            # but "peakStart" or "peakEnd" are not they must exist only 1 correct regions.
-
             if (weak_predict == True):
                 return True
 
@@ -84,7 +104,7 @@ def is_peak(target, value, tolerance = 0, weak_predict = False):
 		if (index + 1) is not len(target)\
 	 		and is_same(target, value, index + 1, tolerance) is 'in'\
 			or is_same(target, value, index - 1, tolerance) is 'in':
-		   return False
+		   return "False Positive"
 		else:
 		   return True
 
@@ -92,7 +112,7 @@ def is_peak(target, value, tolerance = 0, weak_predict = False):
 	    if is_same(target, value, index , tolerance) is 'in':
 		return True
 	    else:
-		return False
+		return "False Negative"
 
 
 def is_noPeak(target, value, tolerance = 0):
@@ -107,7 +127,7 @@ def is_noPeak(target, value, tolerance = 0):
     region_max = value[1]
 
     #for find start regions, delete end regions
-#    value[1] = value[0]
+    #value[1] = value[0]
 
     index = len(target)/2
     min_index = 0

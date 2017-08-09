@@ -1,4 +1,5 @@
 import time
+from math import exp
 from multiprocessing import cpu_count
 from multiprocessing import Process
 import subprocess
@@ -32,15 +33,13 @@ def learnSPPparam(args, test_set, validation_set):
     call_type = args.callType
 
     def wrapper_function(opt_fdr):
-        error = run(input_file, validation_set, str(opt_fdr), call_type, control)
-        return -error
+        correct = run(input_file, validation_set, str(exp(opt_fdr/100.0)-1) , call_type, control)
+        return correct
 
-    parameter_bound = {'opt_fdr' : (10**-8,0.9)}
+    parameter_bound = {'opt_fdr' : (10**-4,26.0)}
     number_of_init_sample = 2
 
-    fdr = 0.01
-    print run(input_file, validation_set+test_set, fdr, call_type, control)
-
+    result = optimizeHyper(wrapper_function, parameter_bound, number_of_init_sample, num_itr = 4)
 
 def run(input_file, valid_set, opt_fdr, call_type, control=None):
     """
@@ -62,9 +61,8 @@ def run(input_file, valid_set, opt_fdr, call_type, control=None):
     
     curr_dir = os.getcwd()
     input_file = curr_dir + "/" + input_file
-    control = curr_dir + "/" + control
-
-    print control
+    if control is not None:
+	control = curr_dir + "/" + control
 
     CORE_NUM = cpu_count()
 
@@ -73,11 +71,15 @@ def run(input_file, valid_set, opt_fdr, call_type, control=None):
     else:
         output_name = input_file.rsplit('.',1)[0] + ".broadPeak"
 
-    command = ['Rscript','oppa/spp/run_spp.R','-c=',input_file,'-i=',control,'-fdr=',str(opt_fdr),\
-               '-savn='+ output_name,'-p='+str(CORE_NUM),'-rf']
-
+    # run spp
+    command = ['Rscript oppa/spp/run_spp.R -c='+input_file+' -i='+control+' -fdr='+str(opt_fdr)+\
+               ' -savn='+ output_name+' -p='+str(CORE_NUM-1)+' -rf']
     subprocess.call(command, shell=True)
-    print "end" 
+
+    # decompressing result file
+    command = ['gunzip ' +output_name + '.gz']
+    subprocess.call(command, shell=True)
+
     # to Split result file of SPP by chromosome then calculate error
     command = ['./oppa/loadParser/spliter.sh ' + output_name]
     subprocess.call(command, shell=True)

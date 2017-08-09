@@ -73,5 +73,18 @@ def main():
 ##############################################################################
 
 
+######################### install PeakSeq ####################################
+    cmd = 'unzip '+ curr_dir +'/dependencies/PeakSeq_1.31.zip'
+    subprocess.call(cmd, shell=True)
+    cmd = 'make -C'+ curr_dir +'/dependencies/PeakSeq'
+    subprocess.call(cmd, shell=True)
+##############################################################################
+
+######################### install HOMER ######################################
+    cmd = 'wget http://homer.ucsd.edu/homer/configureHomer.pl'
+    subprocess.call(cmd, shell=True)
+    cmd = 'perl configureHomer.pl -install homer'
+    subprocess.call(cmd, shell=True)
+##############################################################################
 if __name__ == '__main__':
     main()

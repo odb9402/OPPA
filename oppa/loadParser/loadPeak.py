@@ -7,9 +7,15 @@ def bed_file_load(input_bed, chrom = None):
     peak_table = ['chr','region_s','region_e','peak_name','score']
     peak_labels = []
 
-    for peak in peak_data:
-        peak_labels.append(dict(zip(peak_table,peak.split())))
+    while True:
+	if peak_data[0][0] == '#':
+	    del peak_data[0]
+	else:
+	    break
 
+    for peak in peak_data:
+	peak_labels.append(dict(zip(peak_table,peak.split())))
+ 
     return peak_labels
 
 
