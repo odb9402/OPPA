@@ -22,18 +22,17 @@ QUICK START
 	python dependencies.py
 you can install dependencies from this python script
 >		
-	sudo apt-get install bamtools
-	sudo apt-get install samtools
-and you need bamtools and samtools  for execute oppa
+	( in directory of OPPA )
+	python setup.py install
 
 ---
 
 >RUNNING:
 >
 	example :	
-    `OPPA -t MACS -I input_name -c control_file_name -vs label_name`
+    `OPPA1 -t MACS -I input_name -c control_file_name -vs label_name`
     see more :
-    `OPPA -h`
+    `OPPA1 -h`
 
 
 
@@ -76,7 +75,9 @@ DEPENDENCY
 - [MACS](https://github.com/taoliu/MACS) - using MACS version 2.1.0
 - [SPP](https://github.com/xinwang2hms/SPP) - using SPP version 2.0.1
 - [phantompeakqualtools](https://github.com/kundajelab/phantompeakqualtools) - using phantompeakqualtools
+- [HOMER](http://homer.ucsd.edu/homer/) - using HOMER
 ---------
 >**CITATION**
 1. HOCKING, Toby Dylan, et al. Optimizing ChIP-seq peak detectors using visual labels and supervised machine learning. Bioinformatics, 2016, 33.4: 491-499.
 2.  SNOEK, Jasper; LAROCHELLE, Hugo; ADAMS, Ryan P. Practical bayesian optimization of machine learning algorithms. In: Advances in neural information processing systems. 2012. p. 2951-2959.
+3. Heinz S, Benner C, Spann N, Bertolino E et al. Simple Combinations of Lineage-Determining Transcription Factors Prime cis-Regulatory Elements Required for Macrophage and B Cell Identities. Mol Cell 2010 May 28;38(4):576-589.
