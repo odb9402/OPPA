@@ -28,7 +28,7 @@ def main():
     subprocess.call(cmd, shell=True)
     cmd = 'python ../setup.py install'
     subprocess.call(cmd, shell=True)
-    cmd = 'sudo pip install rpy2'
+    cmd = 'sudo pip install rpy2==2.8.0'
     subprocess.call(cmd, shell=True)
 ##############################################################################
 
