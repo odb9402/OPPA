@@ -14,7 +14,6 @@ def callMAC(input_bam, call_type, control_bam= "", input_q = '0.05', input_broad
     """call MACS by LINUX shell with input parameter"""
     """in MACS, can input control bam file for getting more accurate result, so check it"""
     output_name = input_bam.rsplit('/',1)[0] + '/MACS/' + input_bam.rsplit('/',1)[1]
-    print output_name
 
     if control_bam is not "":
         if call_type == "broad":

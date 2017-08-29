@@ -45,17 +45,18 @@ def learnMACSparam(args, test_set, validation_set, PATH):
 	return_dict = manager.dict()	
 
 	# make result directory
-	os.makedirs(PATH + '/MACS')
+	if not os.path.exists(PATH + '/MACS'):
+		os.makedirs(PATH + '/MACS')
 
 	# set parameter bounds
 	if call_type == "broad":
-		parameters_bounds = {'opt_Qval':(10**-8,60.0),\
-				'opt_cutoff':(10**-7,60.0)}
+		parameters_bounds = {'opt_Qval':(10**-8,30.0),\
+				'opt_cutoff':(10**-7,35.0)}
 	else:
-		parameters_bounds = {'opt_Qval':(10**-8,60.0)}
+		parameters_bounds = {'opt_Qval':(10**-8,30.0)}
 	
 	# set number of initialize sample in bayesian optimization
-	number_of_init_sample = 1 
+	number_of_init_sample = 3
 
 	# get chromosome list
 	chromosome_list = []
@@ -88,10 +89,11 @@ def learnMACSparam(args, test_set, validation_set, PATH):
 				print chromosome,\
 					"Qval :" + str(round(exp(opt_Qval/100)-1,4)),\
 					"Broad-cutoff:" + str(round(exp(opt_cutoff/100)-1,4)),\
-					"score:" + str(round(accuracy,4))
+					"score:" + str(round(accuracy,4)) + '\n'
 				return accuracy
 			# set function will be input of bayesian optimization
 			function = wrapper_function_broad
+
 		else:
 			# create wrapper function about narrow peak calling
 			def wrapper_function_narrow(opt_Qval):
@@ -103,14 +105,18 @@ def learnMACSparam(args, test_set, validation_set, PATH):
 						, call_type, PATH, cr_target)
 				print chromosome,\
 					"Qval :" + str(round(exp(opt_Qval/100)-1,4)),\
-					"score:" + str(round(accuracy,4))
+					"score:" + str(round(accuracy,4)) + '\n'
 				return accuracy
 			# set function will be input of bayesian optimization
 			function = wrapper_function_narrow
 		
 		# each learning_process and wrapper function will be child process of OPPA
-		learning_process = multiprocessing.Process(target=optimizeHyper, args=(function,\
-					parameters_bounds, number_of_init_sample, return_dict, 10, 'ei', chromosome,))
+		if call_type == "broad":
+			learning_process = multiprocessing.Process(target=optimizeHyper, args=(function,\
+					parameters_bounds, number_of_init_sample, return_dict, 15, 'ei', chromosome,))
+		else:
+			learning_process = multiprocessing.Process(target=optimizeHyper, args=(function,\
+					parameters_bounds, number_of_init_sample, return_dict, 15, 'ucb', chromosome,))
 
 		# running each bayesian optimization process in parallel by multiprocessing in python.
 		if len(learning_processes) < MAX_CORE - 1:
@@ -130,12 +136,53 @@ def learnMACSparam(args, test_set, validation_set, PATH):
 							learning_process.start()
 							keep_wait = False
 							break
+
 	for proc in learning_processes:
-		  proc.wait()
-	print return_dict
+		  proc.join()
+	
+	print "finish learning parameter of MACS !"
+	print "Running MACS with learned parameter . . . . . . . . . . . . ."
+	# final run about result.
+	for chromosome in chromosome_list:
+		parameters = return_dict[chromosome]['max_params']
+		target = bam_name + reference_char + chromosome + '.bam'
+		opt_Qval = parameters['opt_Qval']
+
+		learning_processes = []
+
+		if call_type == 'broad':
+			opt_cutoff = parameters['opt_cutoff']
+			learning_process = multiprocessing.Process(target=run, args=(\
+						target, test_set, str(opt_Qval), call_type, PATH, control,\
+						str(opt_cutoff), True,))
+		else:
+			learning_process = multiprocessing.Process(target=run, args=(\
+						target, test_set, str(opt_Qval), call_type, PATH, control,\
+						None,True,))
+			
+		if len(learning_processes) < MAX_CORE - 1:
+			learning_processes.append(learning_process)
+			learning_process.start()
+		else:
+			keep_wait = True
+			while True:
+				time.sleep(0.1)
+				if not (keep_wait is True):
+					break
+				else:
+					for process in reversed(learning_processes):
+						if process.is_alive() is False:
+							learning_processes.remove(process)
+							learning_processes.append(learning_process)
+							learning_process.start()
+							keep_wait = False
+							break
+	for proc in learning_processes:
+		  proc.join()
+			 
 	return return_dict	
 
-def run(input_file, valid_set, Qval, call_type, PATH, control = None, broad=None):
+def run(input_file, valid_set, Qval, call_type, PATH, control = None, broad=None, final=False):
 	"""
     this function run MACS and calculate error at once.
     each arguments will be given by learnMACSparam that from command line.
@@ -171,47 +218,18 @@ def run(input_file, valid_set, Qval, call_type, PATH, control = None, broad=None
 		exit()
 	else:
 		error_num, label_num = calculateError(peakCalled_file, parseLabel(valid_set, peakCalled_file))
-		if os.path.isfile(peakCalled_file):
+		if os.path.isfile(peakCalled_file) and (not final):
 			os.remove(peakCalled_file)
+		elif final:
+			print peakCalled_file + " is stored."
 		else:
-			print "there is no result file."
+		 	print "there is no result file."
 	if label_num is 0:
 		return 0.0
-		
+	
+	if final:
+		print "Test Score ::" + str(1-error_num/label_num) +"\n"
 	return (1 - error_num/label_num)
 
 
-def summerize_error(bam_name, validation_set, call_type):
-	"""
-
-    :param bam_name:
-    :param validation_set:
-    :return:
-	"""
-	sum_error_num = 0
-	sum_label_num = 0
-	reference_char = ".REF_chr"
-	if call_type == "broad":
-		output_format_name = '.broadPeak'
-	else:
-		output_format_name = '.narrowPeak'
-
-	for chr_no in range(22):
-		input_name = bam_name + reference_char + str(chr_no+1) + ".bam_peaks" + output_format_name
-		error_num, label_num = calculateError(input_name, parseLabel(validation_set, input_name))
-		sum_error_num += error_num
-		sum_label_num += label_num
-
-    # add about sexual chromosome
-		input_name = bam_name + reference_char + 'X' + ".bam_peaks" + output_format_name
-		error_num, label_num = calculateError(input_name, parseLabel(validation_set, input_name))
-		sum_error_num += error_num
-		sum_label_num += label_num
-    
-		input_name = bam_name + reference_char + 'Y' + ".bam_peaks" + output_format_name
-		error_num, label_num = calculateError(input_name, parseLabel(validation_set, input_name))
-		sum_error_num += error_num
-		sum_label_num += label_num
-
-	return sum_error_num , sum_label_num
 
