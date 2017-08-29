@@ -19,14 +19,10 @@ def main():
 	# setting arguments
 	arg_parser = argparse.ArgumentParser()
 	arg_parser.add_argument("-t","--tool",nargs='+', help="what tool you use. : { MACS , SPP , peakSeg , HOMER}")
-	arg_parser.add_argument("-i","--input", help="what file you input.")
-	arg_parser.add_argument("-cr","--control", help="it is control-Bam file for MACS")
-	arg_parser.add_argument("-f","--format", help="input file format for : { MACS , ")
-	arg_parser.add_argument("-q","--Qval", default='0.05' ,help="it is parameter that will be learned and it mean\n"
-                                                "significance value in Statical solutions it is only for"
-                                                ": {MACS ")
-	arg_parser.add_argument("-vs","--validSet", help="validation set it is labeled. used for : { MACS , ")
-	arg_parser.add_argument("-ct","--callType", help="decide peak call type either broad or narrow. used for : {MACS ")
+	arg_parser.add_argument("-i","--input", help="input alignment file. the format must be bam.")
+	arg_parser.add_argument("-cr","--control", help="it is control alignment file for MACS")
+	arg_parser.add_argument("-vs","--validSet", help="validation set it is labeled.")
+	arg_parser.add_argument("-ct","--callType", help="decide peak call type either broad or narrow.")
 
 	args = arg_parser.parse_args()
 
@@ -54,10 +50,11 @@ def main():
 	validation_set, test_set = loadLabel(args.validSet)
 	global directory_path
 
-	print "\n INPUT THE WORKING DIRECTORY. this directory will be stored\
-		\n split region of input bam file and store result. you don`t\
-		\n have to input full path of directory. but if you don`t, it\
-		\n create in current directory."
+	print "\n ===INPUT THE WORKING DIRECTORY.=== this directory will store\
+		\n that splited region of input bam file and it store result to \
+		\n wroking directory. you don`t have to input full path of direct\
+		\n ory. if you insert just directory name , it create in current \
+		\n directory."
 	sys.stdout.write("\n input new directory :: ")
 	directory_path = raw_input()
 	directory_path = os.path.abspath(directory_path)
@@ -76,43 +73,37 @@ def main():
 	result_peakSeq = 0
 	result_homer = 0
 	
-	if len(args.tool) > 2:
+	if len(args.tool) >= 2:
 		print "////////////// ENSEMBLE METHOD ON ////////////////"
 
-	if "macs" in args.tool:
-		print "///////////// RUNNING MACS ///////////////////////"
-		from oppa.macs.learnMACSparam import learnMACSparam
-		result_mac = learnMACSparam(args, validation_set, test_set, directory_path)
-		score_list.append(result_mac)
-
-	if "spp" in args.tool:
-		print "/////////////// RUNNING SPP //////////////////////"
-		from oppa.spp.learnSPPparam import learnSPPparam
-		result_spp = learnSPPparam(args, validation_set, test_set)
-	
-	if "peakSeq" in args.tool:
-		print "/////// RUNNING PeakSeq //////////////////////////"
-
 	if "homer" in args.tool:
-		print "/////////////// RUNNING HOMER ////////////////////"
+		print "////////////////// RUNNING HOMER /////////////////"
 		from oppa.HOMER.learnHOMERparam import learnHOMERparam
 		result_homer = learnHOMERparam(args, validation_set, test_set, directory_path)
-		score_list.append(result_homer)
+		score_list.append(result_homer._getvalue())
+
+	if "macs" in args.tool:
+		print "///////////////// RUNNING MACS ///////////////////"
+		from oppa.macs.learnMACSparam import learnMACSparam
+		result_mac = learnMACSparam(args, validation_set, test_set, directory_path)
+		score_list.append(result_mac._getvalue())
+
+	if "peakSeq" in args.tool:
+		print "//////////////// RUNNING PeakSeq /////////////////"
+
+	if "spp" in args.tool:
+		print "////////////////// RUNNING SPP ///////////////////"
+		from oppa.spp.learnSPPparam import learnSPPparam
+		result_spp = learnSPPparam(args, validation_set, test_set, directory_path)
+		score_list.append(result_spp._getvalue())
 	#####################################################
 	
 
-	################ Ensemble step #####################
-
-	####################################################
-
-	# only for testing
-	if "gridMACS" in args.tool:
-		from oppa.macs.learnMACSparam import run as runMACS
-#       	from oppa.bamtools import run as bamtools
-#			bamtools(args.input)
-		for i in range(30):
-	   		print "Qval:"+str(exp((i+1)/100.0)-1)
-	    	print runMACS(args.input, validation_set, str(float(i+1)) , args.callType ,args.control)
+	################ Ensemble step ######################
+	tool_list = sorted(args.tool)
+	score_dict = dict(zip(tool_list, score_list))
+	print score_dict
+	#####################################################
 
 
 if __name__ == '__main__':
