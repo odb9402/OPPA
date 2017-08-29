@@ -98,8 +98,6 @@ def run(function, Param_bound, init_point, return_dict, num_itr = 10, acq_func =
 	optimizer.explore(Param_bound)
 	optimizer.maximize(acq = acq_func, init_points=init_point, n_iter=num_itr)
 
-	optimizer.points_to_csv("result")
-
 	result = chrNo, optimizer.res['max']
 
 	return_dict[chrNo] = optimizer.res['max']
