@@ -20,7 +20,7 @@ def run(input_file, control, call_type, directory, fdr=None, size=None, minDist=
 	if call_type == "broad":
 		command = [homer_PATH + 'findPeaks ' + target_PATH + ' -style histone'+\
 				   ' -o ' + output_name + ' -i ' + control_PATH + ' -size ' + size +\
-				   ' -minDist ' + minDist]
+				   ' -minDist ' + minDist + ' -fdr ' + fdr]
 		process = subprocess.Popen(command, shell= True, stdout = FNULL, stderr=subprocess.STDOUT)
 	else:
 		command = [homer_PATH + 'findPeaks ' + target_PATH + ' -style factor' +\
@@ -30,10 +30,10 @@ def run(input_file, control, call_type, directory, fdr=None, size=None, minDist=
 
 	
 	if os.path.isfile(output_name):
-		command = [ os.getcwd()+'/dependencies/bin/pos2bed.pl ' + output_name +\
+		command = [os.getcwd()+'/dependencies/bin/pos2bed.pl ' + output_name +\
 				  ' > ' + output_name[:-4] + ".bam_peaks.bed"]
 		subprocess.call(command, shell= True, stdout = FNULL, stderr=subprocess.STDOUT)
-	process = subprocess.Popen(command, shell= True, stdout = FNULL, stderr=subprocess.STDOUT)
+
 	return process
 
 
@@ -42,6 +42,6 @@ def run_control_processing(directory, control):
 	homer_PATH = os.getcwd() + '/dependencies/cpp/'
 	control_PATH = directory + '/HOMER/' + control + '/'
 
-	cont_command = ['sudo ' + homer_PATH+'makeTagDirectory ' + control_PATH + ' ' + control]
+	cont_command = [homer_PATH+'makeTagDirectory ' + control_PATH + ' ' + control]
 	process = subprocess.Popen(cont_command, shell= True)
 	process.wait()
