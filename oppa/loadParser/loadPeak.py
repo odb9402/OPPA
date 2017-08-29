@@ -7,8 +7,11 @@ def bed_file_load(input_bed, chrom = None):
     peak_table = ['chr','region_s','region_e','peak_name','score']
     peak_labels = []
 
+    if len(peak_data) is 0:
+    	return []
+
     while True:
-	if peak_data[0][0] == '#':
+	if len(peak_data) > 0 and peak_data[0][0] == '#':
 	    del peak_data[0]
 	else:
 	    break
