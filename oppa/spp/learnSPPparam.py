@@ -1,124 +1,156 @@
-import time
 from math import exp
-from multiprocessing import cpu_count
-from multiprocessing import Process
 import subprocess
+import time
 import os
+from multiprocessing import Process, Manager, cpu_count
+import multiprocessing
 
 from ..optimizeHyper import run as optimizeHyper
 from ..calculateError import run as calculateError
 from ..loadParser.loadLabel import run as loadLabel
 from ..loadParser.parseLabel import run as parseLabel
 
-def learnSPPparam(args, test_set, validation_set):
-    """
-    this function actually control learning steps. args is given by
-    oppa.py ( main function of this program ) from command line.
-    and make wrapper_function to use BayesianOptimization library,
-    only wrapper_function`s arguments will be learned by library.
+def learnSPPparam(args, test_set, validation_set, PATH):
 
-    :param args:
-        argument from command lines
+	input_file = args.input
+	control = args.control
+	call_type = args.callType
 
-    :param test_set:
-        python list of test set
+	manager = Manager()
+	return_dict = manager.dict()
 
-    :param validation_set:
-        python list of validation set
+	if not os.path.exists(PATH + '/SPP'):
+		os.makedirs(PATH + '/SPP')
 
-    :return: learned parameter.
-    """
-    input_file = args.input
-    control = args.control
-    call_type = args.callType
+	parameters_bounds = {'opt_fdr' : (0.005, 0.3)}
+	number_of_init_sample = 2 
 
-    def wrapper_function(opt_fdr):
-        correct = run(input_file, validation_set, str(exp(opt_fdr/100.0)-1) , call_type, control)
-        return correct
+	chromosome_list = []
+	for label in validation_set + test_set:
+		chromosome_list.append(label.split(':')[0])
+	chromosome_list = sorted(list(set(chromosome_list)))
 
-    parameter_bound = {'opt_fdr' : (10**-4,26.0)}
-    number_of_init_sample = 2
+	reference_char = ".REF_"
+	bam_name = input_file[:-4]
+	cr_bam_name = control[:-4]
 
-    result = optimizeHyper(wrapper_function, parameter_bound, number_of_init_sample, num_itr = 4)
+	MAX_CORE = cpu_count()
+	learning_processes = []
 
-def run(input_file, valid_set, opt_fdr, call_type, control=None):
-    """
-    this function run SPP and calculate error at once.
-    each arguments will be given by learnSPPparam that from command line.
+	print chromosome_list
 
-    :param input_file:
-        input file name.
-    :param valid_set:
-        python list of labeled data
-    :param opt_fdr:
-        fdr value which will be SPP`s parameter
-    :param control:
-        control bam file in SPP. it is necessary.
+	for chromosome in chromosome_list:
+		def wrapper_function(opt_fdr):
+			target = bam_name + reference_char + chromosome + '.bam'
+			cr_target = cr_bam_name + '.bam' 
+			accuracy = run(target, cr_target, validation_set, call_type, str(exp(opt_fdr)-1), PATH, False)
+			print chromosome,\
+				"fdr :" + str(round(exp(opt_fdr)-1,4)),\
+				"score:" + str(round(accuracy,4)) + '\n'
+			return accuracy
+	
+		function = wrapper_function
+		learning_process = multiprocessing.Process(target=optimizeHyper, args=(function,\
+					parameters_bounds, number_of_init_sample, return_dict, 7, 'ei', chromosome,))
 
-    :return:
-        error rate of between SPP_output and labeled Data.
-    """
-    
-    curr_dir = os.getcwd()
-    input_file = curr_dir + "/" + input_file
-    if control is not None:
-	control = curr_dir + "/" + control
+		if len(learning_processes) < MAX_CORE - 1:
+			learning_processes.append(learning_process)
+			learning_process.start()
+		else:
+			keep_wait = True
+			while True:
+				time.sleep(0.1)
+				if not (keep_wait is True):
+					break
+				else:
+				 	for process in reversed(learning_processes):
+						if process.is_alive() is False:
+							learning_processes.remove(process)
+							learning_processes.append(learning_process)
+							learning_process.start()
+							keep_wait = False
+							break
+		
+	for proc in learning_processes:
+			 proc.join()
 
-    CORE_NUM = cpu_count()
+	print "finish learning parameter of SPP ! "
+	print "Running SPP with learned parameter . . . . . . . . . . . . . . ."
 
-    if call_type is None:
-        output_name = input_file.rsplit('.',1)[0] + ".narrowPeak"
-    else:
-        output_name = input_file.rsplit('.',1)[0] + ".broadPeak"
+	for chromosome in chromosome_list:
+		parameters = return_dict[chromosome]['max_params']
+		target = bam_name + reference_char + chromosome + '.bam'
+		opt_fdr = parameters['opt_fdr']
 
-    # run spp
-    command = ['Rscript oppa/spp/run_spp.R -c='+input_file+' -i='+control+' -fdr='+str(opt_fdr)+\
-               ' -savn='+ output_name+' -p='+str(CORE_NUM-1)+' -rf']
-    subprocess.call(command, shell=True)
+		learning_processes = []
 
-    # decompressing result file
-    command = ['gunzip ' +output_name + '.gz']
-    subprocess.call(command, shell=True)
+		learning_process = multiprocessing.Process(target = run, args=(\
+				target, control, validation_set, call_type, str(exp(opt_fdr)-1), PATH, True,))
 
-    # to Split result file of SPP by chromosome then calculate error
-    command = ['./oppa/loadParser/spliter.sh ' + output_name]
-    subprocess.call(command, shell=True)
+		if len(learning_processes) < MAX_CORE - 1:
+			learning_processes.append(learning_process)
+			learning_process.start()
+		else:
+			keep_wait = True
+			while True:
+				time.sleep(0.1)
+				if not (keep_wait is True):
+					break
+				else:
+					for process in reversed(learning_processes):
+						if process.is_alive() is False:
+							learning_processes.remove(process)
+							learning_processes.append(learning_process)
+							learning_process.start()
+							keep_wait = False
+							break
+	for proc in learning_processes:
+		 proc.join()
 
-    if not valid_set:
-	print "there are no matched validation set :p\n"
-    else:
-	error_num, label_num = summerize_error(input_file.rsplit('.',1)[0], valid_set, call_type)
-
-    if label_num is 0:
-	return 0
-    return (1 - error_num/label_num ) * 100
+	return return_dict
 
 
-def summerize_error(bam_name, validation_set, call_type):
-    sum_error_num = 0
-    sum_label_num = 0
-    reference_char = ".REF_chr"
+def run(input_file, control, valid_set, call_type, opt_fdr, PATH, final=False):
+	
+	output_PATH = PATH + '/SPP/' + input_file
+	input_file = PATH + '/' + input_file
 
-    if call_type == "broad":
-	print "is SPP work on broadpeak??"
-	return 0, 0
-    else:
-	output_format_name = ".narrowPeak"
+	if call_type == "broad":
+		output_format_type = ".broadPeak"
+	else:
+		output_format_type = ".narrowPeak"
+	
+	peakCalled_file = output_PATH[:-4] + ".bam_peaks" + output_format_type
 
-    for chr_no in range(22):
-	input_name = bam_name + reference_char + str(chr_no+1) + ".narrow_peaks" + output_format_name
-	error_num, label_num = calculateError(input_name , parseLabel(validation_set, input_name))
-	sum_error_num += error_num
-	sum_label_num += label_num
+	FNULL = open(os.devnull, 'w')
+	# run spp
+	command = ['Rscript oppa/spp/run_spp.R -c='+input_file + ' -i='+control+' -fdr='+str(opt_fdr)+\
+			  ' -savn='+ peakCalled_file + ' -rf']
+	subprocess.call(command, shell=True, stdout = FNULL, stderr=subprocess.STDOUT)
 
-    input_name = bam_name + reference_char + 'X' + ".narrow_peaks" + output_format_name
-    error_num, label_num = calculateError(input_name, parseLabel(validation_set, input_name))
-    sum_error_num += error_num
-    sum_label_num += label_num
-    
-    input_name = bam_name + reference_char + 'Y' + ".narrow_peaks" + output_format_name
-    error_num, label_num = calculateError(input_name, parseLabel(validation_set, input_name))
-    sum_error_num += error_num
-    sum_label_num += label_num
+	# decompressing result file
+	command = ['gunzip ' + peakCalled_file + '.gz']
+	subprocess.call(command, shell=True, stdout = FNULL, stderr=subprocess.STDOUT)
 
-    return sum_error_num, sum_label_num
+
+	if not valid_set:
+		print "there are no matched validation set :p\n"
+		exit()
+	else:
+		error_num, label_num = calculateError(peakCalled_file, parseLabel(valid_set, peakCalled_file))
+
+		if final:
+			print peakCalled_file + " is stored."
+		elif os.path.exist(peakCalled_file):
+			pass
+		else:
+		 	print "there is no result file."
+
+	if label_num is 0:
+		return 0.0
+
+	if final:
+		print "Test Score ::" + str(1-error_num/label_num) + "\n"
+	return (1 - error_num/label_num)
+
+
