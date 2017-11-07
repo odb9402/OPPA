@@ -63,7 +63,7 @@ def learnSPPparam(args, test_set, validation_set, PATH):
 				if not (keep_wait is True):
 					break
 				else:
-				 	for process in reversed(learning_processes):
+					for process in reversed(learning_processes):
 						if process.is_alive() is False:
 							learning_processes.remove(process)
 							learning_processes.append(learning_process)
@@ -72,7 +72,7 @@ def learnSPPparam(args, test_set, validation_set, PATH):
 							break
 		
 	for proc in learning_processes:
-			 proc.join()
+		proc.join()
 
 	print "finish learning parameter of SPP ! "
 	print "Running SPP with learned parameter . . . . . . . . . . . . . . ."
@@ -85,7 +85,7 @@ def learnSPPparam(args, test_set, validation_set, PATH):
 		learning_processes = []
 
 		learning_process = multiprocessing.Process(target = run, args=(\
-				target, control, validation_set, call_type, str(exp(opt_fdr)-1), PATH, True,))
+				target, control, validation_set + test_set, call_type, str(exp(opt_fdr)-1), PATH, True,))
 
 		if len(learning_processes) < MAX_CORE - 1:
 			learning_processes.append(learning_process)
@@ -105,7 +105,7 @@ def learnSPPparam(args, test_set, validation_set, PATH):
 							keep_wait = False
 							break
 	for proc in learning_processes:
-		 proc.join()
+		proc.join()
 
 	return return_dict
 
@@ -125,12 +125,16 @@ def run(input_file, control, valid_set, call_type, opt_fdr, PATH, final=False):
 	FNULL = open(os.devnull, 'w')
 	# run spp
 	command = ['Rscript oppa/spp/run_spp.R -c='+input_file + ' -i='+control+' -fdr='+str(opt_fdr)+\
-			  ' -savn='+ peakCalled_file + ' -rf']
+			  ' -savn='+ peakCalled_file + '_befSort' + ' -rf']
 	subprocess.call(command, shell=True, stdout = FNULL, stderr=subprocess.STDOUT)
 
 	# decompressing result file
 	command = ['gunzip ' + peakCalled_file + '.gz']
 	subprocess.call(command, shell=True, stdout = FNULL, stderr=subprocess.STDOUT)
+
+	command = ['sort -k1,1n -k2,2n ' + peakCalled_file + '_befSort' + ' > '\
+			   + peakCalled_file ]
+	subprocess.call(command, shell= True, stdout = FNULL, stderr=subprocess.STDOUT)
 
 
 	if not valid_set:
@@ -141,10 +145,10 @@ def run(input_file, control, valid_set, call_type, opt_fdr, PATH, final=False):
 
 		if final:
 			print peakCalled_file + " is stored."
-		elif os.path.exist(peakCalled_file):
-			pass
+		elif os.path.exists(peakCalled_file):
+			os.remove(peakCalled_file)
 		else:
-		 	print "there is no result file."
+			print "there is no result file."
 
 	if label_num is 0:
 		return 0.0

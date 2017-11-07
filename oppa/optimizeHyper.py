@@ -1,7 +1,3 @@
-import numpy as np
-import math
-
-#from macs.learnMACSparam import run as learnMACparam
 from BayesianOptimization.bayes_opt.bayesian_optimization import BayesianOptimization
 
 #function for testing Bayesian optimization.
@@ -92,13 +88,13 @@ def run(function, Param_bound, init_point, return_dict, num_itr = 10, acq_func =
     and you can do optimization by maximize() Method,
     you can initialize data frame ( table of data structure ) by initialize_df method.
 	"""
+
 	optimizer = BayesianOptimization(function, Param_bound, verbose=False)
-    
-	
+
 	optimizer.explore(Param_bound)
 	optimizer.maximize(acq = acq_func, init_points=init_point, n_iter=num_itr)
 
-	result = chrNo, optimizer.res['max']
-
+	#return_dict[chrNo + "_steps"] = optimizer.res['all']
 	return_dict[chrNo] = optimizer.res['max']
+
 	print chrNo + " is done insert into result containor."

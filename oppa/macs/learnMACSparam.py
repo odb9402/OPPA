@@ -5,7 +5,6 @@ we need to satisfied many condition which mentioned in the paper
 named 'practical bayesian optimization in machine learning algorithm'
 """
 from math import exp
-import subprocess
 import time
 import os
 from multiprocessing import cpu_count
@@ -14,7 +13,6 @@ import multiprocessing
 
 from ..optimizeHyper import run as optimizeHyper
 from ..calculateError import run as calculateError
-from ..loadParser.loadLabel import run as loadLabel
 from ..loadParser.parseLabel import run as parseLabel
 
 
@@ -84,7 +82,7 @@ def learnMACSparam(args, test_set, validation_set, PATH):
 				cr_target = None
 				if control is not None:
 					cr_target = cr_bam_name + '.bam'
-				accuracy = run(target, validation_set, str(exp(opt_Qval/100)-1),\
+				accuracy = run(target, validation_set + test_set, str(exp(opt_Qval/100)-1),\
 						call_type, PATH, cr_target, broad=str(exp(opt_cutoff/100)-1))
 				print chromosome,\
 					"Qval :" + str(round(exp(opt_Qval/100)-1,4)),\
@@ -101,7 +99,7 @@ def learnMACSparam(args, test_set, validation_set, PATH):
 				cr_target = None
 				if control is not None:
 					cr_target = cr_bam_name + '.bam'
-				accuracy = run(target, validation_set, str(exp(opt_Qval/100)-1)\
+				accuracy = run(target, validation_set + test_set, str(exp(opt_Qval/100)-1)\
 						, call_type, PATH, cr_target)
 				print chromosome,\
 					"Qval :" + str(round(exp(opt_Qval/100)-1,4)),\
@@ -113,10 +111,10 @@ def learnMACSparam(args, test_set, validation_set, PATH):
 		# each learning_process and wrapper function will be child process of OPPA
 		if call_type == "broad":
 			learning_process = multiprocessing.Process(target=optimizeHyper, args=(function,\
-					parameters_bounds, number_of_init_sample, return_dict, 15, 'ei', chromosome,))
+					parameters_bounds, number_of_init_sample, return_dict, 6, 'ei', chromosome,))
 		else:
 			learning_process = multiprocessing.Process(target=optimizeHyper, args=(function,\
-					parameters_bounds, number_of_init_sample, return_dict, 15, 'ucb', chromosome,))
+					parameters_bounds, number_of_init_sample, return_dict, 20, 'ucb', chromosome,))
 
 		# running each bayesian optimization process in parallel by multiprocessing in python.
 		if len(learning_processes) < MAX_CORE - 1:
@@ -138,7 +136,7 @@ def learnMACSparam(args, test_set, validation_set, PATH):
 							break
 
 	for proc in learning_processes:
-		  proc.join()
+		proc.join()
 	
 	print "finish learning parameter of MACS !"
 	print "Running MACS with learned parameter . . . . . . . . . . . . ."
@@ -153,11 +151,11 @@ def learnMACSparam(args, test_set, validation_set, PATH):
 		if call_type == 'broad':
 			opt_cutoff = parameters['opt_cutoff']
 			learning_process = multiprocessing.Process(target=run, args=(\
-						target, test_set, str(opt_Qval), call_type, PATH, control,\
-						str(opt_cutoff), True,))
+						target, validation_set + test_set, str(exp(opt_Qval/100)-1), call_type, PATH, control, \
+						str(exp(opt_cutoff / 100) - 1), True,))
 		else:
 			learning_process = multiprocessing.Process(target=run, args=(\
-						target, test_set, str(opt_Qval), call_type, PATH, control,\
+						target, validation_set + test_set, str(opt_Qval), call_type, PATH, control,\
 						None,True,))
 			
 		if len(learning_processes) < MAX_CORE - 1:
@@ -178,7 +176,7 @@ def learnMACSparam(args, test_set, validation_set, PATH):
 							keep_wait = False
 							break
 	for proc in learning_processes:
-		  proc.join()
+		proc.join()
 			 
 	return return_dict	
 
@@ -223,7 +221,8 @@ def run(input_file, valid_set, Qval, call_type, PATH, control = None, broad=None
 		elif final:
 			print peakCalled_file + " is stored."
 		else:
-		 	print "there is no result file."
+			print "there is no result file."
+
 	if label_num is 0:
 		return 0.0
 	

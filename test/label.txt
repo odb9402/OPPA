@@ -1,4 +1,0 @@
-chr1:778,700-779,000 peakEnd test
-chr2:372834-380504 peaks test
-chr2:0-4500 peaks
-chr3:317797-317832 peakStart test

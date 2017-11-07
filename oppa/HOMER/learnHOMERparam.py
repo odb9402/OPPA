@@ -8,7 +8,6 @@ import multiprocessing
 
 from ..optimizeHyper import run as optimizeHyper
 from ..calculateError import run as calculateError
-from ..loadParser.loadLabel import run as loadLabel
 from ..loadParser.parseLabel import run as parseLabel
 
 from HOMER import run as HOMER
@@ -51,7 +50,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH):
 		if call_type == "broad":
 			def wrapper_function_broad(size, minDist,fdr):
 				target = bam_name + reference_char + chromosome + ".bam"
-				accuracy = run(target, control, validation_set, call_type,\
+				accuracy = run(target, control, validation_set + test_set, call_type,\
 						 PATH, str(exp(fdr)-1) ,str(size*1000), str(minDist*5000))
 				print chromosome,\
 					"fdr :" + str(round(exp(fdr)-1,4)),\
@@ -63,7 +62,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH):
 		else:
 			def wrapper_function_narrow(fdr):
 				target = bam_name + reference_char + chromosome + ".bam"
-				accuracy = run(target, control, validation_set, call_type,\
+				accuracy = run(target, control, validation_set + test_set, call_type,\
 						 PATH, str(exp(fdr)-1))
 				print chromosome,\
 					"fdr :" + str(round(exp(fdr)-1,4)),\
@@ -72,7 +71,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH):
 			function = wrapper_function_narrow
 		
 		learning_process = multiprocessing.Process(target=optimizeHyper, args=(function,\
-					parameters_bounds, number_of_init_sample, return_dict, 33, 'ei', chromosome,))
+					parameters_bounds, number_of_init_sample, return_dict, 10, 'ei', chromosome,))
 
 		if len(learning_processes) < MAX_CORE/2:
 			learning_processes.append(learning_process)
@@ -84,7 +83,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH):
 				if not (keep_wait is True):
 					break
 				else:
-				 	for process in reversed(learning_processes):
+					for process in reversed(learning_processes):
 						if process.is_alive() is False:
 							learning_processes.remove(process)
 							learning_processes.append(learning_process)
@@ -97,9 +96,11 @@ def learnHOMERparam(args, test_set, validation_set, PATH):
 	
 	print "finish learning parameter of HOMER !"
 	print "Running HOMER with learned parameter . . . . . . . . . . . . ."
+
+	print return_dict
+
 	# final run about result.
 	for chromosome in chromosome_list:
-		print return_dict
 		parameters = return_dict[chromosome]['max_params']
 		target = bam_name + reference_char + chromosome + '.bam'
 		fdr = parameters['fdr']
@@ -111,11 +112,11 @@ def learnHOMERparam(args, test_set, validation_set, PATH):
 			minDist = parameters['minDist']
 
 			learning_process = multiprocessing.Process(target=run, args=(\
-						target, control, test_set, call_type, PATH, str(exp(fdr)-1),\
-						str(size/1000), str(minDist/5000), True,))
+						target, control, validation_set + test_set, call_type, PATH, str(exp(fdr)-1),\
+						str(size*1000), str(minDist*5000), True,))
 		else:
 			learning_process = multiprocessing.Process(target=run, args=(\
-						target, control, test_set, call_type, PATH, str(exp(fdr)-1), None, None, True,))
+						target, control, validation_set + test_set, call_type, PATH, str(exp(fdr)-1), None, None, True,))
 			
 		if len(learning_processes) < MAX_CORE - 1:
 			learning_processes.append(learning_process)
@@ -134,14 +135,29 @@ def learnHOMERparam(args, test_set, validation_set, PATH):
 							learning_process.start()
 							keep_wait = False
 							break
+
+
 	for proc in learning_processes:
-		  proc.join()	
-	
+		proc.join()
 
 	return return_dict
 
 
 def run(input_file, control, valid_set, call_type, PATH, param, param2=None, param3=None, final=False):
+	"""
+
+	:param input_file:
+	:param control:
+	:param valid_set:
+	:param call_type:
+	:param PATH:
+	:param param:
+	:param param2:
+	:param param3:
+	:param final:
+
+	:return:
+	"""
 
 	output_PATH = PATH + '/HOMER/' + input_file[:-4]
 	input_file = PATH + '/' + input_file
@@ -171,14 +187,14 @@ def run(input_file, control, valid_set, call_type, PATH, param, param2=None, par
 		if os.path.isfile(peakCalled_file) and (not final):
 			os.remove(peakCalled_file)
 		elif final:
-			print peakCalled_file + "is stored."
+			print peakCalled_file + " is stored."
 		else:
-		 	print "there is no result file.."
+			print "there is no result file.."
 
 	if label_num is 0:
 		return 0.0
 
 	if final:
-		print "Test Score ::"+str(1-error_num/label_num)
+		print "Test Score ::" + str(1-error_num/label_num)
 
 	return (1 - error_num/label_num)

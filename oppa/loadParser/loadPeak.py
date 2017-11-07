@@ -18,7 +18,7 @@ def bed_file_load(input_bed, chrom = None):
 
     for peak in peak_data:
 	peak_labels.append(dict(zip(peak_table,peak.split())))
- 
+
     return peak_labels
 
 

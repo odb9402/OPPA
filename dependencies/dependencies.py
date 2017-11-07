@@ -18,7 +18,7 @@ def main():
 ##############################################################################
 
 
-    
+
 ####################### setup.py install #####################################
     cmd = 'sudo apt-get install python-pip'
     subprocess.call(cmd, shell=True)        
@@ -26,7 +26,7 @@ def main():
     subprocess.call(cmd, shell=True)
     cmd = 'sudo pip install --upgrade pip'
     subprocess.call(cmd, shell=True)
-    cmd = 'python ../setup.py install'
+    cmd = 'sudo python ../setup.py install'
     subprocess.call(cmd, shell=True)
     cmd = 'sudo pip install rpy2==2.8.0'
     subprocess.call(cmd, shell=True)
@@ -35,16 +35,16 @@ def main():
 
 
 ####################### boost library of C++ #################################
-#    cmd = 'wget "http://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.bz2"'
-#    subprocess.call(cmd, shell=True)
-#    cmd = 'tar --bzip2 -xf boost_1_64_0.tar.bz2'
-#    subprocess.call(cmd, shell=True)
-#    cmd = '.' + curr_dir + '/boost_1_64_0/bootstrap.sh'
-#    subprocess.call(cmd, shell=True)
-#    cmd = '.' + curr_dir '/boost_1_64_0/b2'
-#    subprocess.call(cmd, shell=True)
-#    cmd = 'sudo mv boost_1_64_0 /usr/local/'
-#    subprocess.call(cmd, shell=True)
+    cmd = 'wget "http://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.bz2"'
+    subprocess.call(cmd, shell=True)
+    cmd = 'tar --bzip2 -xf boost_1_64_0.tar.bz2'
+    subprocess.call(cmd, shell=True)
+    cmd = '.' + curr_dir + '/boost_1_64_0/bootstrap.sh'
+    subprocess.call(cmd, shell=True)
+    cmd = '.' + curr_dir + '/boost_1_64_0/b2'
+    subprocess.call(cmd, shell=True)
+    cmd = 'sudo mv boost_1_64_0 /usr/local/'
+    subprocess.call(cmd, shell=True)
 ##############################################################################
 
 
@@ -64,27 +64,46 @@ def main():
 
 
 ######################### bamtools and samtools install ######################
-#    cmd = 'sudo apt-get install bamtools'
-#    subprocess.call(cmd, shell=True)
-#    cmd = 'sudo apt-get install samtools'
-#    subprocess.call(cmd, shell=True)
-#    cmd = 'sudo apt-get install macs'
-#    subprocess.call(cmd, shell=True)
+    cmd = 'sudo apt-get install bamtools'
+    subprocess.call(cmd, shell=True)
+    cmd = 'sudo apt-get install samtools'
+    subprocess.call(cmd, shell=True)
+    cmd = 'sudo apt-get install macs'
+    subprocess.call(cmd, shell=True)
 ##############################################################################
+
 
 
 ######################### install PeakSeq ####################################
-    cmd = 'unzip '+ curr_dir +'/dependencies/PeakSeq_1.31.zip'
+    cmd = 'sudo unzip '+ curr_dir +'/dependencies/PeakSeq_1.31.zip'
     subprocess.call(cmd, shell=True)
-    cmd = 'make -C'+ curr_dir +'/dependencies/PeakSeq'
+    cmd = 'sudo make -C'+ curr_dir +'/dependencies/PeakSeq'
     subprocess.call(cmd, shell=True)
 ##############################################################################
 
+
+
 ######################### install HOMER ######################################
-    cmd = 'wget http://homer.ucsd.edu/homer/configureHomer.pl'
+    cmd = 'sudo wget http://homer.ucsd.edu/homer/configureHomer.pl'
     subprocess.call(cmd, shell=True)
-    cmd = 'perl configureHomer.pl -install homer'
+    cmd = 'sudo perl configureHomer.pl -install homer'
     subprocess.call(cmd, shell=True)
 ##############################################################################
+
+
+######################## install SICER #######################################
+
+##############################################################################
+
+
+
+######################### build Ensembler ####################################
+    cmd = ['sudo rm -r oppa/Ensembler/build']
+    subprocess.call(cmd, shell=True)
+    cmd = ['python oppa/Ensembler/setup.py install']
+    subprocess.call(cmd, shell=True)
+##############################################################################
+
+
 if __name__ == '__main__':
     main()

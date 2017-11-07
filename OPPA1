@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # Time-stamp: < >
 
-from math import exp
-import time
-from datetime import timedelta
 import os
 import sys
 import argparse
@@ -11,18 +8,21 @@ import subprocess
 
 from oppa.loadParser.loadLabel import run as loadLabel
 from oppa.preProcess import run as preProcess
+from oppa.Ensembler.ensembler import ensembleMethod as ensembler
 
 directory_path = ""
 
 def main():
 
-	# setting arguments
+	################ setting arguments ##################
+
 	arg_parser = argparse.ArgumentParser()
-	arg_parser.add_argument("-t","--tool",nargs='+', help="what tool you use. : { MACS , SPP , peakSeg , HOMER}")
+	arg_parser.add_argument("-t","--tool", nargs='+', help="what tool you use. : { MACS , SPP , SICER , HOMER }")
 	arg_parser.add_argument("-i","--input", help="input alignment file. the format must be bam.")
 	arg_parser.add_argument("-cr","--control", help="it is control alignment file for MACS")
 	arg_parser.add_argument("-vs","--validSet", help="validation set it is labeled.")
 	arg_parser.add_argument("-ct","--callType", help="decide peak call type either broad or narrow.")
+	arg_parser.add_argument("-kt","--karyotype", help="input karyotype file for analyze by using karyotype.")
 
 	args = arg_parser.parse_args()
 
@@ -45,64 +45,95 @@ def main():
 	if not os.path.exists(args.validSet):
 		print args.validSet + " : the label data is not exist"
 		exit()
+	####################################################
+
 
 	################ preprocessing step ################
+
 	validation_set, test_set = loadLabel(args.validSet)
 	global directory_path
 
-	print "\n ===INPUT THE WORKING DIRECTORY.=== this directory will store\
-		\n that splited region of input bam file and it store result to \
-		\n wroking directory. you don`t have to input full path of direct\
-		\n ory. if you insert just directory name , it create in current \
-		\n directory."
-	sys.stdout.write("\n input new directory :: ")
+	print "\n             ===INPUT THE WORKING DIRECTORY.=== \n\
+		\n This directory will store that splited region of input bam file and\
+		\n it stores the result into wokking directory. You do not have to input\
+		\n full path of directory. If you insert only directory name into\
+		\n working directory, it creates the results in current directory."
+
+	sys.stdout.write("\n Input new directory :: ")
 	directory_path = raw_input()
 	directory_path = os.path.abspath(directory_path)
 	
 	if not os.path.exists(directory_path):
 		os.makedirs(directory_path)
-	
-	preProcess(args.input, validation_set + test_set, directory_path)
+
+	if args.karyotype == None:
+		preProcess(args.input, validation_set + test_set, directory_path)
+	else:
+		preProcess(args.input, validation_set + test_set, directory_path, args.karyotype)
 	####################################################
 
 
+
 	################## running step ####################
+
 	score_list = []
-	result_mac = 0
-	result_spp = 0
-	result_peakSeq = 0
-	result_homer = 0
 	
 	if len(args.tool) >= 2:
-		print "////////////// ENSEMBLE METHOD ON ////////////////"
+		print "/////////////////// ENSEMBLE METHOD ON /////////////////////\n"
 
 	if "homer" in args.tool:
-		print "////////////////// RUNNING HOMER /////////////////"
+		print "//////////////////// RUNNING HOMER /////////////////////////\n"
 		from oppa.HOMER.learnHOMERparam import learnHOMERparam
 		result_homer = learnHOMERparam(args, validation_set, test_set, directory_path)
 		score_list.append(result_homer._getvalue())
 
 	if "macs" in args.tool:
-		print "///////////////// RUNNING MACS ///////////////////"
+		print "///////////////////// RUNNING MACS /////////////////////////\n"
 		from oppa.macs.learnMACSparam import learnMACSparam
 		result_mac = learnMACSparam(args, validation_set, test_set, directory_path)
 		score_list.append(result_mac._getvalue())
 
 	if "peakSeq" in args.tool:
-		print "//////////////// RUNNING PeakSeq /////////////////"
+		print "//////////////////// RUNNING PeakSeq ///////////////////////\n"
 
 	if "spp" in args.tool:
-		print "////////////////// RUNNING SPP ///////////////////"
+		print "////////////////////// RUNNING SPP /////////////////////////\n"
 		from oppa.spp.learnSPPparam import learnSPPparam
 		result_spp = learnSPPparam(args, validation_set, test_set, directory_path)
 		score_list.append(result_spp._getvalue())
+
+	if "sicer" in args.tool:
+		print "///////////////////// RUNNING SICER ////////////////////////\n"
+		preProcess(args.control, validation_set + test_set, directory_path)
+		from oppa.SICER.learnSICERparam import learnSICERparam
+		result_sicer = learnSICERparam(args, validation_set, test_set, directory_path)
+		score_list.append(result_sicer._getvalue())
+
 	#####################################################
-	
+
+
 
 	################ Ensemble step ######################
+
+	# Check ensemble method is on or not.
+	if not ( len(args.tool) >= 2 ):
+		exit()
+
 	tool_list = sorted(args.tool)
 	score_dict = dict(zip(tool_list, score_list))
+
+	print "List of tools::"
+	print tool_list
+
+	print "Score Dict::"
 	print score_dict
+
+	print "directory_path ::"
+	print directory_path
+
+	print "/////////////////////// START ENSEMBLER /////////////////////////\n"
+	ensembler(tool_list, score_dict, directory_path, args)
+
 	#####################################################
 
 

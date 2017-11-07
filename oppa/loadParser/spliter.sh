@@ -1,3 +1,8 @@
+:'
+    This script will split narrowPeak file by chromosome.
+    It sholud be extended to other format.
+'
+
 #!/bin/sh
 
 sort -k 1V,1 -k 2n,2 $1 -o $1

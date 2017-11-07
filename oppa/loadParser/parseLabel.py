@@ -1,11 +1,13 @@
-"""to load the file of error rate wrote."""
-import random
-
-
 def parse_chr_celltype(file_name):
-    """Parsing file_name and extracting cell-type , chromosome
+    """
+    Parsing file_name and extracting cell-type , chromosome
     input file must be EXPERIMENT_AREA_CELL-TYPE.bam so bamtools create
-    EXPERIMENT_AREA_CELL-TYPE._chrN.PEAK"""
+    EXPERIMENT_AREA_CELL-TYPE.REF_chrN.PEAK
+
+    :param file_name:
+
+    :return: chromosome, cell_type
+    """
 
     file_name = file_name.rsplit('.',1)[0]
 
@@ -33,12 +35,6 @@ def parse_peak_labels(peak_labels, chromosome_num, cell_type):
         containor.append(peak.split(':')[0])
         containor.append(peak.split(':')[1].split(' ',2))
         labels.append(containor)
-
-    #this part will be change to it decided by input name automatically
-    """print "what chromosome you choose? :: e. g. chrN "
-    chromosome_num = raw_input()
-    print "what cell type you choose? :: e. g. {tcell, bcell, monocyte,... etc }"
-    cell_type = raw_input()"""
 
     #this list will be return value.
     result_labels_list = []

@@ -74,7 +74,7 @@ class UtilityFunction(object):
 
         self.xi = xi
 
-        if kind not in ['ucb', 'ei', 'poi']:
+        if kind not in ['ucb', 'ei', 'poi','integrated']:
             err = "The utility function " \
                   "{} has not been implemented, " \
                   "please choose one of ucb, ei, or poi.".format(kind)
@@ -89,6 +89,8 @@ class UtilityFunction(object):
             return self._ei(x, gp, y_max, self.xi)
         if self.kind == 'poi':
             return self._poi(x, gp, y_max, self.xi)
+        if self.kind == 'integrated':
+            return self._integrated(x, gp, y_max, self.xi)
 
     @staticmethod
     def _ucb(x, gp, kappa):
@@ -106,6 +108,10 @@ class UtilityFunction(object):
         mean, std = gp.predict(x, return_std=True)
         z = (mean - y_max - xi)/std
         return norm.cdf(z)
+
+    @staticmethod
+    def _integrated(x, gp, y_max, xi):
+        return None
 
 
 def unique_rows(a):

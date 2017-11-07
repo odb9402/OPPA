@@ -26,13 +26,19 @@ def run(input_file, control, call_type, directory, fdr=None, size=None, minDist=
 		command = [homer_PATH + 'findPeaks ' + target_PATH + ' -style factor' +\
 				  	' -o '+ output_name + ' -i ' + control_PATH + ' -fdr ' + fdr]
 		process = subprocess.Popen(command, shell= True, stdout = FNULL, stderr=subprocess.STDOUT)
+
 	process.wait()
 
 	
 	if os.path.isfile(output_name):
 		command = [os.getcwd()+'/dependencies/bin/pos2bed.pl ' + output_name +\
-				  ' > ' + output_name[:-4] + ".bam_peaks.bed"]
+				  ' > ' + output_name[:-4] + ".bam_peaks_befsort.bed"]
 		subprocess.call(command, shell= True, stdout = FNULL, stderr=subprocess.STDOUT)
+
+	command = ['sort -k1,1n -k2,2n ' + output_name[:-4] + ".bam_peaks_befsort.bed"\
+			   + ' > ' + output_name[:-4] + ".bam_peaks.bed"]
+	process = subprocess.Popen(command, shell= True, stdout = FNULL, stderr=subprocess.STDOUT)
+	process.wait()
 
 	return process
 

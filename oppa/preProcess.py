@@ -1,21 +1,29 @@
 from multiprocessing import cpu_count
+from loadParser.loadKaryotype import run as loadKaryotype
+
 import subprocess
 import os
-import time
 
-from loadParser import parseLabel
 
-def run(input_bam, valid_set, PATH):
+def split_by_chr(input_bam, valid_set, PATH):
 	"""
+	This method make subsection of bam files from input_bam
+	and it will write that subsection as file in PATH.
+	Those files will be input file of Bayesian Optimization
+	Process and it can run in parallel.
 
 	:param input_bam: name of input bam file for samtools.
 
 	:param valid_set: python list of each line in labeled file.
 
+	:param PATH:
+
 	:return:
 	"""
-	print "preprocessing step. . . . . . . . . . . . . . . . . . . ."
-	print "indexing bam file . . . . . . . . . . . . . . . . . . . ."
+
+	print "\npreprocessing step. . . . . . . . . . . . . . . . . . . .\n"
+	print "spliting by chromosome. . . . . . . . . . . . . . . . . . .\n"
+	print "indexing bam file by Bamtools . . . . . . . . . . . . . . .\n"
 
 	subprocess.call(['bamtools','index','-in',input_bam])
 	bam_name = input_bam[:-4]  ## delete '.bam'
@@ -63,29 +71,47 @@ def run(input_bam, valid_set, PATH):
 
 	bam_name = bam_name + reference_char 
 
-	print "slicing bam file with samtools. . . . . . . . . . . . . ."
-
-	"""	while (len(samtools_process) < MAX_CORE - 1) and (TASK_NO < TASKS):
-		samtools_process.append(samtools(input_bam, regions[TASK_NO], bam_name +chromosome_list[TASK_NO] + ".bam", PATH))
-		TASK_NO += 1	
-
-	while len(samtools_process) > 0:
-		time.sleep(0.1)
-
-        for proc in reversed(range(len(samtools_process))):
-        	if samtools_process[proc].poll() is not None:
-				del samtools_process[proc]
-
-		while (len(samtools_process) < MAX_CORE - 1) and (TASK_NO < TASKS):
-			samtools_process.append(samtools(input_bam, regions[TASK_NO], bam_name\
-					+ chromosome_list[TASK_NO] + ".bam", PATH))
-			TASK_NO += 1"""
+	print "slicing bam file with samtools. . . . . . . . . . . . . .\n"
 
 	for TASK_NO in range(TASKS):
 		samtools(input_bam, regions[TASK_NO], bam_name + chromosome_list[TASK_NO] + ".bam", PATH)
 
+
+def split_by_karyotype(input_bam, kayrotypes, PATH):
+	"""
+	This method make subsection of bam files from input_bam
+	and it will write that subsection as file in PATH.
+	Those files will be input file of Bayesian Optimization
+	Process and it can run in parallel.
+
+	:param input_bam: name of input bam file for samtools.
+
+	:param kayrotypes:
+
+	:param PATH:
+
+	:return:
+	"""
+
+	print "\npreprocessing step. . . . . . . . . . . . . . . . . . . .\n"
+	print "spliting by karyotype . . . . . . . . . . . . . . . . . . .\n"
+	print "indexing bam file by Bamtools . . . . . . . . . . . . . . .\n"
+
+	subprocess.call(['bamtools','index','-in',input_bam])
+
+
+
+
 def samtools(input_bam, regions, output_name, PATH):
-	
+	"""
+	This is Python wrapper of Samtools.
+
+	:param input_bam:
+	:param regions:
+	:param output_name:
+	:param PATH:
+	:return:
+	"""
 	# check input file is full path or not
 	if not ('/' in input_bam):
 		input_bam = os.getcwd() + '/' + input_bam
@@ -95,3 +121,25 @@ def samtools(input_bam, regions, output_name, PATH):
 	print "'"+target+"' is created" + "\n regions  ::: " + regions + "\n"
 	FNULL = open(os.devnull, 'w')
 	subprocess.call(commands, shell = True, stdout = FNULL, stderr=subprocess.STDOUT)
+
+
+def run(input_bam, valid_set, PATH, input_karyo=None):
+	"""
+	There are two ways to preprocesses ( spliting ) which are
+	spliting by chromosome or kayrotype.
+
+	:param input_bam:
+
+	:param valid_set:
+
+	:param PATH:
+
+	:param input_kayro:
+
+	:return:
+	"""
+
+	if input_karyo == None:
+		split_by_chr(input_bam, valid_set, PATH)
+	else:
+		kayrotypes = loadKaryotype(input_karyo)
