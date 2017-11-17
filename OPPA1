@@ -66,12 +66,9 @@ def main():
 	if not os.path.exists(directory_path):
 		os.makedirs(directory_path)
 
-	if args.karyotype == None:
-		preProcess(args.input, validation_set + test_set, directory_path)
-	else:
-		preProcess(args.input, validation_set + test_set, directory_path, args.karyotype)
+	preProcess(args.input, validation_set + test_set, directory_path, args.karyotype)
 	####################################################
-
+	exit()
 
 
 	################## running step ####################

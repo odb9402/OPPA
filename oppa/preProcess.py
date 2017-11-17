@@ -5,7 +5,7 @@ import subprocess
 import os
 
 
-def split_by_chr(input_bam, valid_set, PATH):
+def split_by_chr(input_bam, valid_set, PATH, input_karyo):
 	"""
 	This method make subsection of bam files from input_bam
 	and it will write that subsection as file in PATH.
@@ -77,6 +77,18 @@ def split_by_chr(input_bam, valid_set, PATH):
 		samtools(input_bam, regions[TASK_NO], bam_name + chromosome_list[TASK_NO] + ".bam", PATH)
 
 
+	if not (input_karyo == None):
+		"""
+			If analysis by karyotype argument is true, need additional slicing.
+			Karyotype data Table ::
+
+			chromosome / chr start / chr end / copy number / size
+		
+		"""
+		karyotypes = loadKaryotype(input_karyo, chromosome_list)
+		print karyotypes
+
+
 def split_by_karyotype(input_bam, kayrotypes, PATH):
 	"""
 	This method make subsection of bam files from input_bam
@@ -139,7 +151,4 @@ def run(input_bam, valid_set, PATH, input_karyo=None):
 	:return:
 	"""
 
-	if input_karyo == None:
-		split_by_chr(input_bam, valid_set, PATH)
-	else:
-		kayrotypes = loadKaryotype(input_karyo)
+	split_by_chr(input_bam, valid_set, PATH, input_karyo)
