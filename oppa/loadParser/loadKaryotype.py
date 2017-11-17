@@ -1,6 +1,12 @@
 import csv
 
 def load_kry_file(file_name, chr_list):
+	"""
+
+	:param file_name:
+	:param chr_list:
+	:return:
+	"""
 	kry_list = []
 	f = open(file_name,'r')
 	csvReader = csv.reader(f)
@@ -8,6 +14,11 @@ def load_kry_file(file_name, chr_list):
 	for row in csvReader:
 		if 'chr' in row[0]:
 			row[3] = filter(str.isdigit,row[3])		# Extract copy number
+			row[1] = int(row[1])
+			row[2] = int(row[2])
+			row[3] = int(row[3])
+			row[4] = int(row[4])
+
 			kry_list.append(row)
 
 	f.close()
@@ -24,6 +35,12 @@ def load_kry_file(file_name, chr_list):
 	
 	return kry_dict_list
 
-def run(file_name,chr_list):
-	kry_types = load_kry_file(file_name)
+def run(file_name, chr_list):
+	"""
+
+	:param file_name:
+	:param chr_list:
+	:return:
+	"""
+	kry_types = load_kry_file(file_name, chr_list)
 	return kry_types
