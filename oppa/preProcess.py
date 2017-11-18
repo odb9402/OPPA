@@ -21,7 +21,7 @@ def split_by_chr(input_bam, valid_set, PATH, input_karyo):
 	:return:
 	"""
 
-	print "\npreprocessing step. . . . . . . . . . . . . . . . . . . .\n"
+	print "\npreprocessing step. . . . . . . . . . . . . . . . . . . . .\n"
 	print "spliting by chromosome. . . . . . . . . . . . . . . . . . .\n"
 	print "indexing bam file by Bamtools . . . . . . . . . . . . . . .\n"
 
@@ -85,8 +85,7 @@ def split_by_chr(input_bam, valid_set, PATH, input_karyo):
 			chromosome / chr start / chr end / copy number / size
 		
 		"""
-		split_by_karyotype(input_karyo, chromosome_list, regions, bam_name, PATH)
-		
+		split_by_karyotype(input_karyo, chromosome_list, regions, input_bam, PATH)
 
 
 def split_by_karyotype(input_karyo, chromosome_list, regions, bamfile, PATH):
@@ -104,14 +103,12 @@ def split_by_karyotype(input_karyo, chromosome_list, regions, bamfile, PATH):
 
 	:return:
 	"""
+	print "spliting by karyotypes. . . . . . . . . . . . . . . . . . .\n"
 
 	karyotypes = loadKaryotype(input_karyo, chromosome_list)
-	print chromosome_list
-	print regions
-	
+
 	for chr_no in range(len(regions)):
 		target_bam = bamfile + chromosome_list[chr_no] + ".bam"
-		print target_bam
 
 		region = regions[chr_no].split(':')[1]
 		region = region.split('-')
@@ -121,18 +118,22 @@ def split_by_karyotype(input_karyo, chromosome_list, regions, bamfile, PATH):
 		for kry in karyotypes:
 			new_regions = []
 			if kry['chr'] == chromosome_list[chr_no]:
+				output_name = bamfile.rsplit('.')[0] + ".CP" + str(kry['cpNum']) + '_REF_' + chromosome_list[chr_no] + ".bam"
+
 				print kry
 				if start_label < kry['start'] < end_label:
 					new_regions.append(list((start_label,kry['start'])))
 					new_regions.append(list((kry['start'],end_label)))
 
-					str_new_regions = kry['chr'] + ':' + str(new_regions[0][0])\
-						+ '-' + str(new_regions[0][1])
+					str_new_regions = kry['chr'] + ':' + str(new_regions[0][0]) + '-' + str(new_regions[0][1])
 
-					samtools(target_bam,\
-							 str_new_regions,\
-							 bamfile + "CP_" + str(kry['cpNum']) + '_' + chromosome_list[chr_no] + ".bam",\
-							 PATH)
+					if os.path.isfile(output_name):
+						samtools(bamfile, str_new_regions, "temp_soruce.bam", PATH)
+						cat_command = ['samtools','cat','-o','temp_target.bam','temp_source.bam',output_name]
+						FNULL = open(os.devnull, 'w')
+						subprocess.call(cat_command, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+					else:
+						samtools(bamfile,str_new_regions,output_name,PATH)
 
 					start_label = kry['start']
 
@@ -140,25 +141,24 @@ def split_by_karyotype(input_karyo, chromosome_list, regions, bamfile, PATH):
 					new_regions.append(list((start_label, kry['end'])))
 					new_regions.append(list((kry['end'], end_label)))
 
-					str_new_regions = kry['chr'] + ':' + str(new_regions[0][0]) \
-										+ '-' + str(new_regions[0][1])
+					str_new_regions = kry['chr'] + ':' + str(new_regions[0][0]) + '-' + str(new_regions[0][1])
 
-					samtools(target_bam,\
-							 str_new_regions, \
-							 bamfile + "CP_" + str(kry['cpNum']) + '_' + chromosome_list[chr_no] + ".bam", \
-							 PATH)
+					if os.path.isfile(output_name):
+						samtools(bamfile, str_new_regions, "temp_soruce.bam", PATH)
+						cat_command = ['samtools', 'cat', '-o', 'temp_target.bam', 'temp_source.bam', output_name]
+						FNULL = open(os.devnull, 'w')
+						subprocess.call(cat_command, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+					else:
+						samtools(bamfile, str_new_regions, output_name, PATH)
 
 					start_label = kry['end']
+
 				else:
 					pass
 
 		str_new_region = chromosome_list[chr_no] + ':' + str(start_label) + '-' + str(end_label)
+		samtools(bamfile, str_new_regions, output_name, PATH)
 
-
-		samtools(target_bam, \
-				 str_new_region, \
-				 bamfile + "CP" + str(kry['cpNum']) + '_' + chromosome_list[chr_no] + ".bam", \
-				 PATH)
 
 def samtools(input_bam, regions, output_name, PATH):
 	"""
