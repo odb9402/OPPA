@@ -114,6 +114,7 @@ def split_by_karyotype(input_karyo, chromosome_list, regions, bamfile, PATH):
 		region = region.split('-')
 		start_label = int(region[0])
 		end_label = int(region[1])
+		last_hit_cpnum = -1 	
 
 		for kry in karyotypes:
 			new_regions = []
@@ -128,14 +129,16 @@ def split_by_karyotype(input_karyo, chromosome_list, regions, bamfile, PATH):
 					str_new_regions = kry['chr'] + ':' + str(new_regions[0][0]) + '-' + str(new_regions[0][1])
 
 					if os.path.isfile(output_name):
+						print "There is copy numbers which duplicated so cat It. . . ."
 						samtools(bamfile, str_new_regions, "temp_soruce.bam", PATH)
-						cat_command = ['samtools','cat','-o','temp_target.bam','temp_source.bam',output_name]
+						cat_command = ['samtools', 'cat', '-o', 'temp_target.bam', 'temp_source.bam', output_name]
 						FNULL = open(os.devnull, 'w')
 						subprocess.call(cat_command, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
 					else:
 						samtools(bamfile,str_new_regions,output_name,PATH)
 
 					start_label = kry['start']
+					last_hit_cpnum = kry['cpNum']
 
 				elif start_label < kry['end'] < end_label:
 					new_regions.append(list((start_label, kry['end'])))
@@ -144,6 +147,7 @@ def split_by_karyotype(input_karyo, chromosome_list, regions, bamfile, PATH):
 					str_new_regions = kry['chr'] + ':' + str(new_regions[0][0]) + '-' + str(new_regions[0][1])
 
 					if os.path.isfile(output_name):
+						print "There is copy numbers which duplicated so cat It. . . ."
 						samtools(bamfile, str_new_regions, "temp_soruce.bam", PATH)
 						cat_command = ['samtools', 'cat', '-o', 'temp_target.bam', 'temp_source.bam', output_name]
 						FNULL = open(os.devnull, 'w')
@@ -152,12 +156,32 @@ def split_by_karyotype(input_karyo, chromosome_list, regions, bamfile, PATH):
 						samtools(bamfile, str_new_regions, output_name, PATH)
 
 					start_label = kry['end']
+					last_hit_cpnum = kry['cpNum']
 
 				else:
 					pass
 
+		last_cpnum = 0
 		str_new_region = chromosome_list[chr_no] + ':' + str(start_label) + '-' + str(end_label)
-		samtools(bamfile, str_new_regions, output_name, PATH)
+		
+		# If there was no spliting before, it should be marked copy number about remained reigon.
+		if last_hit_cpnum == -1:
+			if kry['chr'] == chromosome_list[chr_no]:
+				for kry in karyotypes:
+					if kry['start'] < start_label < kry['end']:
+						print "A copy number of the remained region "+str_new_region+" is :" + str(kry['cpNum'])
+						last_cpnum = kry['cpNum']
+						before_name = bamfile.rsplit('.')[0] + ".REF_" + chromosome_list[chr_no] + ".bam"
+						after_name = bamfile.rsplit('.')[0] + ".CP" + str(last_cpnum) + '_REF_' + chromosome_list[chr_no] + ".bam"
+						print "'" + before_name + "' is changed to '" + after_name + "'"
+					   	os.rename(PATH + '/' + before_name, PATH + '/' + after_name)
+						break
+			
+		# If there was spliting , it should be last processing. 
+		else:
+			last_cpnum = last_hit_cpnum
+			output_name = bamfile.rsplit('.')[0] + ".CP" + str(last_cpnum) + '_REF_' + chromosome_list[chr_no] + ".bam"
+			samtools(bamfile, str_new_region, output_name, PATH)
 
 
 def samtools(input_bam, regions, output_name, PATH):
