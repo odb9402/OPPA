@@ -3,6 +3,7 @@ from loadParser.loadKaryotype import run as loadKaryotype
 
 import subprocess
 import os
+import glob
 
 
 def split_by_chr(input_bam, valid_set, PATH, input_karyo):
@@ -63,7 +64,6 @@ def split_by_chr(input_bam, valid_set, PATH, input_karyo):
 
 		regions.append(containor[0].split(':')[0]+':'+start+'-'+end)
 
-
 	MAX_CORE  = cpu_count()
 	TASKS = len(chromosome_list)
 	TASK_NO = 0
@@ -75,7 +75,6 @@ def split_by_chr(input_bam, valid_set, PATH, input_karyo):
 
 	for TASK_NO in range(TASKS):
 		samtools(input_bam, regions[TASK_NO], bam_name + chromosome_list[TASK_NO] + ".bam", PATH)
-
 
 	if not (input_karyo == None):
 		"""
@@ -166,6 +165,49 @@ def split_by_karyotype(input_karyo, chromosome_list, regions, bamfile, PATH):
 			os.remove(PATH+'/'+bamfile.rsplit('.')[0]+'.REF_'+chr_no+'.bam')
 
 
+def combine_by_karyotypes(file_name, PATH):
+	"""
+
+	:param file_name:
+	:param PATH:
+	:return:
+	"""
+
+	file_list = glob.glob(PATH + '/*.bam')
+
+	cpNum_list = []
+	for file in file_list:
+		cpNum = int(file.split('.')[1].split('_')[0][2:])
+		cpNum_list.append(cpNum)
+
+	cpNum_set = list(set(cpNum_list))
+
+	kry_list = []
+	for cpNum in cpNum_set:
+		kry_set = []
+		for index in range(len(cpNum_list)):
+			if cpNum_list[index] == cpNum:
+				kry_set.append(file_list[index])
+		kry_list.append(kry_set)
+
+	for index in range(len(cpNum_set)):
+		output_name = PATH + '/' + file_name.split('.')[0] + ".CP" + str(cpNum_set[index]) + ".bam"
+		input_strings = ""
+
+		if len(kry_list[index]) == 1:
+			cpNum_string = "CP" + str(cpNum_set[index])
+			os.rename(glob.glob(PATH + "/*" + cpNum_string + "*")[0] , PATH + '/' + file_name.split('.')[0] + ".CP" + str(cpNum_set[index]) + ".bam" )
+			print "'" + PATH + '/' + file_name.split('.')[0] + ".CP" + str(cpNum_set[index]) + ".bam" + "' is renamed about a karyotype copy number.\n"
+
+		else:
+			for string in kry_list[index]:
+				input_strings += (string + " ")
+			cat_command = ['sudo samtools cat -o ' + output_name + ' ' + input_strings]
+			FNULL = open(os.devnull, 'w')
+			subprocess.call(cat_command, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+			print "'" + output_name + "' is combined about same karyotype.\n"
+
+
 def samtools(input_bam, regions, output_name, PATH):
 	"""
 	This is Python wrapper of Samtools.
@@ -201,16 +243,16 @@ def samtools_cat(input_bam, chr_num, cp_num, region, PATH):
 
 	print "There is copy numbers which duplicated so cat It. . . ."
 
-	output_name = input_bam.rsplit('.')[0] + ".CP" + str(cp_num) + '_REF_' + chr_num + ".bam"
+	input_file = input_bam.rsplit('.')[0] + ".CP" + str(cp_num) + '_REF_' + chr_num + ".bam"
 	samtools(input_bam, region, "temp_source.bam", PATH)
-	cat_command = ['sudo samtools cat -o ' + PATH + '/temp_target.bam ' + PATH + '/temp_source.bam ' + PATH + '/' + output_name]
+	cat_command = ['sudo samtools cat -o ' + PATH + '/temp_target.bam ' + PATH + '/temp_source.bam ' + PATH + '/' + input_file]
 	FNULL = open(os.devnull, 'w')
 	subprocess.call(cat_command, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
 
-	os.remove(PATH + '/' + output_name)
-	os.rename(PATH + '/temp_target.bam', PATH + '/' + output_name)
+	os.remove(PATH + '/' + input_file)
+	os.rename(PATH + '/temp_target.bam', PATH + '/' + input_file)
 	os.remove(PATH + '/temp_source.bam')
-	print "'" + output_name + "' is combined\n"
+	print "'" + input_file + "' is combined\n"
 
 
 def run(input_bam, valid_set, PATH, input_karyo=None):
@@ -230,3 +272,5 @@ def run(input_bam, valid_set, PATH, input_karyo=None):
 	"""
 
 	split_by_chr(input_bam, valid_set, PATH, input_karyo)
+	if not (input_karyo is None):
+		combine_by_karyotypes(input_bam, PATH)
