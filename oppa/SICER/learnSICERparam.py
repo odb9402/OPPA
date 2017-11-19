@@ -1,6 +1,8 @@
 import time
 import os
+import glob
 from multiprocessing import Process, Manager, cpu_count
+
 import multiprocessing
 
 from ..optimizeHyper import run as optimizeHyper
@@ -8,8 +10,7 @@ from ..calculateError import run as calculateError
 from ..loadParser.parseLabel import run as parseLabel
 from SICER import run as SICER
 
-
-def learnSICERparam(args, test_set, validation_set, PATH):
+def learnSICERparam(args, test_set, validation_set, PATH, copyNums=None):
     """
 
 
@@ -38,10 +39,11 @@ def learnSICERparam(args, test_set, validation_set, PATH):
                          ,'gapSize': (1.0/6.0, 1.0)}
     number_of_init_sample = 2
 
-    chromosome_list = []
-    for label in validation_set + test_set:
-        chromosome_list.append(label.split(':')[0])
-    chromosome_list = sorted(list(set(chromosome_list)))
+    if copyNums is None:
+        chromosome_list = []
+        for label in validation_set + test_set:
+            chromosome_list.append(label.split(':')[0])
+        chromosome_list = sorted(list(set(chromosome_list)))
 
     reference_char = ".REF_"
     bam_name = input_file[:-4]

@@ -1,5 +1,5 @@
 from math import exp
-import subprocess
+import glob
 import time
 import os
 from multiprocessing import cpu_count
@@ -13,7 +13,7 @@ from ..loadParser.parseLabel import run as parseLabel
 from HOMER import run as HOMER
 from HOMER import run_control_processing as control_processing
 
-def learnHOMERparam(args, test_set, validation_set, PATH):
+def learnHOMERparam(args, test_set, validation_set, PATH, type=None):
 	
 	input_file = args.input
 	control = args.control
@@ -31,10 +31,14 @@ def learnHOMERparam(args, test_set, validation_set, PATH):
 		
 	number_of_init_sample = 5
 
-	chromosome_list = []
-	for label in validation_set + test_set:
-		chromosome_list.append(label.split(':')[0])
-	chromosome_list = sorted(list(set(chromosome_list)))
+	if type is None:
+		chromosome_list = []
+		for label in validation_set + test_set:
+			chromosome_list.append(label.split(':')[0])
+		chromosome_list = sorted(list(set(chromosome_list)))
+	else:
+		copyNum_list = []
+		glob.glob()
 
 	reference_char = ".REF_"
 	bam_name = input_file[:-4]
@@ -46,7 +50,6 @@ def learnHOMERparam(args, test_set, validation_set, PATH):
 	control_processing(PATH, control)
 
 	for chromosome in chromosome_list:
-	
 		if call_type == "broad":
 			def wrapper_function_broad(size, minDist,fdr):
 				target = bam_name + reference_char + chromosome + ".bam"
