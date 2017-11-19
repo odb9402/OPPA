@@ -108,8 +108,6 @@ def split_by_karyotype(input_karyo, chromosome_list, regions, bamfile, PATH):
 	karyotypes = loadKaryotype(input_karyo, chromosome_list)
 
 	for chr_no in range(len(regions)):
-		target_bam = bamfile + chromosome_list[chr_no] + ".bam"
-
 		region = regions[chr_no].split(':')[1]
 		region = region.split('-')
 		start_label = int(region[0])
@@ -117,71 +115,55 @@ def split_by_karyotype(input_karyo, chromosome_list, regions, bamfile, PATH):
 		last_hit_cpnum = -1 	
 
 		for kry in karyotypes:
-			new_regions = []
 			if kry['chr'] == chromosome_list[chr_no]:
 				output_name = bamfile.rsplit('.')[0] + ".CP" + str(kry['cpNum']) + '_REF_' + chromosome_list[chr_no] + ".bam"
 
-				print kry
 				if start_label < kry['start'] < end_label:
-					new_regions.append(list((start_label,kry['start'])))
-					new_regions.append(list((kry['start'],end_label)))
-
-					str_new_regions = kry['chr'] + ':' + str(new_regions[0][0]) + '-' + str(new_regions[0][1])
+					str_new_regions = kry['chr'] + ':' + str(start_label) + '-' + str(kry['start'])
 
 					if os.path.isfile(output_name):
-						print "There is copy numbers which duplicated so cat It. . . ."
-						samtools(bamfile, str_new_regions, "temp_soruce.bam", PATH)
-						cat_command = ['samtools', 'cat', '-o', 'temp_target.bam', 'temp_source.bam', output_name]
-						FNULL = open(os.devnull, 'w')
-						subprocess.call(cat_command, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+						samtools_cat(bamfile, chromosome_list[chr_no], kry['cpNum'], str_new_regions, PATH)
 					else:
 						samtools(bamfile,str_new_regions,output_name,PATH)
 
 					start_label = kry['start']
 					last_hit_cpnum = kry['cpNum']
 
-				elif start_label < kry['end'] < end_label:
-					new_regions.append(list((start_label, kry['end'])))
-					new_regions.append(list((kry['end'], end_label)))
 
-					str_new_regions = kry['chr'] + ':' + str(new_regions[0][0]) + '-' + str(new_regions[0][1])
+				elif start_label < kry['end'] < end_label:
+					str_new_regions = kry['chr'] + ':' + str(start_label) + '-' + str(kry['end'])
 
 					if os.path.isfile(output_name):
-						print "There is copy numbers which duplicated so cat It. . . ."
-						samtools(bamfile, str_new_regions, "temp_soruce.bam", PATH)
-						cat_command = ['samtools', 'cat', '-o', 'temp_target.bam', 'temp_source.bam', output_name]
-						FNULL = open(os.devnull, 'w')
-						subprocess.call(cat_command, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+						samtools_cat(bamfile, chromosome_list[chr_no], kry['cpNum'], str_new_regions, PATH)
 					else:
 						samtools(bamfile, str_new_regions, output_name, PATH)
 
 					start_label = kry['end']
 					last_hit_cpnum = kry['cpNum']
 
-				else:
-					pass
-
-		last_cpnum = 0
 		str_new_region = chromosome_list[chr_no] + ':' + str(start_label) + '-' + str(end_label)
 		
 		# If there was no spliting before, it should be marked copy number about remained reigon.
 		if last_hit_cpnum == -1:
-			if kry['chr'] == chromosome_list[chr_no]:
-				for kry in karyotypes:
+			for kry in karyotypes:
+				if kry['chr'] == chromosome_list[chr_no]:
 					if kry['start'] < start_label < kry['end']:
 						print "A copy number of the remained region "+str_new_region+" is :" + str(kry['cpNum'])
 						last_cpnum = kry['cpNum']
 						before_name = bamfile.rsplit('.')[0] + ".REF_" + chromosome_list[chr_no] + ".bam"
 						after_name = bamfile.rsplit('.')[0] + ".CP" + str(last_cpnum) + '_REF_' + chromosome_list[chr_no] + ".bam"
-						print "'" + before_name + "' is changed to '" + after_name + "'"
-					   	os.rename(PATH + '/' + before_name, PATH + '/' + after_name)
+						print "'" + before_name + "' is changed to '" + after_name + "'\n"
+						os.rename(PATH + '/' + before_name, PATH + '/' + after_name)
 						break
 			
 		# If there was spliting , it should be last processing. 
 		else:
-			last_cpnum = last_hit_cpnum
-			output_name = bamfile.rsplit('.')[0] + ".CP" + str(last_cpnum) + '_REF_' + chromosome_list[chr_no] + ".bam"
-			samtools(bamfile, str_new_region, output_name, PATH)
+			samtools_cat(bamfile, chromosome_list[chr_no], last_hit_cpnum, str_new_region, PATH)
+
+	# Eliminate files which was splited before by chromosome.
+	for chr_no in chromosome_list:
+		if os.path.exists(PATH+'/'+bamfile.rsplit('.')[0]+'.REF_'+chr_no+'.bam'):
+			os.remove(PATH+'/'+bamfile.rsplit('.')[0]+'.REF_'+chr_no+'.bam')
 
 
 def samtools(input_bam, regions, output_name, PATH):
@@ -203,6 +185,32 @@ def samtools(input_bam, regions, output_name, PATH):
 	print "'"+target+"' is created" + "\n regions  ::: " + regions + "\n"
 	FNULL = open(os.devnull, 'w')
 	subprocess.call(commands, shell = True, stdout = FNULL, stderr=subprocess.STDOUT)
+
+
+def samtools_cat(input_bam, chr_num, cp_num, region, PATH):
+	"""
+	This is Python wrapper of Samtools-cat.
+
+	:param input_bam:
+	:param chr_num:
+	:param cp_num:
+	:param region:
+	:param PATH:
+	:return:
+	"""
+
+	print "There is copy numbers which duplicated so cat It. . . ."
+
+	output_name = input_bam.rsplit('.')[0] + ".CP" + str(cp_num) + '_REF_' + chr_num + ".bam"
+	samtools(input_bam, region, "temp_source.bam", PATH)
+	cat_command = ['sudo samtools cat -o ' + PATH + '/temp_target.bam ' + PATH + '/temp_source.bam ' + PATH + '/' + output_name]
+	FNULL = open(os.devnull, 'w')
+	subprocess.call(cat_command, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+
+	os.remove(PATH + '/' + output_name)
+	os.rename(PATH + '/temp_target.bam', PATH + '/' + output_name)
+	os.remove(PATH + '/temp_source.bam')
+	print "'" + output_name + "' is combined\n"
 
 
 def run(input_bam, valid_set, PATH, input_karyo=None):
