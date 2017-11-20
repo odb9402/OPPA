@@ -1,4 +1,4 @@
-def parse_chr_celltype(file_name):
+def parse_cellType(file_name):
     """
     Parsing file_name and extracting cell-type , chromosome
     input file must be EXPERIMENT_AREA_CELL-TYPE.bam so bamtools create
@@ -6,7 +6,29 @@ def parse_chr_celltype(file_name):
 
     :param file_name:
 
-    :return: chromosome, cell_type
+    :return: cell_type
+    """
+    file_name = file_name.rsplit('.',1)[0]
+
+    file_name = file_name.rsplit('.',1)[0]
+    file_name = file_name.rsplit('_',1)
+
+    file_name = file_name[0].rsplit('.',1)[0]
+    file_name = file_name.rsplit('_',1)
+    cell_type = file_name[1]
+
+    return cell_type
+
+
+def parse_chr(file_name):
+    """
+    Parsing file_name and extracting cell-type , chromosome
+    input file must be EXPERIMENT_AREA_CELL-TYPE.bam so bamtools create
+    EXPERIMENT_AREA_CELL-TYPE.REF_chrN.PEAK
+
+    :param file_name:
+
+    :return: chromosome
     """
 
     file_name = file_name.rsplit('.',1)[0]
@@ -15,11 +37,7 @@ def parse_chr_celltype(file_name):
     file_name = file_name.rsplit('_',1)
     chromosome = file_name[1]
 
-    file_name = file_name[0].rsplit('.',1)[0]
-    file_name = file_name.rsplit('_',1)
-    cell_type = file_name[1]
-
-    return chromosome, cell_type
+    return chromosome
 
 
 def parse_peak_labels(peak_labels, chromosome_num, cell_type):
@@ -64,10 +82,27 @@ def parse_peak_labels(peak_labels, chromosome_num, cell_type):
     return result_labels_list
 
 
-def run(validSet, file_name):
-    # load and handle labeled Data
-    chromosome, cell_type = parse_chr_celltype(file_name)
-    peak_labels = parse_peak_labels(validSet, chromosome, cell_type)
+def run(validSet, file_name, input_chromosome = None, input_cellType = None):
+    """
+
+    :param validSet:
+    :param file_name:
+    :param input_chromosome:
+    :param input_cellType:
+    :return:
+    """
+
+    if input_chromosome is None:
+        chromosome = parse_chr(file_name)
+    else:
+        chromosome = input_chromosome
+
+    if input_cellType is None:
+        cellType = parse_cellType(file_name)
+    else:
+        cellType = input_cellType
+
+    peak_labels = parse_peak_labels(validSet, chromosome, cellType)
 
     # cannot found label about selected area.
     if peak_labels is -1:

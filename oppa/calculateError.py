@@ -333,7 +333,7 @@ def bonus_weight(label, target, case):
             exit(0)
 
 
-def run(input_file_name, input_labels):
+def run(input_peaks, input_labels):
     """
     This is the module for calculation Error by comparing between
     labeled data and the input file.
@@ -353,16 +353,12 @@ def run(input_file_name, input_labels):
     if input_labels is -1:
         return 0, 0
 
-    #load and handle peak files
-    if not os.path.exists(input_file_name):
+    if input_peaks is -1:
         return 0, 0
 
-    #load result file.
-    input_file = loadPeak(input_file_name)
-
-    if len(input_file) is 0:
+    if len(input_peaks) is 0:
         return 0, 0
 
-    error_num, total_label = calculate_error(input_file, input_labels)
+    error_num, total_label = calculate_error(input_peaks, input_labels)
 
     return error_num, total_label

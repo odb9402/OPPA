@@ -57,7 +57,7 @@ def main():
 		\n This directory will store that splited region of input bam file and\
 		\n it stores the result into wokking directory. You do not have to input\
 		\n full path of directory. If you insert only directory name into\
-		\n working directory, it creates the results in current directory."
+		\n working directory, it creates results in current directory."
 
 	sys.stdout.write("\n Input new directory :: ")
 	directory_path = raw_input()
@@ -68,7 +68,6 @@ def main():
 
 	preProcess(args.input, validation_set + test_set, directory_path, args.karyotype)
 	####################################################
-	exit()
 
 
 	################## running step ####################
@@ -101,9 +100,9 @@ def main():
 
 	if "sicer" in args.tool:
 		print "///////////////////// RUNNING SICER ////////////////////////\n"
-		preProcess(args.control, validation_set + test_set, directory_path)
+		preProcess(args.control, validation_set + test_set, directory_path, args.karyotype)
 		from oppa.SICER.learnSICERparam import learnSICERparam
-		result_sicer = learnSICERparam(args, validation_set, test_set, directory_path)
+		result_sicer = learnSICERparam(args, validation_set, test_set, directory_path, args.karyotype)
 		score_list.append(result_sicer._getvalue())
 
 	#####################################################

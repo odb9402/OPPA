@@ -2,27 +2,30 @@ import time
 import os
 import glob
 from multiprocessing import Process, Manager, cpu_count
-
 import multiprocessing
 
 from ..optimizeHyper import run as optimizeHyper
 from ..calculateError import run as calculateError
 from ..loadParser.parseLabel import run as parseLabel
+from ..loadParser.loadPeak import run as loadPeak
 from SICER import run as SICER
 
-def learnSICERparam(args, test_set, validation_set, PATH, copyNums=None):
+def learnSICERparam(args, test_set, validation_set, PATH, kry_analysis=None):
     """
 
     :param args:
     :param test_set:
     :param validation_set:
     :param PATH:
-    :param copyNums:
+    :param kry_analysis:
     :return:
     """
 
     input_file = args.input
     control = args.control
+    chromosome_list = []
+    cpNum_files = []
+    cpNum_controls = []
 
     manager = Manager()
     return_dict = manager.dict()
@@ -33,13 +36,18 @@ def learnSICERparam(args, test_set, validation_set, PATH, copyNums=None):
     parameters_bounds = {'windowSize': (1.0/12.0 , 1.0)\
                          ,'fragmentSize': (1.0/9.0 , 1.0)\
                          ,'gapSize': (1.0/6.0, 1.0)}
+
     number_of_init_sample = 2
 
-    if copyNums is None:
-        chromosome_list = []
+    if kry_analysis is None:
         for label in validation_set + test_set:
             chromosome_list.append(label.split(':')[0])
         chromosome_list = sorted(list(set(chromosome_list)))
+    else:
+        cpNum_files = glob.glob(PATH + "/" + input_file.split(".")[0] + ".CP[1-9].bam")
+        cpNum_controls = glob.glob(PATH + "/" + control.split(".")[0] + ".CP[1-9].bam")
+
+    print cpNum_files, cpNum_controls
 
     reference_char = ".REF_"
     bam_name = input_file[:-4]
@@ -59,7 +67,7 @@ def learnSICERparam(args, test_set, validation_set, PATH, copyNums=None):
     ###############################################################
 
 
-    if copyNums is None:
+    if kry_analysis is None:
         for chromosome in chromosome_list:
             def wrapper_function(windowSize, fragmentSize, gapSize):
                 target = PATH + '/' + bam_name + reference_char + chromosome + '.bam'
@@ -75,29 +83,43 @@ def learnSICERparam(args, test_set, validation_set, PATH, copyNums=None):
                 return accuracy
 
             function = wrapper_function
-            learning_process = multiprocessing.Process(target=optimizeHyper, args=(function, \
-                                                                                   parameters_bounds, number_of_init_sample,
-                                                                                   return_dict, 20, 'ei', chromosome,))
+            learning_process = multiprocessing.Process(target=optimizeHyper, \
+                args=(function, parameters_bounds, number_of_init_sample, return_dict, 20, 'ei', chromosome,))
 
-            if len(learning_processes) < MAX_CORE - 1:
-                learning_processes.append(learning_process)
-                learning_process.start()
-            else:
-                keep_wait = True
-                while True:
-                    time.sleep(0.1)
-                    if not (keep_wait is True):
-                        break
-                    else:
-                        for process in reversed(learning_processes):
-                            if process.is_alive() is False:
-                                learning_processes.remove(process)
-                                learning_processes.append(learning_process)
-                                learning_process.start()
-                                keep_wait = False
-                                break
     else:
-        for copyNum in copyNums:
+        for index in range(len(cpNum_files)):
+            def wrapper_function(windowSize, fragmentSize, gapSize):
+                accuracy = run(cpNum_files[index], cpNum_controls[index], validation_set + test_set \
+                               , str(int(windowSize*600.0))\
+                               , str(int(fragmentSize*450.0)), str(int(gapSize*6.0)))
+                print chromosome, \
+                    "windowSize : " + str(int(windowSize*600.0)),\
+                    "fragmentSize : " + str(int(fragmentSize*450.0)),\
+                    "gapSize : " + str(int(gapSize*6.0)),\
+                    "score:" + str(round(accuracy, 4)) + '\n'
+                return accuracy
+            function = wrapper_function
+            exit()
+            learning_process = multiprocessing.Process(target=optimizeHyper,\
+                args=(function, parameters_bounds, number_of_init_sample, return_dict, 20, 'ei', chromosome, False, True))
+
+    if len(learning_processes) < MAX_CORE - 1:
+        learning_processes.append(learning_process)
+        learning_process.start()
+    else:
+        keep_wait = True
+        while True:
+            time.sleep(0.1)
+            if not (keep_wait is True):
+                break
+            else:
+                for process in reversed(learning_processes):
+                    if process.is_alive() is False:
+                        learning_processes.remove(process)
+                        learning_processes.append(learning_process)
+                        learning_process.start()
+                        keep_wait = False
+                        break
 
     for proc in learning_processes:
         proc.join()
@@ -146,23 +168,52 @@ def learnSICERparam(args, test_set, validation_set, PATH, copyNums=None):
     return return_dict
 
 
-def run(input_file, control, valid_set, windowSize='200', fragSize='150', gapSize='3', final=False):
+def run(input_file, control, valid_set, windowSize='200', fragSize='150', gapSize='3', final=False, kry_analysis=False):
+    """
 
+    :param input_file:
+    :param control:
+    :param valid_set:
+    :param final:
+    :param kry_analysis:
+
+    :return: accuracy rate about a result file.
+    """
     result_file = input_file[:-4] + ".bam_peaks.bed"
     result_file = result_file.rsplit('/',1)[0] + '/SICER/' + result_file.rsplit('/',1)[1]
 
-    process = SICER(input_file, control, windowSize, fragSize, gapSize)
-
-    """ Finding result file which getting out recently.
-    This process use glob which for pattern matching about
-    file system, and we check writing time among them. """
+    SICER(input_file, control, windowSize, fragSize, gapSize)
 
     if not valid_set:
         print "there are no matched validation set :p\n"
         exit()
-
     else:
-        error_num, label_num = calculateError(result_file, parseLabel(valid_set, result_file))
+        if not os.path.exists(result_file):
+            return 0, 0
+        peaks = loadPeak(result_file)
+
+        if not kry_analysis:
+            error_num, label_num = calculateError(peaks, parseLabel(valid_set, result_file))
+        else:
+            error_num, label_num = 0, 0
+
+            peaks_by_chr = []
+            containor = []
+            for index in range(len(peaks)):
+                if index + 1 is not len(peaks):
+                    if peaks[index]['chr'] != peaks[index+1]['chr']:
+                        containor.append(peaks[index])
+                        peaks_by_chr.append(containor)
+                        containor = []
+                    else:
+                        containor.append(peaks[index])
+                else:
+                    peaks_by_chr.append(containor)
+
+            for peak_by_chr in peaks_by_chr:
+                temp_error, temp_label = calculateError(peaks_by_chr, parseLabel(valid_set,peak_by_chr))
+                error_num += temp_error
+                label_num += temp_label
 
         if os.path.isfile(result_file) and (not final):
             os.remove(result_file)
