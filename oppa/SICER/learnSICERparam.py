@@ -13,15 +13,11 @@ from SICER import run as SICER
 def learnSICERparam(args, test_set, validation_set, PATH, copyNums=None):
     """
 
-
     :param args:
-
     :param test_set:
-
     :param validation_set:
-
     :param PATH:
-
+    :param copyNums:
     :return:
     """
 
@@ -63,43 +59,45 @@ def learnSICERparam(args, test_set, validation_set, PATH, copyNums=None):
     ###############################################################
 
 
+    if copyNums is None:
+        for chromosome in chromosome_list:
+            def wrapper_function(windowSize, fragmentSize, gapSize):
+                target = PATH + '/' + bam_name + reference_char + chromosome + '.bam'
+                cr_target = PATH + '/' + cr_bam_name + reference_char + chromosome + '.bam'
+                accuracy = run(target, cr_target, validation_set + test_set \
+                               , str(int(windowSize*600.0))\
+                               , str(int(fragmentSize*450.0)), str(int(gapSize*6.0)))
+                print chromosome, \
+                    "windowSize : " + str(int(windowSize*600.0)),\
+                    "fragmentSize : " + str(int(fragmentSize*450.0)),\
+                    "gapSize : " + str(int(gapSize*6.0)),\
+                    "score:" + str(round(accuracy, 4)) + '\n'
+                return accuracy
 
-    for chromosome in chromosome_list:
-        def wrapper_function(windowSize, fragmentSize, gapSize):
-            target = PATH + '/' + bam_name + reference_char + chromosome + '.bam'
-            cr_target = PATH + '/' + cr_bam_name + reference_char + chromosome + '.bam'
-            accuracy = run(target, cr_target, validation_set + test_set \
-                           , str(int(windowSize*600.0))\
-                           , str(int(fragmentSize*450.0)), str(int(gapSize*6.0)))
-            print chromosome, \
-                "windowSize : " + str(int(windowSize*600.0)),\
-                "fragmentSize : " + str(int(fragmentSize*450.0)),\
-                "gapSize : " + str(int(gapSize*6.0)),\
-                "score:" + str(round(accuracy, 4)) + '\n'
-            return accuracy
+            function = wrapper_function
+            learning_process = multiprocessing.Process(target=optimizeHyper, args=(function, \
+                                                                                   parameters_bounds, number_of_init_sample,
+                                                                                   return_dict, 20, 'ei', chromosome,))
 
-        function = wrapper_function
-        learning_process = multiprocessing.Process(target=optimizeHyper, args=(function, \
-                                                                               parameters_bounds, number_of_init_sample,
-                                                                               return_dict, 20, 'ei', chromosome,))
-
-        if len(learning_processes) < MAX_CORE - 1:
-            learning_processes.append(learning_process)
-            learning_process.start()
-        else:
-            keep_wait = True
-            while True:
-                time.sleep(0.1)
-                if not (keep_wait is True):
-                    break
-                else:
-                    for process in reversed(learning_processes):
-                        if process.is_alive() is False:
-                            learning_processes.remove(process)
-                            learning_processes.append(learning_process)
-                            learning_process.start()
-                            keep_wait = False
-                            break
+            if len(learning_processes) < MAX_CORE - 1:
+                learning_processes.append(learning_process)
+                learning_process.start()
+            else:
+                keep_wait = True
+                while True:
+                    time.sleep(0.1)
+                    if not (keep_wait is True):
+                        break
+                    else:
+                        for process in reversed(learning_processes):
+                            if process.is_alive() is False:
+                                learning_processes.remove(process)
+                                learning_processes.append(learning_process)
+                                learning_process.start()
+                                keep_wait = False
+                                break
+    else:
+        for copyNum in copyNums:
 
     for proc in learning_processes:
         proc.join()

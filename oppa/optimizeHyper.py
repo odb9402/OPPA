@@ -29,7 +29,7 @@ def optimized_function(function, error, *param):
 	return None
 
 
-def run(function, Param_bound, init_point, return_dict, num_itr = 10, acq_func = 'ei', chrNo= None):
+def run(function, Param_bound, init_point, return_dict, num_itr = 10, acq_func = 'ei', number= None):
 	"""
     Doing Bayesian optimization with some function. the function is just process that
     input the file and parameter to Peak Detection algorithm and get some error.
@@ -95,6 +95,6 @@ def run(function, Param_bound, init_point, return_dict, num_itr = 10, acq_func =
 	optimizer.maximize(acq = acq_func, init_points=init_point, n_iter=num_itr)
 
 	#return_dict[chrNo + "_steps"] = optimizer.res['all']
-	return_dict[chrNo] = optimizer.res['max']
+	return_dict[number] = optimizer.res['max']
 
-	print chrNo + " is done insert into result containor."
+	print number + " is done insert into result containor."
