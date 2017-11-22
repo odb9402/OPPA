@@ -40,15 +40,28 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_analysis=None):
 
     number_of_init_sample = 2
 
+    if not os.path.exists(PATH+'/SICER/control/'):
+        os.makedirs(PATH + '/SICER/control/')
+
     if kry_analysis is None:
         for label in validation_set + test_set:
             chromosome_list.append(label.split(':')[0])
         chromosome_list = sorted(list(set(chromosome_list)))
+        for chromosome in chromosome_list:
+            output_dir = PATH + '/SICER/' + chromosome + '/'
+            if not os.path.exists(PATH + '/SICER/' + chromosome):
+                os.makedirs(output_dir)
     else:
         cpNum_files = glob.glob(PATH + "/" + input_file.split(".")[0] + ".CP[1-9].bam")
         cpNum_controls = glob.glob(PATH + "/" + control.split(".")[0] + ".CP[1-9].bam")
+        str_cpnum_list = []
+        for cp in cpNum_files:
+            str_cpnum_list.append(re.search("CP[1-9]", cp).group(0))
+        for str_cpnum in str_cpnum_list:
+            output_dir = PATH + '/SICER/' + str_cpnum + '/'
+            if not os.path.exists(PATH + '/SICER/' + str_cpnum):
+                os.makedirs(output_dir)
 
-    print cpNum_files, cpNum_controls
 
     reference_char = ".REF_"
     bam_name = input_file[:-4]
@@ -57,14 +70,7 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_analysis=None):
     MAX_CORE = cpu_count()
     learning_processes = []
 
-    ## SICER need some preprocess which convert bamfile to bedfiles
-    if not os.path.exists(PATH+'/SICER/control/'):
-        os.makedirs(PATH + '/SICER/control/')
 
-    for chromosome in chromosome_list:
-        output_dir = PATH + '/SICER/' + chromosome + '/'
-        if not os.path.exists(PATH + '/SICER/' + chromosome):
-            os.makedirs(output_dir)
     ###############################################################
 
 
@@ -75,7 +81,7 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_analysis=None):
                 cr_target = PATH + '/' + cr_bam_name + reference_char + chromosome + '.bam'
                 accuracy = run(target, cr_target, validation_set + test_set \
                                , str(int(windowSize*600.0))\
-                               , str(int(fragmentSize*450.0)), str(int(gapSize*6.0)))
+                               , str(int(fragmentSize*450.0)), str(int(gapSize*6.0)), False, False)
                 print chromosome, \
                     "windowSize : " + str(int(windowSize*600.0)),\
                     "fragmentSize : " + str(int(fragmentSize*450.0)),\
@@ -87,6 +93,7 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_analysis=None):
             learning_process = multiprocessing.Process(target=optimizeHyper, \
                 args=(function, parameters_bounds, number_of_init_sample, return_dict, 20, 'ei', chromosome,))
 
+            parallel_learning(MAX_CORE, learning_process, learning_processes)
     else:
         for index in range(len(cpNum_files)):
             cpNum_str = re.search("CP[1-9]", cpNum_files[index]).group(0)
@@ -94,7 +101,7 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_analysis=None):
             def wrapper_function(windowSize, fragmentSize, gapSize):
                 accuracy = run(cpNum_files[index], cpNum_controls[index], validation_set + test_set \
                                , str(int(windowSize*600.0))\
-                               , str(int(fragmentSize*450.0)), str(int(gapSize*6.0)))
+                               , str(int(fragmentSize*450.0)), str(int(gapSize*6.0)), False, True)
                 print cpNum_str, \
                     "windowSize : " + str(int(windowSize*600.0)),\
                     "fragmentSize : " + str(int(fragmentSize*450.0)),\
@@ -103,31 +110,17 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_analysis=None):
                 return accuracy
             function = wrapper_function
             learning_process = multiprocessing.Process(target=optimizeHyper,\
-                args=(function, parameters_bounds, number_of_init_sample, return_dict, 20, 'ei', cpNum, False, True))
+                args=(function, parameters_bounds, number_of_init_sample, return_dict, 20, 'ei', cpNum,))
 
-    if len(learning_processes) < MAX_CORE - 1:
-        learning_processes.append(learning_process)
-        learning_process.start()
-    else:
-        keep_wait = True
-        while True:
-            time.sleep(0.1)
-            if not (keep_wait is True):
-                break
-            else:
-                for process in reversed(learning_processes):
-                    if process.is_alive() is False:
-                        learning_processes.remove(process)
-                        learning_processes.append(learning_process)
-                        learning_process.start()
-                        keep_wait = False
-                        break
+            parallel_learning(MAX_CORE, learning_process, learning_processes)
 
     for proc in learning_processes:
         proc.join()
 
     print "finish learning parameter of SICER ! "
     print "Running SICER with learned parameter . . . . . . . . . . . . . . ."
+
+    learning_processes = []
 
     if kry_analysis is None:
         for chromosome in chromosome_list:
@@ -137,14 +130,12 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_analysis=None):
             fragmentSize = parameters['fragmentSize']
             gapSize = parameters['gapSize']
 
-            learning_processes = []
-
             learning_process = multiprocessing.Process(target=run,\
                 args=( PATH + '/' + target, PATH + '/' + cr_bam_name + reference_char + chromosome + '.bam'\
-                    , validation_set + test_set, str(int(windowSize*600.0)), str(int(fragmentSize*450.0)), str(int(gapSize*6.0)), True,))
+                    , validation_set + test_set, str(int(windowSize*600.0)), str(int(fragmentSize*450.0)), str(int(gapSize*6.0)), True, False,))
 
-            print PATH+'/'+target
-            print control
+            parallel_learning(MAX_CORE, learning_process, learning_processes)
+
     else:
         for index in range(len(cpNum_files)):
             cpNum_str = re.search("CP[1-9]", cpNum_files[index]).group(0)
@@ -155,29 +146,11 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_analysis=None):
             fragmentSize = parameters['fragmentSize']
             gapSize = parameters['gapSize']
 
-            learning_processes = []
-
             learning_process = multiprocessing.Process(target=run,\
                 args=(cpNum_files[index], cpNum_controls[index], validation_set + test_set, str(int(windowSize*600.0)),\
                     str(int(fragmentSize*450.0)), str(int(gapSize*6.0)), True, True,))
 
-    if len(learning_processes) < MAX_CORE - 1:
-        learning_processes.append(learning_process)
-        learning_process.start()
-    else:
-        keep_wait = True
-        while True:
-            time.sleep(0.1)
-            if not (keep_wait is True):
-                break
-            else:
-                for process in reversed(learning_processes):
-                    if process.is_alive() is False:
-                        learning_processes.remove(process)
-                        learning_processes.append(learning_process)
-                        learning_process.start()
-                        keep_wait = False
-                        break
+            parallel_learning(MAX_CORE, learning_process, learning_processes)
 
     for proc in learning_processes:
         proc.join()
@@ -199,7 +172,7 @@ def run(input_file, control, valid_set, windowSize='200', fragSize='150', gapSiz
     result_file = input_file[:-4] + ".bam_peaks.bed"
     result_file = result_file.rsplit('/',1)[0] + '/SICER/' + result_file.rsplit('/',1)[1]
 
-    SICER(input_file, control, windowSize, fragSize, gapSize)
+    SICER(input_file, control, windowSize, fragSize, gapSize, kry_analysis)
 
     if not valid_set:
         print "there are no matched validation set :p\n"
@@ -217,7 +190,7 @@ def run(input_file, control, valid_set, windowSize='200', fragSize='150', gapSiz
             peaks_by_chr = []
             containor = []
             for index in range(len(peaks)):
-                if index + 1 is not len(peaks):
+                if not (index+1 == len(peaks)):
                     if peaks[index]['chr'] != peaks[index+1]['chr']:
                         containor.append(peaks[index])
                         peaks_by_chr.append(containor)
@@ -228,9 +201,11 @@ def run(input_file, control, valid_set, windowSize='200', fragSize='150', gapSiz
                     peaks_by_chr.append(containor)
 
             for peak_by_chr in peaks_by_chr:
-                temp_error, temp_label = calculateError(peaks_by_chr, parseLabel(valid_set,peak_by_chr))
-                error_num += temp_error
-                label_num += temp_label
+                if len(peak_by_chr) > 0:
+                    chromosome = peak_by_chr[0]['chr']
+                    temp_error, temp_label = calculateError(peak_by_chr, parseLabel(valid_set, result_file, peak_by_chr, chromosome))
+                    error_num += temp_error
+                    label_num += temp_label
 
         if os.path.isfile(result_file) and (not final):
             os.remove(result_file)
@@ -248,3 +223,22 @@ def run(input_file, control, valid_set, windowSize='200', fragSize='150', gapSiz
     return (1 - error_num / label_num)
 
 
+def parallel_learning(MAX_CORE, learning_process, learning_processes):
+
+    if len(learning_processes) < MAX_CORE - 1:
+        learning_processes.append(learning_process)
+        learning_process.start()
+    else:
+        keep_wait = True
+        while True:
+            time.sleep(0.1)
+            if not (keep_wait is True):
+                break
+            else:
+                for process in reversed(learning_processes):
+                    if process.is_alive() is False:
+                        learning_processes.remove(process)
+                        learning_processes.append(learning_process)
+                        learning_process.start()
+                        keep_wait = False
+                        break

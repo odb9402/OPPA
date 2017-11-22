@@ -34,7 +34,7 @@ GAPSIZE : -g
     
 """
 
-def run(input_file, control_file, windowSize, fragSize, gapSize):
+def run(input_file, control_file, windowSize, fragSize, gapSize, kry_analysis = False):
     """
 
     :param input_file:
@@ -43,8 +43,13 @@ def run(input_file, control_file, windowSize, fragSize, gapSize):
     :return:
     """
 
-    spliter = input_file.rsplit('/',1)
-    working_dir = spliter[0] + '/SICER/' +spliter[1].rsplit('.',2)[1].rsplit('_')[1]
+    spliter = input_file.rsplit('/', 1)
+
+    if kry_analysis is False:
+        working_dir = spliter[0] + '/SICER/' +spliter[1].rsplit('.',2)[1].rsplit('_')[1]
+    else:
+        working_dir = spliter[0] + '/SICER/' + spliter[1].rsplit('.', 2)[1]
+
     output_file_name = spliter[0] + '/SICER/' + spliter[1][:-3] + 'bam_peaks.bed'
 
     commands = ['python ' + os.getcwd() + '/dependencies/SICERpy/SICERpy/SICER.py -t ' + input_file\

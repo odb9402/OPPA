@@ -8,16 +8,7 @@ def parse_cellType(file_name):
 
     :return: cell_type
     """
-    file_name = file_name.rsplit('.',1)[0]
-
-    file_name = file_name.rsplit('.',1)[0]
-    file_name = file_name.rsplit('_',1)
-
-    file_name = file_name[0].rsplit('.',1)[0]
-    file_name = file_name.rsplit('_',1)
-    cell_type = file_name[1]
-
-    return cell_type
+    return file_name.split('.')[0].rsplit('_')[1]
 
 
 def parse_chr(file_name):
@@ -82,7 +73,13 @@ def parse_peak_labels(peak_labels, chromosome_num, cell_type):
     return result_labels_list
 
 
-def run(validSet, file_name, input_chromosome = None, input_cellType = None):
+def slice_cpnum(peak_labels):
+    for label in peak_labels:
+        pass
+        ## If some regions have value over the some copy number, slice it.
+
+
+def run(validSet, file_name, peaks = None, input_chromosome = None, input_cellType = None):
     """
 
     :param validSet:
@@ -103,6 +100,9 @@ def run(validSet, file_name, input_chromosome = None, input_cellType = None):
         cellType = input_cellType
 
     peak_labels = parse_peak_labels(validSet, chromosome, cellType)
+
+    if input_chromosome != None:
+        slice_cpnum(peak_labels)
 
     # cannot found label about selected area.
     if peak_labels is -1:

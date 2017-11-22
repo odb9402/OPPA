@@ -97,4 +97,4 @@ def run(function, Param_bound, init_point, return_dict, num_itr = 10, acq_func =
 	#return_dict[chrNo + "_steps"] = optimizer.res['all']
 	return_dict[number] = optimizer.res['max']
 
-	print number + " is done insert into result containor."
+	print str(number) + " is done insert into result containor."

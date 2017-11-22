@@ -15,7 +15,6 @@ def calculate_error(peak_data, labeled_data):
     	return python tuple ( number of incorrect label , number of whole label )
     """
 
-
     # sum of error label
     scores = 0.0
 
@@ -357,6 +356,9 @@ def run(input_peaks, input_labels):
         return 0, 0
 
     if len(input_peaks) is 0:
+        return 0, 0
+
+    if len(input_labels) is 0:
         return 0, 0
 
     error_num, total_label = calculate_error(input_peaks, input_labels)
