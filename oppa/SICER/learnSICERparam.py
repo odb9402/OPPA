@@ -1,6 +1,7 @@
 import time
 import os
 import glob
+import re
 from multiprocessing import Process, Manager, cpu_count
 import multiprocessing
 
@@ -88,20 +89,21 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_analysis=None):
 
     else:
         for index in range(len(cpNum_files)):
+            cpNum_str = re.search("CP[1-9]", cpNum_files[index]).group(0)
+            cpNum = int(cpNum_str[2:3])
             def wrapper_function(windowSize, fragmentSize, gapSize):
                 accuracy = run(cpNum_files[index], cpNum_controls[index], validation_set + test_set \
                                , str(int(windowSize*600.0))\
                                , str(int(fragmentSize*450.0)), str(int(gapSize*6.0)))
-                print chromosome, \
+                print cpNum_str, \
                     "windowSize : " + str(int(windowSize*600.0)),\
                     "fragmentSize : " + str(int(fragmentSize*450.0)),\
                     "gapSize : " + str(int(gapSize*6.0)),\
                     "score:" + str(round(accuracy, 4)) + '\n'
                 return accuracy
             function = wrapper_function
-            exit()
             learning_process = multiprocessing.Process(target=optimizeHyper,\
-                args=(function, parameters_bounds, number_of_init_sample, return_dict, 20, 'ei', chromosome, False, True))
+                args=(function, parameters_bounds, number_of_init_sample, return_dict, 20, 'ei', cpNum, False, True))
 
     if len(learning_processes) < MAX_CORE - 1:
         learning_processes.append(learning_process)
@@ -127,40 +129,55 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_analysis=None):
     print "finish learning parameter of SICER ! "
     print "Running SICER with learned parameter . . . . . . . . . . . . . . ."
 
-    for chromosome in chromosome_list:
-        parameters = return_dict[chromosome]['max_params']
-        target = bam_name + reference_char + chromosome + '.bam'
-        windowSize = parameters['windowSize']
-        fragmentSize = parameters['fragmentSize']
-        gapSize = parameters['gapSize']
+    if kry_analysis is None:
+        for chromosome in chromosome_list:
+            parameters = return_dict[chromosome]['max_params']
+            target = bam_name + reference_char + chromosome + '.bam'
+            windowSize = parameters['windowSize']
+            fragmentSize = parameters['fragmentSize']
+            gapSize = parameters['gapSize']
 
-        learning_processes = []
+            learning_processes = []
 
-        learning_process = multiprocessing.Process(target=run, args=( \
-            PATH + '/' + target, PATH + '/' + cr_bam_name + reference_char + chromosome + '.bam'\
-                , validation_set + test_set, str(int(windowSize*600.0)),\
-                str(int(fragmentSize*450.0)), str(int(gapSize*6.0)), True,))
+            learning_process = multiprocessing.Process(target=run,\
+                args=( PATH + '/' + target, PATH + '/' + cr_bam_name + reference_char + chromosome + '.bam'\
+                    , validation_set + test_set, str(int(windowSize*600.0)), str(int(fragmentSize*450.0)), str(int(gapSize*6.0)), True,))
 
-        print PATH+'/'+target
-        print control
+            print PATH+'/'+target
+            print control
+    else:
+        for index in range(len(cpNum_files)):
+            cpNum_str = re.search("CP[1-9]", cpNum_files[index]).group(0)
+            cpNum = int(cpNum_str[2:3])
 
-        if len(learning_processes) < MAX_CORE - 1:
-            learning_processes.append(learning_process)
-            learning_process.start()
-        else:
-            keep_wait = True
-            while True:
-                time.sleep(0.1)
-                if not (keep_wait is True):
-                    break
-                else:
-                    for process in reversed(learning_processes):
-                        if process.is_alive() is False:
-                            learning_processes.remove(process)
-                            learning_processes.append(learning_process)
-                            learning_process.start()
-                            keep_wait = False
-                            break
+            parameters = return_dict[cpNum]['max_params']
+            windowSize = parameters['windowSize']
+            fragmentSize = parameters['fragmentSize']
+            gapSize = parameters['gapSize']
+
+            learning_processes = []
+
+            learning_process = multiprocessing.Process(target=run,\
+                args=(cpNum_files[index], cpNum_controls[index], validation_set + test_set, str(int(windowSize*600.0)),\
+                    str(int(fragmentSize*450.0)), str(int(gapSize*6.0)), True, True,))
+
+    if len(learning_processes) < MAX_CORE - 1:
+        learning_processes.append(learning_process)
+        learning_process.start()
+    else:
+        keep_wait = True
+        while True:
+            time.sleep(0.1)
+            if not (keep_wait is True):
+                break
+            else:
+                for process in reversed(learning_processes):
+                    if process.is_alive() is False:
+                        learning_processes.remove(process)
+                        learning_processes.append(learning_process)
+                        learning_process.start()
+                        keep_wait = False
+                        break
 
     for proc in learning_processes:
         proc.join()
