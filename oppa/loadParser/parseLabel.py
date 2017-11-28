@@ -1,3 +1,5 @@
+from loadKaryotype import run as loadKaryotype
+
 def parse_cellType(file_name):
     """
     Parsing file_name and extracting cell-type , chromosome
@@ -31,12 +33,21 @@ def parse_chr(file_name):
     return chromosome
 
 
-def parse_peak_labels(peak_labels, chromosome_num, cell_type):
-    """Parsing Peak_labels by each chromosome and cell_types
-	if there are correct , append to result and return."""
+def parse_peak_labels(peak_labels, chromosome_num, cell_type, cpNum_data=None):
+    """
+
+    :param peak_labels:
+    :param chromosome_num:
+    :param cell_type:
+    :param cpNum_data:
+    :return:
+    """
 
     labels = []
-    label_table = ['regions', 'peakStat', 'cellType']
+    if cpNum_data is None:
+        label_table = ['regions', 'peakStat', 'cellType']
+    else:
+        label_table = ['regions', 'peakStat', 'cellType']#, 'cpNum']
 
     #parse the text file to python list
     for peak in peak_labels:
@@ -44,6 +55,10 @@ def parse_peak_labels(peak_labels, chromosome_num, cell_type):
         containor.append(peak.split(':')[0])
         containor.append(peak.split(':')[1].split(' ',2))
         labels.append(containor)
+
+    if not (cpNum_data is None):
+        pass
+        # mark cpnum
 
     #this list will be return value.
     result_labels_list = []
@@ -73,13 +88,7 @@ def parse_peak_labels(peak_labels, chromosome_num, cell_type):
     return result_labels_list
 
 
-def slice_cpnum(peak_labels):
-    for label in peak_labels:
-        pass
-        ## If some regions have value over the some copy number, slice it.
-
-
-def run(validSet, file_name, peaks = None, input_chromosome = None, input_cellType = None):
+def run(validSet, file_name, input_chromosome = None, input_cellType = None, cpNum_file_name = None):
     """
 
     :param validSet:
@@ -99,10 +108,13 @@ def run(validSet, file_name, peaks = None, input_chromosome = None, input_cellTy
     else:
         cellType = input_cellType
 
-    peak_labels = parse_peak_labels(validSet, chromosome, cellType)
+    if not (cpNum_file_name is None):
+        cpNum_data = loadKaryotype(cpNum_file_name, [input_chromosome])
+        print cpNum_data
+    else:
+        cpNum_data = None
 
-    if input_chromosome != None:
-        slice_cpnum(peak_labels)
+    peak_labels = parse_peak_labels(validSet, chromosome, cellType, cpNum_data)
 
     # cannot found label about selected area.
     if peak_labels is -1:
