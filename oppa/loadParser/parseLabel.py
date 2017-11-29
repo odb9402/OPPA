@@ -1,8 +1,9 @@
 from loadKaryotype import run as loadKaryotype
+import copy
 
 def parse_cellType(file_name):
     """
-    Parsing file_name and extracting cell-type , chromosome
+    Parsing file_name and extracting cell-type
     input file must be EXPERIMENT_AREA_CELL-TYPE.bam so bamtools create
     EXPERIMENT_AREA_CELL-TYPE.REF_chrN.PEAK
 
@@ -15,7 +16,7 @@ def parse_cellType(file_name):
 
 def parse_chr(file_name):
     """
-    Parsing file_name and extracting cell-type , chromosome
+    Parsing file_name and extracting chromosome
     input file must be EXPERIMENT_AREA_CELL-TYPE.bam so bamtools create
     EXPERIMENT_AREA_CELL-TYPE.REF_chrN.PEAK
 
@@ -33,6 +34,15 @@ def parse_chr(file_name):
     return chromosome
 
 
+def parse_cpNum(file_name):
+    """
+
+    :param file_name:
+    :return:
+    """
+    cpNum_str = file_name.split('.')[1]
+    return int(filter(str.isdigit, cpNum_str))
+
 def parse_peak_labels(peak_labels, chromosome_num, cell_type, cpNum_data=None):
     """
 
@@ -44,10 +54,7 @@ def parse_peak_labels(peak_labels, chromosome_num, cell_type, cpNum_data=None):
     """
 
     labels = []
-    if cpNum_data is None:
-        label_table = ['regions', 'peakStat', 'cellType']
-    else:
-        label_table = ['regions', 'peakStat', 'cellType']#, 'cpNum']
+    label_table = ['regions', 'peakStat', 'cellType']
 
     #parse the text file to python list
     for peak in peak_labels:
@@ -55,10 +62,6 @@ def parse_peak_labels(peak_labels, chromosome_num, cell_type, cpNum_data=None):
         containor.append(peak.split(':')[0])
         containor.append(peak.split(':')[1].split(' ',2))
         labels.append(containor)
-
-    if not (cpNum_data is None):
-        pass
-        # mark cpnum
 
     #this list will be return value.
     result_labels_list = []
@@ -68,7 +71,6 @@ def parse_peak_labels(peak_labels, chromosome_num, cell_type, cpNum_data=None):
         if label[0] == chromosome_num:
             label_map = dict(zip(label_table, label[1]))
             result_labels_list.append(label_map)
-
 
     #print "%d`s label data is found.i" % len(result_labels_list)
 
@@ -85,10 +87,55 @@ def parse_peak_labels(peak_labels, chromosome_num, cell_type, cpNum_data=None):
         label['regions'][0] = int(label['regions'][0].replace(',',''))
         label['regions'][1] = int(label['regions'][1].replace(',',''))
 
+    #mark a copy number on the label.
+    if not (cpNum_data is None):
+        for label in result_labels_list:
+            is_sliced = False
+            for index in range(len(cpNum_data)):
+                if label['regions'][0] < cpNum_data[index]['start'] < label['regions'][1]:
+                    new_label = copy.deepcopy(label)
+                    label['regions'][1] = cpNum_data[index]['start']
+                    label['cpNum'] = cpNum_data[index]['cpNum']
+                    new_label['regions'][0] = cpNum_data[index]['start']
+                    new_label['cpNum'] = cpNum_data[index]['cpNum']
+                    result_labels_list.append(new_label)
+                    is_sliced = True
+
+                if label['regions'][0] < cpNum_data[index]['end'] < label['regions'][1]:
+                    new_label = copy.deepcopy(label)
+                    label['regions'][1] = cpNum_data[index]['end']
+                    label['cpNum'] = cpNum_data[index]['cpNum']
+
+                    if index + 1 == len(cpNum_data):
+                        print "The label region is bigger than a range of karyotype"
+                        new_label['regions'][0] = cpNum_data[index]['end']
+                        new_label['cpNum'] = None
+
+                    else:
+                        new_label['regions'][0] = cpNum_data[index]['end']
+
+                        # Check empty space on Karyotype file.
+                        if new_label['regions'][1] < cpNum_data[index+1]['start']:
+                            new_label['cpNum'] = None
+                        else:
+                            new_label['cpNum'] = cpNum_data[index + 1]['cpNum']
+
+                    result_labels_list.append(new_label)
+                    is_sliced = True
+
+            if not is_sliced:
+                for index in range(len(cpNum_data)):
+                    if cpNum_data[index]['start'] < label['regions'][0] and\
+                        label['regions'][1] < cpNum_data[index]['end']:
+                        label['cpNum'] = cpNum_data[index]['cpNum']
+                        break
+
+    print result_labels_list
+
     return result_labels_list
 
 
-def run(validSet, file_name, input_chromosome = None, input_cellType = None, cpNum_file_name = None):
+def run(validSet, file_name, input_chromosome = None, input_cellType = None, input_cpNum = None, cpNum_file_name = None):
     """
 
     :param validSet:
@@ -108,9 +155,13 @@ def run(validSet, file_name, input_chromosome = None, input_cellType = None, cpN
     else:
         cellType = input_cellType
 
+    if input_cpNum is None:
+        cpNum = parse_cpNum(file_name)
+    else:
+        cpNum = input_cpNum
+
     if not (cpNum_file_name is None):
         cpNum_data = loadKaryotype(cpNum_file_name, [input_chromosome])
-        print cpNum_data
     else:
         cpNum_data = None
 

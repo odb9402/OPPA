@@ -27,7 +27,6 @@ def calculate_error(peak_data, labeled_data):
     possible_FN = 0
 
     for label in labeled_data:
-        print label
         if label['peakStat'] == 'peaks':
             possible_FN += 1
             state = is_peak(peak_data, label['regions'], weak_predict = True)
