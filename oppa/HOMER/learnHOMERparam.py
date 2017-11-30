@@ -13,7 +13,7 @@ from ..loadParser.parseLabel import run as parseLabel
 from HOMER import run as HOMER
 from HOMER import run_control_processing as control_processing
 
-def learnHOMERparam(args, test_set, validation_set, PATH, type=None):
+def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None):
 	
 	input_file = args.input
 	control = args.control
@@ -31,7 +31,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH, type=None):
 		
 	number_of_init_sample = 5
 
-	if type is None:
+	if kry_file is None:
 		chromosome_list = []
 		for label in validation_set + test_set:
 			chromosome_list.append(label.split(':')[0])

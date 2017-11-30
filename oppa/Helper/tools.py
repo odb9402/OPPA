@@ -1,8 +1,15 @@
 import os
 import time
+import glob
+import re
 from ..calculateError import run as calculateError
 from ..loadParser.parseLabel import run as parseLabel
 from ..loadParser.loadPeak import run as loadPeak
+"""
+These methods are common parts of learning processes which are in
+learn****param.py. 
+"""
+
 
 def parallel_learning(MAX_CORE, learning_process, learning_processes):
     """
@@ -93,3 +100,41 @@ def return_accuracy(final, kry_file, result_file, valid_set):
         print "Test Score ::" + str(1 - error_num / label_num)
 
     return (1 - error_num / label_num)
+
+
+def extract_chr_cpNum(chromosome_list, input_file, control_file, cpNum_controls, cpNum_files, kry_file, test_set,
+                      validation_set, PATH, tool_name=None):
+    """
+
+    :param PATH:
+    :param chromosome_list:
+    :param control_file:
+    :param cpNum_controls:
+    :param cpNum_files:
+    :param input_file:
+    :param kry_file:
+    :param test_set:
+    :param validation_set:
+    :param tool_name:
+    :return:
+    """
+    if kry_file is None:
+        for label in validation_set + test_set:
+            chromosome_list.append(label.split(':')[0])
+        chromosome_list = sorted(list(set(chromosome_list)))
+        for chromosome in chromosome_list:
+            output_dir = PATH + '/'+ tool_name +'/' + chromosome + '/'
+            if not os.path.exists(PATH + '/'+ tool_name +'/' + chromosome):
+                os.makedirs(output_dir)
+    else:
+        cpNum_files = glob.glob(PATH + "/" + input_file.split(".")[0] + ".CP[1-9].bam")
+        cpNum_controls = glob.glob(PATH + "/" + control_file.split(".")[0] + ".CP[1-9].bam")
+        str_cpnum_list = []
+        for cp in cpNum_files:
+            str_cpnum_list.append(re.search("CP[1-9]", cp).group(0))
+        for str_cpnum in str_cpnum_list:
+            output_dir = PATH + '/'+ tool_name +'/' + str_cpnum + '/'
+            if not os.path.exists(PATH + '/'+ tool_name +'/' + str_cpnum):
+                os.makedirs(output_dir)
+
+    return chromosome_list, cpNum_controls, cpNum_files

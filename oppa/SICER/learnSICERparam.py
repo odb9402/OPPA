@@ -1,4 +1,3 @@
-import time
 import os
 import glob
 import re
@@ -7,6 +6,7 @@ import multiprocessing
 
 from ..Helper.tools import parallel_learning
 from ..Helper.tools import return_accuracy
+from ..Helper.tools import extract_chr_cpNum
 from ..optimizeHyper import run as optimizeHyper
 from SICER import run as SICER
 
@@ -22,16 +22,13 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_file=None):
     """
 
     input_file = args.input
-    control = args.control
+    control_file = args.control
     chromosome_list = []
     cpNum_files = []
     cpNum_controls = []
 
     manager = Manager()
     return_dict = manager.dict()
-
-    if not os.path.exists(PATH + '/SICER'):
-        os.makedirs(PATH + '/SICER')
 
     parameters_bounds = {'windowSize': (1.0/12.0 , 1.0)\
                          ,'fragmentSize': (1.0/9.0 , 1.0)\
@@ -42,29 +39,17 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_file=None):
     if not os.path.exists(PATH+'/SICER/control/'):
         os.makedirs(PATH + '/SICER/control/')
 
-    if kry_file is None:
-        for label in validation_set + test_set:
-            chromosome_list.append(label.split(':')[0])
-        chromosome_list = sorted(list(set(chromosome_list)))
-        for chromosome in chromosome_list:
-            output_dir = PATH + '/SICER/' + chromosome + '/'
-            if not os.path.exists(PATH + '/SICER/' + chromosome):
-                os.makedirs(output_dir)
-    else:
-        cpNum_files = glob.glob(PATH + "/" + input_file.split(".")[0] + ".CP[1-9].bam")
-        cpNum_controls = glob.glob(PATH + "/" + control.split(".")[0] + ".CP[1-9].bam")
-        str_cpnum_list = []
-        for cp in cpNum_files:
-            str_cpnum_list.append(re.search("CP[1-9]", cp).group(0))
-        for str_cpnum in str_cpnum_list:
-            output_dir = PATH + '/SICER/' + str_cpnum + '/'
-            if not os.path.exists(PATH + '/SICER/' + str_cpnum):
-                os.makedirs(output_dir)
+    if not os.path.exists(PATH + '/SICER'):
+        os.makedirs(PATH + '/SICER')
+
+    chromosome_list, cpNum_controls, cpNum_files = extract_chr_cpNum(chromosome_list, input_file, control_file,
+                                                                     cpNum_controls, cpNum_files, kry_file, test_set,
+                                                                     validation_set, PATH, tool_name='SICER')
 
 
     reference_char = ".REF_"
     bam_name = input_file[:-4]
-    cr_bam_name = control[:-4]
+    cr_bam_name = control_file[:-4]
 
     MAX_CORE = cpu_count()
     learning_processes = []
@@ -174,5 +159,3 @@ def run(input_file, control, valid_set, windowSize='200', fragSize='150', gapSiz
     SICER(input_file, control, windowSize, fragSize, gapSize, kry_file)
 
     return return_accuracy(final, kry_file, result_file, valid_set)
-
-

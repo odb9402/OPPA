@@ -67,6 +67,7 @@ def main():
 		os.makedirs(directory_path)
 
 	preProcess(args.input, validation_set + test_set, directory_path, args.karyotype)
+	preProcess(args.control, validation_set + test_set, directory_path, args.karyotype)
 	####################################################
 
 
@@ -100,7 +101,6 @@ def main():
 
 	if "sicer" in args.tool:
 		print "///////////////////// RUNNING SICER ////////////////////////\n"
-		preProcess(args.control, validation_set + test_set, directory_path, args.karyotype)
 		from oppa.SICER.learnSICERparam import learnSICERparam
 		result_sicer = learnSICERparam(args, validation_set, test_set, directory_path, args.karyotype)
 		score_list.append(result_sicer._getvalue())
