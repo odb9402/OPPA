@@ -43,7 +43,7 @@ def parse_cpNum(file_name):
     cpNum_str = file_name.split('.')[1]
     return int(filter(str.isdigit, cpNum_str))
 
-def parse_peak_labels(peak_labels, chromosome_num, cell_type, cpNum_data=None):
+def parse_peak_labels(peak_labels, chromosome_num, cell_type, cpNum_data=None, input_cpNum=None):
     """
 
     :param peak_labels:
@@ -130,7 +130,14 @@ def parse_peak_labels(peak_labels, chromosome_num, cell_type, cpNum_data=None):
                         label['cpNum'] = cpNum_data[index]['cpNum']
                         break
 
-    print result_labels_list
+    index = 0
+    while True:
+        if index == len(result_labels_list):
+            break
+        if (result_labels_list[index]['cpNum'] != input_cpNum):
+            result_labels_list.pop(index)
+        else:
+            index += 1
 
     return result_labels_list
 
@@ -165,7 +172,7 @@ def run(validSet, file_name, input_chromosome = None, input_cellType = None, inp
     else:
         cpNum_data = None
 
-    peak_labels = parse_peak_labels(validSet, chromosome, cellType, cpNum_data)
+    peak_labels = parse_peak_labels(validSet, chromosome, cellType, cpNum_data=cpNum_data, input_cpNum=cpNum)
 
     # cannot found label about selected area.
     if peak_labels is -1:

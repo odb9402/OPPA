@@ -88,7 +88,7 @@ def is_peak(target, value, tolerance = 500, weak_predict = False):
     # if find correct one, return True
     while True:
         correct_ness = is_same(target, value, index, tolerance)
-
+        #print index,min_index ,  max_index, len(target)
         if correct_ness is 'less':
             max_index = index
             index = (min_index + index) / 2
@@ -98,38 +98,7 @@ def is_peak(target, value, tolerance = 500, weak_predict = False):
         #find correct regions
         else:
             if (weak_predict == True):
-                peaks = []
-                num_of_peaks = 1
-                front_check = 1
-                back_check = 1
-
-                peaks.append(target[index])
-
-                ## front seek
-                while True:
-                    if index + front_check is not len(target):
-                        if (is_same(target, value, index + front_check, tolerance) is 'in'):
-                            num_of_peaks += 1
-                            peaks.append(target[index + front_check])
-                        else:
-                            break
-                        front_check += 1
-                    else:
-                        break
-
-                ## back seek
-                while True:
-                    if index - back_check is not (-1):
-                        if (is_same(target, value, index - back_check, tolerance) is 'in'):
-                            num_of_peaks += 1
-                            peaks.append(target[index - back_check])
-                        else:
-                            break
-                        back_check += 1
-                    else:
-                        break
-
-                return 1 + bonus_weight(value, peaks, 'peaks')
+                return calculate_sum_of_weights(index, target, tolerance, value, mode='bonus')
 
             #find one peak
             else:
@@ -174,38 +143,7 @@ def is_noPeak(target, value, tolerance = 0):
             index = (max_index + index) / 2
         #find correct regions , so it is fail
         else:
-            peaks = []
-            num_of_peaks = 1
-            front_check = 1
-            back_check = 1
-
-            peaks.append(target[index])
-
-            ## front seek
-            while True:
-                if index + front_check is not len(target):
-                    if (is_same(target, value, index + front_check, tolerance) is 'in'):
-                        num_of_peaks += 1
-                        peaks.append(target[index + front_check])
-                    else:
-                        break
-                    front_check += 1
-                else:
-                    break
-
-            ## back seek
-            while True:
-                if index - back_check is not (-1):
-                    if (is_same(target, value, index - back_check, tolerance) is 'in'):
-                        num_of_peaks += 1
-                        peaks.append(target[index - back_check])
-                    else:
-                        break
-                    back_check += 1
-                else:
-                    break
-
-            return bonus_weight(value, peaks, 'nopeak')
+            return calculate_sum_of_weights(index, target, tolerance, value, mode='bias')
 
         if abs(float(target[index]['region_e']) - region_min) < 5 * steps or steps > 1000:
             break
@@ -221,38 +159,42 @@ def is_noPeak(target, value, tolerance = 0):
 
     #false negative no peak ( there is peak )
     else:
-        peaks = []
-        num_of_peaks = 1
-        front_check = 1
-        back_check = 1
+        return calculate_sum_of_weights(index, target, tolerance, value, mode='bias')
 
-        peaks.append(target[index])
 
-        ## front seek
-        while True:
-            if index + front_check is not len(target):
-                if (is_same(target, value, index + front_check, tolerance) is 'in'):
-                    num_of_peaks += 1
-                    peaks.append(target[index + front_check])
-                else:
-                    break
-                front_check += 1
+def calculate_sum_of_weights(index, target, tolerance, value, mode=None):
+    peaks = []
+    num_of_peaks = 1
+    front_check = 1
+    back_check = 1
+    peaks.append(target[index])
+    ## front seek
+    while True:
+        if index + front_check < len(target):
+            if (is_same(target, value, index + front_check, tolerance) is 'in'):
+                num_of_peaks += 1
+                peaks.append(target[index + front_check])
             else:
                 break
+            front_check += 1
+        else:
+            break
 
-        ## back seek
-        while True:
-            if index - back_check is not (-1):
-                if (is_same(target, value, index - back_check, tolerance) is 'in'):
-                    num_of_peaks += 1
-                    peaks.append(target[index - back_check])
-                else:
-                    break
-                back_check += 1
+    ## back seek
+    while True:
+        if index - back_check is not (-1):
+            if (is_same(target, value, index - back_check, tolerance) is 'in'):
+                num_of_peaks += 1
+                peaks.append(target[index - back_check])
             else:
                 break
+            back_check += 1
+        else:
+            break
 
-        #print "nopeak : " + str(bonus_weight(value, peaks, 'nopeak'))
+    if mode is 'bonus':
+        return 1 + bonus_weight(value, peaks, 'peaks')
+    elif mode is 'bias':
         return bonus_weight(value, peaks, 'nopeak')
 
 
