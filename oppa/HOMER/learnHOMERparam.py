@@ -2,9 +2,12 @@ from math import exp
 import glob
 import time
 import os
-from multiprocessing import cpu_count
-from multiprocessing import Process, Manager
+from multiprocessing import cpu_count, Process, Manager
 import multiprocessing
+
+from ..Helper.tools import parallel_learning
+from ..Helper.tools import return_accuracy
+from ..Helper.tools import extract_chr_cpNum
 
 from ..optimizeHyper import run as optimizeHyper
 from ..calculateError import run as calculateError
@@ -18,6 +21,9 @@ def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None):
 	input_file = args.input
 	control = args.control
 	call_type = args.callType
+	chromosome_list = []
+	cpNum_files = []
+	cpNum_controls = []
 
 	manager = Manager()
 	return_dict = manager.dict()
@@ -31,76 +37,66 @@ def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None):
 		
 	number_of_init_sample = 5
 
-	if kry_file is None:
-		chromosome_list = []
-		for label in validation_set + test_set:
-			chromosome_list.append(label.split(':')[0])
-		chromosome_list = sorted(list(set(chromosome_list)))
-	else:
-		copyNum_list = []
-		glob.glob()
+	if not os.path.exists(PATH+'/HOMER'):
+		os.makedirs(PATH + '/HOMER')
+
+	if not os.path.exists(PATH+'/SICER'):
+		os.makedirs(PATH+'/SICER')
+
+	chromosome_list, cpNum_controls, cpNum_files = extract_chr_cpNum(chromosome_list,\
+		   input_file, control, cpNum_controls,	cpNum_files, kry_file, test_set,\
+		   validation_set, PATH, tool_name='HOMER')
 
 	reference_char = ".REF_"
 	bam_name = input_file[:-4]
-	
+	cr_bam_name = control[:-4]
+
 	MAX_CORE = cpu_count()
 	learning_processes = []
 
 	print " HOMER control ChIP-seq pre processing. . . . . . . . . . . . . ."
 	control_processing(PATH, control)
 
-	for chromosome in chromosome_list:
-		if call_type == "broad":
-			def wrapper_function_broad(size, minDist,fdr):
-				target = bam_name + reference_char + chromosome + ".bam"
-				accuracy = run(target, control, validation_set + test_set, call_type,\
-						 PATH, str(exp(fdr)-1) ,str(size*1000), str(minDist*5000))
-				print chromosome,\
-					"fdr :" + str(round(exp(fdr)-1,4)),\
-					"size :" + str(size*1000),\
-					"minDist :" + str(minDist*5000),\
-					"score :" + str(round(accuracy,4)) + "\n"
-				return accuracy
-			function = wrapper_function_broad
-		else:
-			def wrapper_function_narrow(fdr):
-				target = bam_name + reference_char + chromosome + ".bam"
-				accuracy = run(target, control, validation_set + test_set, call_type,\
-						 PATH, str(exp(fdr)-1))
-				print chromosome,\
-					"fdr :" + str(round(exp(fdr)-1,4)),\
-					"score :" + str(round(accuracy,4)) + "\n"
-				return accuracy
-			function = wrapper_function_narrow
+	if kry_file is None:
+		for chromosome in chromosome_list:
+			if call_type == "broad":
+				def wrapper_function_broad(size, minDist,fdr):
+					target = bam_name + reference_char + chromosome + ".bam"
+					accuracy = run(target, control, validation_set + test_set, call_type,\
+							 PATH, str(exp(fdr)-1) ,str(size*1000), str(minDist*5000))
+					print chromosome,\
+						"fdr :" + str(round(exp(fdr)-1,4)),\
+						"size :" + str(size*1000),\
+						"minDist :" + str(minDist*5000),\
+						"score :" + str(round(accuracy,4)) + "\n"
+					return accuracy
+				function = wrapper_function_broad
+			else:
+				def wrapper_function_narrow(fdr):
+					target = bam_name + reference_char + chromosome + ".bam"
+					accuracy = run(target, control, validation_set + test_set, call_type,\
+							 PATH, str(exp(fdr)-1))
+					print chromosome,\
+						"fdr :" + str(round(exp(fdr)-1,4)),\
+						"score :" + str(round(accuracy,4)) + "\n"
+					return accuracy
+				function = wrapper_function_narrow
 		
-		learning_process = multiprocessing.Process(target=optimizeHyper, args=(function,\
+			learning_process = multiprocessing.Process(target=optimizeHyper, args=(function,\
 					parameters_bounds, number_of_init_sample, return_dict, 10, 'ei', chromosome,))
+			parallel_learning(MAX_CORE, learning_process, learning_processes)
 
-		if len(learning_processes) < MAX_CORE/2:
-			learning_processes.append(learning_process)
-			learning_process.start()
-		else:
-			keep_wait = True
-			while True:
-				time.sleep(0.1)
-				if not (keep_wait is True):
-					break
-				else:
-					for process in reversed(learning_processes):
-						if process.is_alive() is False:
-							learning_processes.remove(process)
-							learning_processes.append(learning_process)
-							learning_process.start()
-							keep_wait = False
-							break
+	else:
+		for index in range(len(cpNum_files)):
+			pass
 
 	for proc in learning_processes:
 		proc.join()
-	
+
 	print "finish learning parameter of HOMER !"
 	print "Running HOMER with learned parameter . . . . . . . . . . . . ."
 
-	print return_dict
+	learning_processes = []
 
 	# final run about result.
 	for chromosome in chromosome_list:
