@@ -34,7 +34,7 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_file=None):
                          ,'fragmentSize': (1.0/9.0 , 1.0)\
                          ,'gapSize': (1.0/6.0, 1.0)}
 
-    number_of_init_sample = 2
+    number_of_init_sample = 5
 
     if not os.path.exists(PATH+'/SICER/control/'):
         os.makedirs(PATH + '/SICER/control/')
@@ -56,7 +56,6 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_file=None):
 
 
     ###############################################################
-
 
     if kry_file is None:
         for chromosome in chromosome_list:

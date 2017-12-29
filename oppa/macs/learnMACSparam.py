@@ -1,5 +1,5 @@
 """
-this module is actual fix some parameter by using
+This module is actually fixing some parameters by using
 bayesian optimization. if we run this function in parallel,
 we need to satisfied many condition which mentioned in the paper
 named 'practical bayesian optimization in machine learning algorithm'

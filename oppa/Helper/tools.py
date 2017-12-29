@@ -53,7 +53,7 @@ def return_accuracy(final, kry_file, result_file, valid_set):
         exit()
     else:
         if not os.path.exists(result_file):
-            return 0, 0
+            return 0.0
         peaks = loadPeak(result_file)
 
         if kry_file is None:

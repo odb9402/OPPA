@@ -49,7 +49,6 @@ def main():
 
 
 	################ preprocessing step ################
-
 	validation_set, test_set = loadLabel(args.validSet)
 	global directory_path
 
@@ -72,7 +71,6 @@ def main():
 
 
 	################## running step ####################
-
 	score_list = []
 	
 	if len(args.tool) >= 2:
@@ -81,7 +79,7 @@ def main():
 	if "homer" in args.tool:
 		print "//////////////////// RUNNING HOMER /////////////////////////\n"
 		from oppa.HOMER.learnHOMERparam import learnHOMERparam
-		result_homer = learnHOMERparam(args, validation_set, test_set, directory_path)
+		result_homer = learnHOMERparam(args, validation_set, test_set, directory_path, args.karyotype, args.callType)
 		score_list.append(result_homer._getvalue())
 
 	if "macs" in args.tool:
@@ -104,13 +102,11 @@ def main():
 		from oppa.SICER.learnSICERparam import learnSICERparam
 		result_sicer = learnSICERparam(args, validation_set, test_set, directory_path, args.karyotype)
 		score_list.append(result_sicer._getvalue())
-
 	#####################################################
 
 
 
 	################ Ensemble step ######################
-
 	# Check ensemble method is on or not.
 	if not ( len(args.tool) >= 2 ):
 		exit()
@@ -129,7 +125,6 @@ def main():
 
 	print "/////////////////////// START ENSEMBLER /////////////////////////\n"
 	ensembler(tool_list, score_dict, directory_path, args)
-
 	#####################################################
 
 

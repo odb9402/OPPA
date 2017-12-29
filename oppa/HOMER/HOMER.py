@@ -9,6 +9,10 @@ def run(input_file, control, call_type, directory, fdr=None, size=None, minDist=
 	target_PATH = directory + '/HOMER/' + pure_input_file + '/'
 	control_PATH = directory + '/HOMER/' + control + '/'
 
+	print input_file, control
+	print pure_input_file
+	print target_PATH
+
 	output_name = target_PATH[:-5] + ".txt"
 	FNULL = open(os.devnull, 'w')
 	
