@@ -97,7 +97,7 @@ def return_accuracy(final, kry_file, result_file, valid_set):
         return 0.0
 
     if final:
-        print "Test Score ::" + str(1 - error_num / label_num)
+        print "Test Score ::" + str(1 - error_num / label_num) +"\n\n"
 
     return (1 - error_num / label_num)
 
