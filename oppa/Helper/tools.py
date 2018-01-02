@@ -105,10 +105,13 @@ def return_accuracy(final, kry_file, result_file, valid_set):
 def extract_chr_cpNum(chromosome_list, input_file, control_file, cpNum_controls, cpNum_files, kry_file, test_set,
                       validation_set, PATH, tool_name=None):
     """
-
+	This module extracts chromosome and copy number from a input file name.
+	And also, it makes directories which takes result files.
+	It will be used in start sections of each learning sources ( learn***params.py )
+	
     :param PATH:
     :param chromosome_list:
-    :param control_file:
+    :param control_fil
     :param cpNum_controls:
     :param cpNum_files:
     :param input_file:
