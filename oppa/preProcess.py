@@ -241,7 +241,7 @@ def samtools_cat(input_bam, chr_num, cp_num, region, PATH):
 	:return:
 	"""
 
-	print "There is copy numbers which duplicated so cat It. . . ."
+	print "There are copy numbers which duplicated so cat It. . . ."
 
 	input_file = input_bam.rsplit('.')[0] + ".CP" + str(cp_num) + '_REF_' + chr_num + ".bam"
 	samtools(input_bam, region, "temp_source.bam", PATH)

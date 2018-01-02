@@ -106,7 +106,7 @@ def extract_chr_cpNum(chromosome_list, input_file, control_file, cpNum_controls,
                       validation_set, PATH, tool_name=None):
     """
 	This module extracts chromosome and copy number from a input file name.
-	And also, it makes directories which takes result files.
+	Also, it makes directories which takes result files.
 	It will be used in start sections of each learning sources ( learn***params.py )
 	
     :param PATH:

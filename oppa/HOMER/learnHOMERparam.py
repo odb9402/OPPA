@@ -175,9 +175,8 @@ def run(input_file, control, valid_set, call_type, PATH, param, param2=None, par
 
 	:return:
 	"""
-
-	output_PATH = PATH + '/HOMER/' + input_file[:-4]
-	input_file = PATH + '/' + input_file
+	pure_input_file = input_file.rsplit('/',1)[1]
+	output_PATH = PATH + '/HOMER/' + pure_input_file[:-4]
 
 	if call_type == "broad":
 		process = HOMER(input_file, control, call_type, PATH, fdr=param ,size=param2, minDist=param3)

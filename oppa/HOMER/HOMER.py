@@ -9,15 +9,11 @@ def run(input_file, control, call_type, directory, fdr=None, size=None, minDist=
 	target_PATH = directory + '/HOMER/' + pure_input_file + '/'
 	control_PATH = directory + '/HOMER/' + control + '/'
 
-	print input_file, control
-	print pure_input_file
-	print target_PATH
-
 	output_name = target_PATH[:-5] + ".txt"
 	FNULL = open(os.devnull, 'w')
-	
-	#preProcess in Hoemr
-	command = [homer_PATH + 'makeTagDirectory ' + target_PATH + ' ' +input_file]
+
+	#preProcess in Homer
+	command = [homer_PATH + 'makeTagDirectory ' + target_PATH + ' ' + input_file]
 	process = subprocess.Popen(command, shell= True, stdout = FNULL, stderr=subprocess.STDOUT)
 	process.wait()
 
@@ -39,7 +35,7 @@ def run(input_file, control, call_type, directory, fdr=None, size=None, minDist=
 				  ' > ' + output_name[:-4] + ".bam_peaks_befsort.bed"]
 		subprocess.call(command, shell= True, stdout = FNULL, stderr=subprocess.STDOUT)
 
-	command = ['sort -k1,1n -k2,2n ' + output_name[:-4] + ".bam_peaks_befsort.bed"\
+	command = ['sort -k1,1n -k2,2n -k3,3n ' + output_name[:-4] + ".bam_peaks_befsort.bed"\
 			   + ' > ' + output_name[:-4] + ".bam_peaks.bed"]
 	process = subprocess.Popen(command, shell= True, stdout = FNULL, stderr=subprocess.STDOUT)
 	process.wait()
