@@ -85,7 +85,7 @@ def main():
 	if "macs" in args.tool:
 		print "///////////////////// RUNNING MACS /////////////////////////\n"
 		from oppa.macs.learnMACSparam import learnMACSparam
-		result_mac = learnMACSparam(args, validation_set, test_set, directory_path)
+		result_mac = learnMACSparam(args, validation_set, test_set, directory_path, args.karyotype, args.callType)
 		score_list.append(result_mac._getvalue())
 
 	if "peakSeq" in args.tool:

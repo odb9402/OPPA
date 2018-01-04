@@ -52,7 +52,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None, call_ty
 		for chromosome in chromosome_list:
 			if call_type == "broad":
 				def wrapper_function_broad(size, minDist,fdr):
-					target = bam_name + reference_char + chromosome + ".bam"
+					target = PATH + '/' +bam_name + reference_char + chromosome + ".bam"
 					accuracy = run(target, control_file, validation_set + test_set, call_type,\
 							PATH, str(exp(fdr)-1) ,str(size*1000), str(minDist*5000))
 					print chromosome,\
@@ -64,7 +64,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None, call_ty
 				function = wrapper_function_broad
 			else:
 				def wrapper_function_narrow(fdr):
-					target = bam_name + reference_char + chromosome + ".bam"
+					target = PATH + '/' + bam_name + reference_char + chromosome + ".bam"
 					accuracy = run(target, control_file, validation_set + test_set, call_type,\
 							PATH, str(exp(fdr)-1))
 					print chromosome,\
@@ -119,7 +119,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None, call_ty
 	if kry_file is None:
 		for chromosome in chromosome_list:
 			parameters = return_dict[chromosome]['max_params']
-			target = bam_name + reference_char + chromosome + '.bam'
+			target = PATH + '/' + bam_name + reference_char + chromosome + '.bam'
 			fdr = parameters['fdr']
 
 			if call_type == 'broad':
@@ -160,7 +160,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None, call_ty
 	return return_dict
 
 
-def run(input_file, control, valid_set, call_type, PATH, param, param2=None, param3=None, final=False, kry_file = None):
+def run(input_file, control, valid_set, call_type, PATH, fdr_in, size_in=None, minDist_in=None, final=False, kry_file = None):
 	"""
 
 	:param input_file:
@@ -179,9 +179,9 @@ def run(input_file, control, valid_set, call_type, PATH, param, param2=None, par
 	output_PATH = PATH + '/HOMER/' + pure_input_file[:-4]
 
 	if call_type == "broad":
-		process = HOMER(input_file, control, call_type, PATH, fdr=param ,size=param2, minDist=param3)
+		process = HOMER(input_file, control, call_type, PATH, fdr=fdr_in ,size=size_in, minDist=minDist_in)
 	else:
-		process = HOMER(input_file, control, call_type, PATH, fdr=param)
+		process = HOMER(input_file, control, call_type, PATH, fdr=fdr_in)
 
 	process.wait()	
 
