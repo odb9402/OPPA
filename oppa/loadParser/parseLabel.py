@@ -130,14 +130,14 @@ def parse_peak_labels(peak_labels, chromosome_num, cell_type, cpNum_data=None, i
                         label['cpNum'] = cpNum_data[index]['cpNum']
                         break
 
-    index = 0
-    while True:
-        if index == len(result_labels_list):
-            break
-        if (result_labels_list[index]['cpNum'] != input_cpNum):
-            result_labels_list.pop(index)
-        else:
-            index += 1
+        index = 0
+        while True:
+            if index == len(result_labels_list):
+                break
+            if (result_labels_list[index]['cpNum'] != input_cpNum):
+                result_labels_list.pop(index)
+            else:
+                index += 1
 
     return result_labels_list
 
@@ -170,6 +170,7 @@ def run(validSet, file_name, input_chromosome = None, input_cellType = None, inp
     if not (cpNum_file_name is None):
         cpNum_data = loadKaryotype(cpNum_file_name, [input_chromosome])
     else:
+        print "cpnumfile n"
         cpNum_data = None
 
     peak_labels = parse_peak_labels(validSet, chromosome, cellType, cpNum_data=cpNum_data, input_cpNum=cpNum)
