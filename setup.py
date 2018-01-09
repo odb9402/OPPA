@@ -17,8 +17,8 @@ def main():
             url='http://github.com/odb9402/OPPA',
             scripts=['OPPA1'],
             license='MIT',
-            packages=['oppa','oppa.macs','oppa.loadParser','oppa.spp',
-                     'oppa.BayesianOptimization','dependencies'],
+            packages=['oppa','oppa.macs','oppa.loadParser','oppa.spp','oppa.SICER','oppa.HOMER','oppa.Helper'
+                     ,'oppa.Ensembler','oppa.BayesianOptimization','dependencies'],
             install_requires=['scikit-learn','scipy','numpy','Cython','MACS2','rpy2'],
             zip_safe=False)
 

@@ -98,7 +98,7 @@ def learnMACSparam(args, test_set, validation_set, PATH, kry_file=None, call_typ
 			# each learning_process and wrapper function will be child process of OPPA
 			if call_type == "broad":
 				learning_process = multiprocessing.Process(target=optimizeHyper, args=(function,\
-						parameters_bounds, number_of_init_sample, return_dict, 15, 'ei', chromosome,))
+						parameters_bounds, number_of_init_sample, return_dict, 13, 'ei', chromosome,))
 			else:
 				learning_process = multiprocessing.Process(target=optimizeHyper, args=(function,\
 						parameters_bounds, number_of_init_sample, return_dict, 20, 'ucb', chromosome,))
@@ -132,7 +132,7 @@ def learnMACSparam(args, test_set, validation_set, PATH, kry_file=None, call_typ
 
 			if call_type == "broad":
 				learning_process = multiprocessing.Process(target=optimizeHyper, args=(function,\
-						parameters_bounds, number_of_init_sample, return_dict, 15, 'ei', cpNum,))
+						parameters_bounds, number_of_init_sample, return_dict, 13, 'ei', cpNum,))
 			else:
 				learning_process = multiprocessing.Process(target=optimizeHyper, args=(function,\
 						parameters_bounds, number_of_init_sample, return_dict, 20, 'ucb', cpNum,))

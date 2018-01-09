@@ -74,7 +74,7 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_file=None):
 
             function = wrapper_function
             learning_process = multiprocessing.Process(target=optimizeHyper, \
-                args=(function, parameters_bounds, number_of_init_sample, return_dict, 20, 'ei', chromosome,))
+                args=(function, parameters_bounds, number_of_init_sample, return_dict, 30, 'ei', chromosome,))
 
             parallel_learning(MAX_CORE, learning_process, learning_processes)
     else:
@@ -93,7 +93,7 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_file=None):
                 return accuracy
             function = wrapper_function
             learning_process = multiprocessing.Process(target=optimizeHyper,\
-                args=(function, parameters_bounds, number_of_init_sample, return_dict, 20, 'ei', cpNum,))
+                args=(function, parameters_bounds, number_of_init_sample, return_dict, 30, 'ei', cpNum,))
 
             parallel_learning(MAX_CORE, learning_process, learning_processes)
 

@@ -11,8 +11,8 @@ def parse_cellType(file_name):
 
     :return: cell_type
     """
-    return file_name.split('.')[0].rsplit('_')[1]
-
+    parse = file_name.split('.')[0].rsplit('_')
+    return parse[len(parse)-1]
 
 def parse_chr(file_name):
     """
@@ -138,7 +138,6 @@ def parse_peak_labels(peak_labels, chromosome_num, cell_type, cpNum_data=None, i
                 result_labels_list.pop(index)
             else:
                 index += 1
-
     return result_labels_list
 
 
