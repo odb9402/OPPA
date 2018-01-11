@@ -35,7 +35,7 @@ def run(input_file, control, call_type, directory, fdr=None, size=None, minDist=
 				  ' > ' + output_name[:-4] + ".bam_peaks_befsort.bed"]
 		subprocess.call(command, shell= True, stdout = FNULL, stderr=subprocess.STDOUT)
 
-	command = ['sort -k1,1n -k2,2n -k3,3n ' + output_name[:-4] + ".bam_peaks_befsort.bed"\
+	command = ['bedtools sort -chrThenSizeA -i ' + output_name[:-4] + ".bam_peaks_befsort.bed"\
 			   + ' > ' + output_name[:-4] + ".bam_peaks.bed"]
 	process = subprocess.Popen(command, shell= True, stdout = FNULL, stderr=subprocess.STDOUT)
 	process.wait()

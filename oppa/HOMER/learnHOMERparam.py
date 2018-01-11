@@ -74,7 +74,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None, call_ty
 				function = wrapper_function_narrow
 			
 			learning_process = multiprocessing.Process(target=optimizeHyper, args=(function,\
-						parameters_bounds, number_of_init_sample, return_dict, 20, 'ei', chromosome,))
+						parameters_bounds, number_of_init_sample, return_dict, 30, 'ei', chromosome,))
 
 			parallel_learning(MAX_CORE, learning_process, learning_processes)
 
@@ -104,7 +104,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None, call_ty
 				function = wrapper_function_narrow
 			
 			learning_process = multiprocessing.Process(target=optimizeHyper, args=(function,\
-				parameters_bounds, number_of_init_sample, return_dict, 20, 'ei', cpNum,))
+				parameters_bounds, number_of_init_sample, return_dict, 30, 'ei', cpNum,))
 			parallel_learning(MAX_CORE, learning_process, learning_processes)
 	
 	for proc in learning_processes:

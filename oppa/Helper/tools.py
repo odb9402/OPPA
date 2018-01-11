@@ -73,18 +73,21 @@ def return_accuracy(final, kry_file, result_file, valid_set):
                         containor.append(peaks[index])
                 else:
                     peaks_by_chr.append(containor)
-
+            
+            ## Output for each chromosomes which have the same copy number.
             for peak_by_chr in peaks_by_chr:
                 if len(peak_by_chr) > 0:
                     chromosome = peak_by_chr[0]['chr']
+                    label = parseLabel(valid_set, result_file,input_chromosome=chromosome\
+                                    ,cpNum_file_name=kry_file)
                     print chromosome + " ====================== "
-                    temp_error, temp_label = calculateError(peak_by_chr, \
-                                                            parseLabel(valid_set, result_file,
-                                                                       input_chromosome=chromosome,
-                                                                       cpNum_file_name=kry_file))
+                    temp_error, temp_label = calculateError(peak_by_chr, label)
                     error_num += temp_error
                     label_num += temp_label
                     print "============================\n"
+                    if (temp_error is 0) and (temp_label is 0):
+                        error_num += label
+                        label_num += label
 
         if os.path.isfile(result_file) and (not final):
             os.remove(result_file)

@@ -75,6 +75,8 @@ def stacking_peaks(dir, args, tool_list, score_dict, chr=None):
      #   print "combine error :: tool name is none."
       #  exit()
 
+    chr = str(chr)
+
     for tool in tool_list:
         name_tag = args.input.rsplit(".", 1)[0] + ref_char + chr
         print name_tag

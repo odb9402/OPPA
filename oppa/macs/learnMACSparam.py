@@ -71,7 +71,7 @@ def learnMACSparam(args, test_set, validation_set, PATH, kry_file=None, call_typ
 			if call_type == "broad":
 				# create wrapper function about broad peak calling
 				def wrapper_function_broad(opt_Qval, opt_cutoff):
-					target = bam_name + reference_char + chromosome + '.bam'
+					target = PATH + '/' + bam_name + reference_char + chromosome + '.bam'
 					accuracy = run(target, validation_set + test_set, str(exp(opt_Qval/100)-1),\
 							call_type, PATH, control_file, str(exp(opt_cutoff/100)-1), False, kry_file,)
 					print chromosome,\
@@ -85,7 +85,7 @@ def learnMACSparam(args, test_set, validation_set, PATH, kry_file=None, call_typ
 			else:
 				# create wrapper function about narrow peak calling
 				def wrapper_function_narrow(opt_Qval):
-					target = bam_name + reference_char + chromosome + '.bam'
+					target = PATH + '/' + bam_name + reference_char + chromosome + '.bam'
 					accuracy = run(target, validation_set + test_set, str(exp(opt_Qval/100)-1)\
 							, call_type, PATH, control_file, None, False, kry_file,)
 					print chromosome,\
@@ -149,7 +149,7 @@ def learnMACSparam(args, test_set, validation_set, PATH, kry_file=None, call_typ
 	if kry_file is None:
 		for chromosome in chromosome_list:
 			parameters = return_dict[chromosome]['max_params']
-			target = bam_name + reference_char + chromosome + '.bam'
+			target = PATH + '/' + bam_name + reference_char + chromosome + '.bam'
 			opt_Qval = parameters['opt_Qval']
 
 			if call_type == 'broad':
