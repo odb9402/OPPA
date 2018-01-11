@@ -34,7 +34,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None, call_ty
 
 	chromosome_list, cpNum_controls, cpNum_files = extract_chr_cpNum(chromosome_list, input_file, control_file,
 																	 cpNum_controls, cpNum_files, kry_file, test_set,
-																	 validation_set, PATH, tool_name='HOMER')
+																	 validation_set + test_set, PATH, tool_name='HOMER')
 
 	print " HOMER control ChIP-seq pre processing. . . . . . . . . . . . . ."
 	control_processing(PATH, control_file)
@@ -53,7 +53,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None, call_ty
 			if call_type == "broad":
 				def wrapper_function_broad(size, minDist,fdr):
 					target = PATH + '/' +bam_name + reference_char + chromosome + ".bam"
-					accuracy = run(target, control_file, validation_set + test_set, call_type,\
+					accuracy = run(target, control_file, validation_set, call_type,\
 							PATH, str(exp(fdr)-1) ,str(size*1000), str(minDist*5000))
 					print chromosome,\
 						"fdr :" + str(round(exp(fdr)-1,4)),\
@@ -65,7 +65,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None, call_ty
 			else:
 				def wrapper_function_narrow(fdr):
 					target = PATH + '/' + bam_name + reference_char + chromosome + ".bam"
-					accuracy = run(target, control_file, validation_set + test_set, call_type,\
+					accuracy = run(target, control_file, validation_set, call_type,\
 							PATH, str(exp(fdr)-1))
 					print chromosome,\
 						"fdr :" + str(round(exp(fdr)-1,4)),\
@@ -84,7 +84,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None, call_ty
 			cpNum = int(cpNum_str[2:3])
 			if call_type == "broad":
 				def wrapper_function_broad(size, minDist,fdr):
-					accuracy = run(cpNum_files[index], control_file, validation_set + test_set, call_type,\
+					accuracy = run(cpNum_files[index], control_file, validation_set, call_type,\
 							PATH, str(exp(fdr)-1) ,str(size*1000), str(minDist*5000),False,kry_file)
 					print cpNum_str,\
 						"fdr :" + str(round(exp(fdr)-1,4)),\
@@ -95,7 +95,7 @@ def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None, call_ty
 				function = wrapper_function_broad
 			else:
 				def wrapper_function_narrow(fdr):
-					accuracy = run(cpNum_files[index], control_file, validation_set + test_set, call_type,\
+					accuracy = run(cpNum_files[index], control_file, validation_set, call_type,\
 							PATH, str(exp(fdr)-1), None, None, False, kry_file)
 					print cpNum_str,\
 						"fdr :" + str(round(exp(fdr)-1,4)),\
@@ -127,11 +127,11 @@ def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None, call_ty
 				minDist = parameters['minDist']
 
 				learning_process = multiprocessing.Process(target=run, args=(\
-							target, control_file, validation_set + test_set, call_type, PATH, str(exp(fdr)-1),\
+							target, control_file, test_set, call_type, PATH, str(exp(fdr)-1),\
 							str(size*1000), str(minDist*5000), True,))
 			else:
 				learning_process = multiprocessing.Process(target=run, args=(\
-							target, control_file, validation_set + test_set, call_type, PATH, str(exp(fdr)-1), None, None, True,))
+							target, control_file, test_set, call_type, PATH, str(exp(fdr)-1), None, None, True,))
 				
 			parallel_learning(MAX_CORE, learning_process, learning_processes)
 	else:
@@ -146,11 +146,11 @@ def learnHOMERparam(args, test_set, validation_set, PATH, kry_file=None, call_ty
 				size = parameters['size']
 				minDist = parameters['minDist']
 				learning_process = multiprocessing.Process(target=run, args=(\
-					cpNum_files[index], control_file, validation_set + test_set, call_type, PATH, str(exp(fdr)-1),\
+					cpNum_files[index], control_file, test_set, call_type, PATH, str(exp(fdr)-1),\
 					str(size*1000), str(minDist*5000), True, kry_file))
 			else:
 				learning_process = multiprocessing.Process(target=run, args=(\
-					cpNum_files[index], control_file, validation_set + test_set, call_type, PATH, str(exp(fdr)-1), None, None, True,kry_file,))
+					cpNum_files[index], control_file, test_set, call_type, PATH, str(exp(fdr)-1), None, None, True,kry_file,))
 				
 			parallel_learning(MAX_CORE, learning_process, learning_processes)
 

@@ -44,7 +44,7 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_file=None):
 
     chromosome_list, cpNum_controls, cpNum_files = extract_chr_cpNum(chromosome_list, input_file, control_file,
                                                                      cpNum_controls, cpNum_files, kry_file, test_set,
-                                                                     validation_set, PATH, tool_name='SICER')
+                                                                     validation_set + test_set, PATH, tool_name='SICER')
 
 
     reference_char = ".REF_"
@@ -62,7 +62,7 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_file=None):
             def wrapper_function(windowSize, fragmentSize, gapSize):
                 target = PATH + '/' + bam_name + reference_char + chromosome + '.bam'
                 cr_target = PATH + '/' + cr_bam_name + reference_char + chromosome + '.bam'
-                accuracy = run(target, cr_target, validation_set + test_set \
+                accuracy = run(target, cr_target, validation_set \
                                , str(int(windowSize*600.0))\
                                , str(int(fragmentSize*450.0)), str(int(gapSize*6.0)), False, )
                 print chromosome, \
@@ -82,7 +82,7 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_file=None):
             cpNum_str = re.search("CP[1-9]", cpNum_files[index]).group(0)
             cpNum = int(cpNum_str[2:3])
             def wrapper_function(windowSize, fragmentSize, gapSize):
-                accuracy = run(cpNum_files[index], cpNum_controls[index], validation_set + test_set \
+                accuracy = run(cpNum_files[index], cpNum_controls[index], validation_set\
                                , str(int(windowSize*600.0))\
                                , str(int(fragmentSize*450.0)), str(int(gapSize*6.0)), False, kry_file, )
                 print cpNum_str, \
@@ -115,7 +115,7 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_file=None):
 
             learning_process = multiprocessing.Process(target=run,\
                 args=( PATH + '/' + target, PATH + '/' + cr_bam_name + reference_char + chromosome + '.bam'\
-                    , validation_set + test_set, str(int(windowSize*600.0)), str(int(fragmentSize*450.0)), str(int(gapSize*6.0)), True,))
+                    , test_set, str(int(windowSize*600.0)), str(int(fragmentSize*450.0)), str(int(gapSize*6.0)), True,))
 
             parallel_learning(MAX_CORE, learning_process, learning_processes)
 
@@ -130,7 +130,7 @@ def learnSICERparam(args, test_set, validation_set, PATH, kry_file=None):
             gapSize = parameters['gapSize']
 
             learning_process = multiprocessing.Process(target=run,\
-                args=(cpNum_files[index], cpNum_controls[index], validation_set + test_set, str(int(windowSize*600.0)),\
+                args=(cpNum_files[index], cpNum_controls[index], test_set, str(int(windowSize*600.0)),\
                     str(int(fragmentSize*450.0)), str(int(gapSize*6.0)), True, kry_file,))
 
             parallel_learning(MAX_CORE, learning_process, learning_processes)

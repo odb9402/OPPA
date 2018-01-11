@@ -56,7 +56,7 @@ def learnMACSparam(args, test_set, validation_set, PATH, kry_file=None, call_typ
 
 	chromosome_list, cpNum_controls, cpNum_files = extract_chr_cpNum(chromosome_list, input_file, control_file,
 																	 cpNum_controls, cpNum_files, kry_file, test_set,
-																	 validation_set, PATH, tool_name='MACS')
+																	 validation_set + test_set, PATH, tool_name='MACS')
 
 	reference_char = ".REF_"
 	bam_name = input_file[:-4]  ## delete '.bam'
@@ -72,7 +72,7 @@ def learnMACSparam(args, test_set, validation_set, PATH, kry_file=None, call_typ
 				# create wrapper function about broad peak calling
 				def wrapper_function_broad(opt_Qval, opt_cutoff):
 					target = PATH + '/' + bam_name + reference_char + chromosome + '.bam'
-					accuracy = run(target, validation_set + test_set, str(exp(opt_Qval/100)-1),\
+					accuracy = run(target, validation_set, str(exp(opt_Qval/100)-1),\
 							call_type, PATH, control_file, str(exp(opt_cutoff/100)-1), False, kry_file,)
 					print chromosome,\
 						"Qval :" + str(round(exp(opt_Qval/100)-1,4)),\
@@ -86,7 +86,7 @@ def learnMACSparam(args, test_set, validation_set, PATH, kry_file=None, call_typ
 				# create wrapper function about narrow peak calling
 				def wrapper_function_narrow(opt_Qval):
 					target = PATH + '/' + bam_name + reference_char + chromosome + '.bam'
-					accuracy = run(target, validation_set + test_set, str(exp(opt_Qval/100)-1)\
+					accuracy = run(target, validation_set, str(exp(opt_Qval/100)-1)\
 							, call_type, PATH, control_file, None, False, kry_file,)
 					print chromosome,\
 						"Qval :" + str(round(exp(opt_Qval/100)-1,4)),\
@@ -112,7 +112,7 @@ def learnMACSparam(args, test_set, validation_set, PATH, kry_file=None, call_typ
 			cpNum = int(cpNum_str[2:3])
 			if call_type == "broad":
 				def wrapper_function_broad(opt_Qval, opt_cutoff):
-					accuracy = run(cpNum_files[index], validation_set + test_set, str(exp(opt_Qval/100)-1),\
+					accuracy = run(cpNum_files[index], validation_set, str(exp(opt_Qval/100)-1),\
 							call_type, PATH, control_file, str(exp(opt_cutoff/100)-1),False,kry_file,)
 					print cpNum_str,\
 						"Qval :" + str(round(exp(opt_Qval/100)-1,4)),\
@@ -122,7 +122,7 @@ def learnMACSparam(args, test_set, validation_set, PATH, kry_file=None, call_typ
 				function = wrapper_function_broad
 			else:
 				def wrapper_function_narrow(opt_Qval):
-					accuracy = run(cpNum_files[index], validation_set + test_set, str(exp(opt_Qval/100)-1)\
+					accuracy = run(cpNum_files[index], validation_set, str(exp(opt_Qval/100)-1)\
 							, call_type, PATH, control_file,None,False,kry_file,)
 					print cpNum_str,\
 						"Qval :" + str(round(exp(opt_Qval/100)-1,4)),\
@@ -155,11 +155,11 @@ def learnMACSparam(args, test_set, validation_set, PATH, kry_file=None, call_typ
 			if call_type == 'broad':
 				opt_cutoff = parameters['opt_cutoff']
 				learning_process = multiprocessing.Process(target=run, args=(\
-							target, validation_set + test_set, str(exp(opt_Qval/100)-1), call_type, PATH, control_file, \
+							target, test_set, str(exp(opt_Qval/100)-1), call_type, PATH, control_file, \
 							str(exp(opt_cutoff / 100) - 1), True,))
 			else:
 				learning_process = multiprocessing.Process(target=run, args=(\
-							target, validation_set + test_set, str(opt_Qval), call_type, PATH, control_file,\
+							target, test_set, str(opt_Qval), call_type, PATH, control_file,\
 							None,True,))
 				
 			parallel_learning(MAX_CORE, learning_process, learning_processes)
@@ -174,11 +174,11 @@ def learnMACSparam(args, test_set, validation_set, PATH, kry_file=None, call_typ
 			if call_type == 'broad':
 				opt_cutoff = parameters['opt_cutoff']
 				learning_process = multiprocessing.Process(target=run, args=(\
-							cpNum_files[index], validation_set + test_set, str(exp(opt_Qval/100)-1), call_type, PATH, control_file, \
+							cpNum_files[index], test_set, str(exp(opt_Qval/100)-1), call_type, PATH, control_file, \
 							str(exp(opt_cutoff / 100) - 1), True,kry_file,))
 			else:
 				learning_process = multiprocessing.Process(target=run, args=(\
-							cpNum_files[index], validation_set + test_set, str(opt_Qval), call_type, PATH, control_file,\
+							cpNum_files[index], test_set, str(opt_Qval), call_type, PATH, control_file,\
 							None,True,kry_file,))
 				
 			parallel_learning(MAX_CORE, learning_process, learning_processes)

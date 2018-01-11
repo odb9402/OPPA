@@ -20,7 +20,7 @@ def peak_label_load(validSet):
 	return peak_labels
 
 
-def split_label_for_crossValidation(labels, k_fold = 4):
+def split_label_for_crossValidation(labels, k_fold = 3):
 	"""split the label list for k-fold crossValidation."""
 	test_labels = []
 	test_num = len(labels) / k_fold
