@@ -39,8 +39,7 @@ you can install dependencies from this python script
 --------
 LABELED DATA
 -------
-
-for running oppa, you need labeled data file for defining error.  all these approach is from [1] ( 2016 HOCKING , Toby Dylan  ,et al ). example of labeled data is like this. (ASCII)
+OPPA uses labeled data which has its own format. All these approach that use labeled data for marking is from [1]. Examples of labeled data is as the following below. (It based on ASCII)
 
 > 
 	chr1:1,000,000-1,100,000 peaks K562
@@ -48,8 +47,7 @@ for running oppa, you need labeled data file for defining error.  all these appr
 	chr1:1,250,000-1,300,000 peakEnd K562
 	chr2:10,000,000-10,002,000 peaks
 
-
-in line 1, mean cell K562 at least has one peak in that regions. in line 2, 3, mean cell K562 just only one peak in that regions. in line 4,  there is no peak in that regions about K562 or other cell. if you using this label data on other cell,  all the line 1-4 mean 'noPeak' because there is no cell name in line. as the paper [1], you can label your own data in 10 minute at UCSC genome browser. if you want to know specific rules of this labeling work, please look [here.](https://academic.oup.com/bioinformatics/article/33/4/491/2608653/Optimizing-ChIP-seq-peak-detectors-using-visual)
+In line 1, **peaks**, this means that cell K562 at least has one peak in a region (chr1:1,000,000-1,100,000). In line 2, 3 ,**peakStart, peakEnd**,  it means that cell K562 just only one peak in the regions. In line 4, there is no peak in that regions about K562 or other cell because there is no matched cell line name at this raw. If you want to use this label data on other cells,  all these line 1-4 mean **noPeak** because there is no cell name in  the lines.  If you want to know specific rules or methods of this labeling work, please look [here.](https://academic.oup.com/bioinformatics/article/33/4/491/2608653/Optimizing-ChIP-seq-peak-detectors-using-visual)
 
 --------
 DEPENDENCY
