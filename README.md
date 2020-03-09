@@ -1,7 +1,7 @@
 
 OPPA
 ======
-Optimize Parameter for Peak detection Algorithm by bayesian optimization. ( it is being developed . . . )
+Optimize Parameter for Peak detection Algorithm by bayesian optimization.
 
 <p align="center">
     <img src="https://github.com/odb9402/OPPA/blob/master/oppa/oppa.jpg" alt="OPPA logo" size=50  width="210" height="200">
@@ -9,7 +9,7 @@ Optimize Parameter for Peak detection Algorithm by bayesian optimization. ( it i
 
 > **OPPA :** A respectful Korean term used by females to call older males such as older male friends or older brothers, but now with the Hallyu kickin' in, people are using it being as annoying as the Japanese, "Kawaii" wave.
 
-oppa try to bayesian optimize hyperparameter of peak detection algirithm , like a macs , by using labeled data.
+OPPA try to bayesian optimize hyperparameter of peak detection algirithms such as macs2 by using labeled data.
 
 --------
 QUICK START
@@ -39,7 +39,7 @@ you can install dependencies from this python script
 --------
 LABELED DATA
 -------
-OPPA uses labeled data which has its own format. All these approach that use labeled data for marking is from [1]. Examples of labeled data is as the following below. (It based on ASCII)
+OPPA uses labeled data which has its own format. All these approaches that use labeled data for marking is from [1]. Examples of labeled data is as the following below. (It based on ASCII)
 
 > 
 	chr1:1,000,000-1,100,000 peaks K562
@@ -47,7 +47,7 @@ OPPA uses labeled data which has its own format. All these approach that use lab
 	chr1:1,250,000-1,300,000 peakEnd K562
 	chr2:10,000,000-10,002,000 peaks
 
-In line 1, **peaks**, it means that K562 cell has at least one peak in a region (chr1:1,000,000-1,100,000). In line 2, 3 ,**peakStart, peakEnd**, represent that there is an only one single peak in the regions of K562 cell. In line 4, there is no peak in that regions about K562 or other cell because there is no matched cell line name at this raw. If you want to use this label data on other cells, all these line 1-4 are going to be **noPeak** because there is no cell name in the lines. If you want to know specific rules or methods of this labeling work, please look [here.](https://academic.oup.com/bioinformatics/article/33/4/491/2608653/Optimizing-ChIP-seq-peak-detectors-using-visual)
+In line 1, **peaks**, it means that K562 cell has at least one peak in a region (chr1:1,000,000-1,100,000). In line 2, 3 ,**peakStart, peakEnd**, represent that there is an only one single peak in the regions of K562 cell. In line 4, there is no peak in that region about K562 or other cells because there is no matched cell line name at this raw. If you want to use this label data on other cells, all these lines 1-4 are going to be **noPeak** because there is no cell name in the lines. If you want to know specific rules or methods of this labeling work, please look [here.](https://academic.oup.com/bioinformatics/article/33/4/491/2608653/Optimizing-ChIP-seq-peak-detectors-using-visual)
 
 --------
 DEPENDENCY
